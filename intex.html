@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ReservaYa</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f3f4f6;
+    color: #222;
+}
+
+header {
+    background: #111827;
+    color: white;
+    padding: 18px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+}
+
+.contenedor {
+    max-width: 650px;
+    margin: auto;
+    padding: 20px;
+}
+
+.tarjeta {
+    background: white;
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.08);
+}
+
+.oculto {
+    display: none !important;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 13px;
+    margin-top: 6px;
+    margin-bottom: 14px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 16px;
+}
+
+textarea {
+    min-height: 90px;
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    border: 0;
+    border-radius: 10px;
+    margin-top: 8px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.boton {
+    background: #111827;
+    color: white;
+}
+
+.secundario {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+.negocio {
+    border: 1px solid #ddd;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+    cursor: pointer;
+}
+
+.negocio:hover {
+    background: #f9fafb;
+}
+
+.negocio h3 {
+    margin: 0 0 6px;
+}
+
+.servicio {
+    background: #f3f4f6;
+    padding: 14px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+}
+
+.reserva {
+    border: 1px solid #ddd;
+    padding: 14px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+.exito {
+    color: #087f23;
+    font-weight: bold;
+}
+
+.error {
+    color: #b00020;
+    font-weight: bold;
+}
+
+.mensaje {
+    margin-top: 12px;
+    text-align: center;
+}
+
+.nav {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.nav button {
+    flex: 1;
+}
+
+.pequeno {
+    color: #666;
+    font-size: 14px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>📅 ReservaYa</h1>
+    <p>Reserva servicios de tus negocios favoritos</p>
+</header>
+
+<div class="contenedor">
+
+    <!-- =========================
+         INICIO
+         ========================= -->
+
+    <div id="inicio" class="tarjeta">
+
+        <h2>Bienvenido</h2>
+
+        <p>
+            Reserva citas y servicios de diferentes negocios
+            desde un solo lugar.
+        </p>
+
+        <button
+            class="boton"
+            onclick="mostrar('login')"
+        >
+            Iniciar sesión
+        </button>
+
+        <button
+            class="secundario"
+            onclick="mostrar('registro')"
+        >
+            Crear una cuenta
+        </button>
+
+    </div>
+
+
+    <!-- =========================
+         REGISTRO
+         ========================= -->
+
+    <div id="registro" class="tarjeta oculto">
+
+        <h2>Crear cuenta</h2>
+
+        <label>Nombre</label>
+
+        <input
+            id="registroNombre"
+            type="text"
+            placeholder="Tu nombre"
+        >
+
+        <label>Correo</label>
+
+        <input
+            id="registroEmail"
+            type="email"
+            placeholder="tu@email.com"
+        >
+
+        <label>Contraseña</label>
+
+        <input
+            id="registroPassword"
+            type="password"
+            placeholder="Contraseña"
+        >
+
+        <button
+            class="boton"
+            onclick="crearCuenta()"
+        >
+            Registrarme
+        </button>
+
+        <button
+            class="secundario"
+            onclick="mostrar('inicio')"
+        >
+            Volver
+        </button>
+
+        <div id="mensajeRegistro" class="mensaje"></div>
+
+    </div>
+
+
+    <!-- =========================
+         LOGIN
+         ========================= -->
+
+    <div id="login" class="tarjeta oculto">
+
+        <h2>Iniciar sesión</h2>
+
+        <label>Correo</label>
+
+        <input
+            id="loginEmail"
+            type="email"
+            placeholder="tu@email.com"
+        >
+
+        <label>Contraseña</label>
+
+        <input
+            id="loginPassword"
+            type="password"
+            placeholder="Contraseña"
+        >
+
+        <button
+            class="boton"
+            onclick="iniciarSesion()"
+        >
+            Iniciar sesión
+        </button>
+
+        <button
+            class="secundario"
+            onclick="mostrar('inicio')"
+        >
+            Volver
+        </button>
+
+        <div id="mensajeLogin" class="mensaje"></div>
+
+    </div>
+
+
+    <!-- =========================
+         CLIENTE
+         ========================= -->
+
+    <div id="cliente" class="oculto">
+
+        <div class="tarjeta">
+
+            <h2>👋 Hola, <span id="nombreCliente"></span></h2>
+
+            <p>
+                Elige un negocio para reservar.
+            </p>
+
+            <button
+                class="secundario"
+                onclick="cerrarSesion()"
+            >
+                Cerrar sesión
+            </button>
+
+        </div>
+
+
+        <div class="tarjeta">
+
+            <h2>🏢 Negocios</h2>
+
+            <div
+                class="negocio"
+                onclick="seleccionarNegocio('Barbería El Estilo')"
+            >
+                <h3>💈 Barbería El Estilo</h3>
+                <p>Cortes y cuidado personal</p>
+            </div>
+
+            <div
+                class="negocio"
+                onclick="seleccionarNegocio('Restaurante Sabor')"
+            >
+                <h3>🍽️ Restaurante Sabor</h3>
+                <p>Reserva tu mesa</p>
+            </div>
+
+            <div
+                class="negocio"
+                onclick="seleccionarNegocio('Belleza Glam')"
+            >
+                <h3>💅 Belleza Glam</h3>
+                <p>Servicios de belleza</p>
+            </div>
+
+        </div>
+
+
+        <div
+            id="zonaNegocio"
+            class="tarjeta oculto"
+        >
+
+            <h2 id="nombreNegocio"></h2>
+
+            <h3>Servicios</h3>
+
+            <div id="listaServicios"></div>
+
+            <h3>Reservar</h3>
+
+            <label>Servicio</label>
+
+            <select id="servicioReserva">
+            </select>
+
+            <label>Fecha</label>
+
+            <input
+                id="fechaReserva"
+                type="date"
+            >
+
+            <label>Hora</label>
+
+            <select id="horaReserva">
+
+                <option value="">
+                    Selecciona una hora
+                </option>
+
+                <option>09:00</option>
+                <option>10:00</option>
+                <option>11:00</option>
+                <option>12:00</option>
+                <option>13:00</option>
+                <option>14:00</option>
+                <option>15:00</option>
+                <option>16:00</option>
+                <option>17:00</option>
+                <option>18:00</option>
+
+            </select>
+
+            <label>Comentario</label>
+
+            <textarea
+                id="comentarioReserva"
+                placeholder="Algo que quieras decirle al negocio"
+            ></textarea>
+
+            <button
+                class="boton"
+                onclick="reservar()"
+            >
+                Confirmar reserva
+            </button>
+
+            <div
+                id="mensajeReserva"
+                class="mensaje"
+            ></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         PANEL TRABAJADOR
+         ========================= -->
+
+    <div
+        id="trabajador"
+        class="oculto"
+    >
+
+        <div class="tarjeta">
+
+            <h2>👨‍💼 Panel del negocio</h2>
+
+            <p>
+                Aquí el trabajador podrá administrar
+                las reservas de su negocio.
+            </p>
+
+            <button
+                class="secundario"
+                onclick="cerrarSesion()"
+            >
+                Cerrar sesión
+            </button>
+
+        </div>
+
+        <div class="tarjeta">
+
+            <h2>📅 Reservas</h2>
+
+            <div id="listaReservasTrabajador"></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+let usuarioActual = null;
+
+let negocioActual = null;
+
+let reservas = [];
+
+
+/* =========================
+   DATOS TEMPORALES
+   ========================= */
+
+const negocios = {
+
+    "Barbería El Estilo": {
+
+        servicios: [
+            {
+                nombre: "Corte",
+                precio: 25000
+            },
+            {
+                nombre: "Corte + barba",
+                precio: 35000
+            },
+            {
+                nombre: "Diseño completo",
+                precio: 45000
+            }
+        ]
+
+    },
+
+    "Restaurante Sabor": {
+
+        servicios: [
+            {
+                nombre: "Mesa para 2 personas",
+                precio: 0
+            },
+            {
+                nombre: "Mesa para 4 personas",
+                precio: 0
+            },
+            {
+                nombre: "Mesa para 6 personas",
+                precio: 0
+            }
+        ]
+
+    },
+
+    "Belleza Glam": {
+
+        servicios: [
+            {
+                nombre: "Manicure",
+                precio: 20000
+            },
+            {
+                nombre: "Pedicure",
+                precio: 25000
+            },
+            {
+                nombre: "Servicio completo",
+                precio: 50000
+            }
+        ]
+
+    }
+
+};
+
+
+/* =========================
+   CAMBIAR PANTALLA
+   ========================= */
+
+function mostrar(id) {
+
+    const secciones = [
+        "inicio",
+        "registro",
+        "login",
+        "cliente",
+        "trabajador"
+    ];
+
+    secciones.forEach(function(seccion) {
+
+        const elemento =
+            document.getElementById(seccion);
+
+        if (elemento) {
+            elemento.classList.add("oculto");
+        }
+
+    });
+
+
+    const destino =
+        document.getElementById(id);
+
+    if (destino) {
+        destino.classList.remove("oculto");
+    }
+
+}
+
+
+/* =========================
+   CREAR CUENTA
+   ========================= */
+
+function crearCuenta() {
+
+    const nombre =
+        document
+            .getElementById("registroNombre")
+            .value
+            .trim();
+
+    const email =
+        document
+            .getElementById("registroEmail")
+            .value
+            .trim();
+
+    const password =
+        document
+            .getElementById("registroPassword")
+            .value;
+
+
+    const mensaje =
+        document.getElementById("mensajeRegistro");
+
+
+    if (!nombre || !email || !password) {
+
+        mensaje.textContent =
+            "Completa todos los campos.";
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    if (!email.includes("@")) {
+
+        mensaje.textContent =
+            "Escribe un correo válido.";
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    if (password.length < 6) {
+
+        mensaje.textContent =
+            "La contraseña debe tener mínimo 6 caracteres.";
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    const usuario = {
+
+        nombre: nombre,
+        email: email,
+        password: password
+
+    };
+
+
+    localStorage.setItem(
+        "reservaya_usuario",
+        JSON.stringify(usuario)
+    );
+
+
+    mensaje.textContent =
+        "Cuenta creada correctamente.";
+
+    mensaje.className =
+        "mensaje exito";
+
+
+    setTimeout(function() {
+
+        document
+            .getElementById("loginEmail")
+            .value = email;
+
+        mostrar("login");
+
+    }, 800);
+
+}
+
+
+/* =========================
+   INICIAR SESIÓN
+   ========================= */
+
+function iniciarSesion() {
+
+    const email =
+        document
+            .getElementById("loginEmail")
+            .value
+            .trim();
+
+    const password =
+        document
+            .getElementById("loginPassword")
+            .value;
+
+
+    const mensaje =
+        document.getElementById("mensajeLogin");
+
+
+    if (!email || !password) {
+
+        mensaje.textContent =
+            "Completa correo y contraseña.";
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    const usuarioGuardado =
+        localStorage.getItem(
+            "reservaya_usuario"
+        );
+
+
+    if (!usuarioGuardado) {
+
+        mensaje.textContent =
+            "Primero debes crear una cuenta.";
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    const usuario =
+        JSON.parse(usuarioGuardado);
+
+
+    if (
+        email !== usuario.email ||
+        password !== usuario.password
+    ) {
+
+        mensaje.textContent =
+            "Correo o contraseña incorrectos.";
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    usuarioActual = usuario;
+
+
+    mensaje.textContent =
+        "Sesión iniciada.";
+
+    mensaje.className =
+        "mensaje exito";
+
+
+    document
+        .getElementById("nombreCliente")
+        .textContent =
+            usuario.nombre;
+
+
+    setTimeout(function() {
+
+        mostrar("cliente");
+
+    }, 500);
+
+}
+
+
+/* =========================
+   SELECCIONAR NEGOCIO
+   ========================= */
+
+function seleccionarNegocio(nombre) {
+
+    negocioActual = nombre;
+
+
+    document
+        .getElementById("nombreNegocio")
+        .textContent =
+            nombre;
+
+
+    const lista =
+        document.getElementById(
+            "listaServicios"
+        );
+
+
+    const selector =
+        document.getElementById(
+            "servicioReserva"
+        );
+
+
+    lista.innerHTML = "";
+
+    selector.innerHTML = "";
+
+
+    negocios[nombre].servicios.forEach(
+        function(servicio) {
+
+            const div =
+                document.createElement("div");
+
+            div.className =
+                "servicio";
+
+
+            let precio =
+                servicio.precio > 0
+                    ? "$" +
+                      servicio.precio.toLocaleString(
+                          "es-CO"
+                      )
+                    : "Reserva";
+
+
+            div.innerHTML =
+                "<strong>" +
+                servicio.nombre +
+                "</strong><br>" +
+                precio;
+
+
+            lista.appendChild(div);
+
+
+            const opcion =
+                document.createElement("option");
+
+            opcion.value =
+                servicio.nombre;
+
+            opcion.textContent =
+                servicio.nombre +
+                (
+                    servicio.precio > 0
+                    ? " - $" +
+                      servicio.precio.toLocaleString(
+                          "es-CO"
+                      )
+                    : ""
+                );
+
+
+            selector.appendChild(opcion);
+
+        }
+    );
+
+
+    document
+        .getElementById("zonaNegocio")
+        .classList.remove("oculto");
+
+}
+
+
+/* =========================
+   RESERVAR
+   ========================= */
+
+function reservar() {
+
+    const servicio =
+        document
+            .getElementById(
+                "servicioReserva"
+            )
+            .value;
+
+    const fecha =
+        document
+            .getElementById(
+                "fechaReserva"
+            )
+            .value;
+
+    const hora =
+        document
+            .getElementById(
+                "horaReserva"
+            )
+            .value;
+
+    const comentario =
+        document
+            .getElementById(
+                "comentarioReserva"
+            )
+            .value
+            .trim();
+
+
+    const mensaje =
+        document.getElementById(
+            "mensajeReserva"
+        );
+
+
+    if (!servicio || !fecha || !hora) {
+
+        mensaje.textContent =
+            "Selecciona servicio, fecha y hora.";
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    const nuevaReserva = {
+
+        id: Date.now(),
+
+        cliente:
+            usuarioActual.nombre,
+
+        email:
+            usuarioActual.email,
+
+        negocio:
+            negocioActual,
+
+        servicio:
+            servicio,
+
+        fecha:
+            fecha,
+
+        hora:
+            hora,
+
+        comentario:
+            comentario,
+
+        estado:
+            "Pendiente"
+
+    };
+
+
+    reservas.push(nuevaReserva);
+
+
+    localStorage.setItem(
+        "reservaya_reservas",
+        JSON.stringify(reservas)
+    );
+
+
+    mensaje.textContent =
+        "✅ Reserva realizada correctamente.";
+
+    mensaje.className =
+        "mensaje exito";
+
+
+    mostrarReservasTrabajador();
+
+}
+
+
+/* =========================
+   MOSTRAR RESERVAS
+   ========================= */
+
+function mostrarReservasTrabajador() {
+
+    const lista =
+        document.getElementById(
+            "listaReservasTrabajador"
+        );
+
+
+    lista.innerHTML = "";
+
+
+    if (reservas.length === 0) {
+
+        lista.innerHTML =
+            "<p>No hay reservas todavía.</p>";
+
+        return;
+    }
+
+
+    reservas.forEach(function(reserva) {
+
+        const div =
+            document.createElement("div");
+
+        div.className =
+            "reserva";
+
+
+        div.innerHTML =
+
+            "<strong>" +
+            reserva.negocio +
+            "</strong><br><br>" +
+
+            "👤 Cliente: " +
+            reserva.cliente +
+            "<br>" +
+
+            "📧 Correo: " +
+            reserva.email +
+            "<br>" +
+
+            "✂️ Servicio: " +
+            reserva.servicio +
+            "<br>" +
+
+            "📅 Fecha: " +
+            reserva.fecha +
+            "<br>" +
+
+            "🕐 Hora: " +
+            reserva.hora +
+            "<br>" +
+
+            "📌 Estado: " +
+            reserva.estado;
+
+
+        lista.appendChild(div);
+
+    });
+
+}
+
+
+/* =========================
+   CERRAR SESIÓN
+   ========================= */
+
+function cerrarSesion() {
+
+    usuarioActual = null;
+
+    mostrar("inicio");
+
+}
+
+
+/* =========================
+   CARGAR RESERVAS
+   ========================= */
+
+const reservasGuardadas =
+    localStorage.getItem(
+        "reservaya_reservas"
+    );
+
+
+if (reservasGuardadas) {
+
+    reservas =
+        JSON.parse(
+            reservasGuardadas
+        );
+
+}
+
+
+mostrar("inicio");
+
+</script>
+
+</body>
+</html>
