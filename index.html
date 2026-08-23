@@ -754,17 +754,18 @@ async function iniciarSesion() {
             password: password
         });
 
+if (resultado.error) {
 
-    if (resultado.error) {
+    console.log("ERROR REAL DE SUPABASE:", resultado.error);
 
-        mensaje.textContent =
-            "Correo o contraseña incorrectos.";
+    mensaje.textContent =
+        "Error: " + resultado.error.message;
 
-        mensaje.className =
-            "mensaje error";
+    mensaje.className =
+        "mensaje error";
 
-        return;
-    }
+    return;
+}
 
 
     const usuario =
