@@ -452,7 +452,11 @@ button {
 
 
 let usuarioActual = null;
-
+if (window.supabase) {
+    console.log("Supabase cargó correctamente");
+} else {
+    console.log("Supabase NO cargó");
+}
 
 let negocioActual = null;
 
