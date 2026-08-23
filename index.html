@@ -704,7 +704,7 @@ async function crearCuenta() {
 
     }, 1000);
 
-    }
+    
 }
 
 
@@ -712,7 +712,7 @@ async function crearCuenta() {
    INICIAR SESIÓN
    ========================= */
 
-function iniciarSesion() {
+async function iniciarSesion() {
 
     const email =
         document
@@ -724,7 +724,6 @@ function iniciarSesion() {
         document
             .getElementById("loginPassword")
             .value;
-
 
     const mensaje =
         document.getElementById("mensajeLogin");
@@ -742,32 +741,21 @@ function iniciarSesion() {
     }
 
 
-    const usuarioGuardado =
-        localStorage.getItem(
-            "reservaya_usuario"
-        );
+    mensaje.textContent =
+        "Iniciando sesión...";
+
+    mensaje.className =
+        "mensaje";
 
 
-    if (!usuarioGuardado) {
-
-        mensaje.textContent =
-            "Primero debes crear una cuenta.";
-
-        mensaje.className =
-            "mensaje error";
-
-        return;
-    }
+    const resultado =
+        await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
 
 
-    const usuario =
-        JSON.parse(usuarioGuardado);
-
-
-    if (
-        email !== usuario.email ||
-        password !== usuario.password
-    ) {
+    if (resultado.error) {
 
         mensaje.textContent =
             "Correo o contraseña incorrectos.";
@@ -779,20 +767,29 @@ function iniciarSesion() {
     }
 
 
+    const usuario =
+        resultado.data.user;
+
+
     usuarioActual = usuario;
 
 
-    mensaje.textContent =
-        "Sesión iniciada.";
-
-    mensaje.className =
-        "mensaje exito";
+    const nombre =
+        usuario.user_metadata?.nombre ||
+        usuario.email;
 
 
     document
         .getElementById("nombreCliente")
         .textContent =
-            usuario.nombre;
+            nombre;
+
+
+    mensaje.textContent =
+        "✅ Sesión iniciada correctamente.";
+
+    mensaje.className =
+        "mensaje exito";
 
 
     setTimeout(function() {
@@ -801,7 +798,7 @@ function iniciarSesion() {
 
     }, 500);
 
-}
+    }
 
 
 /* =========================
