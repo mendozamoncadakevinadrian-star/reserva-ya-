@@ -805,10 +805,7 @@ if (resultado.error) {
 /* =========================
    SELECCIONAR NEGOCIO
    ========================= */
-
 async function seleccionarNegocio(nombre) {
-
-    negocioActual = nombre;
 
     document.getElementById("nombreNegocio").textContent = nombre;
 
@@ -818,59 +815,86 @@ async function seleccionarNegocio(nombre) {
     lista.innerHTML = "";
     selector.innerHTML = "";
 
-    // Buscar el negocio en Supabase
+    // Buscar el negocio
     const { data: negocio, error: errorNegocio } =
         await supabaseClient
-            .from("negocios")
+            .from("public_negocios")
             .select("id, nombre")
             .eq("nombre", nombre)
             .single();
 
     if (errorNegocio) {
+
         console.error("Error buscando negocio:", errorNegocio);
 
         lista.innerHTML =
             "<p class='error'>No se pudo cargar el negocio.</p>";
 
+        document
+            .getElementById("zonaNegocio")
+            .classList.remove("oculto");
+
         return;
     }
 
-    // Guardamos el UUID real del negocio
+    // Guardamos el negocio con su UUID
     negocioActual = negocio;
 
-    // Buscar sus servicios
+
+    // Buscar los servicios de ese negocio
     const { data: servicios, error: errorServicios } =
         await supabaseClient
-            .from("servicios")
+            .from("public_servicios")
             .select("id, nombre, precio, duracion")
             .eq("negocio_id", negocio.id);
 
     if (errorServicios) {
-        console.error("Error buscando servicios:", errorServicios);
+
+        console.error(
+            "Error buscando servicios:",
+            errorServicios
+        );
 
         lista.innerHTML =
             "<p class='error'>No se pudieron cargar los servicios.</p>";
 
+        document
+            .getElementById("zonaNegocio")
+            .classList.remove("oculto");
+
         return;
     }
+
 
     if (!servicios || servicios.length === 0) {
+
         lista.innerHTML =
-            "<p>No hay servicios disponibles.</p>";
+            "<p>No hay servicios disponibles para este negocio.</p>";
+
+        document
+            .getElementById("zonaNegocio")
+            .classList.remove("oculto");
 
         return;
     }
+
 
     servicios.forEach(function(servicio) {
 
-        const div = document.createElement("div");
+        const div =
+            document.createElement("div");
 
-        div.className = "servicio";
+        div.className =
+            "servicio";
+
 
         const precio =
             servicio.precio > 0
-                ? "$" + Number(servicio.precio).toLocaleString("es-CO")
+                ? "$" +
+                  Number(servicio.precio)
+                      .toLocaleString("es-CO")
                 : "Reserva";
+
 
         div.innerHTML =
             "<strong>" +
@@ -882,30 +906,37 @@ async function seleccionarNegocio(nombre) {
             servicio.duracion +
             " minutos</span>";
 
+
         lista.appendChild(div);
 
-        const opcion = document.createElement("option");
 
-        opcion.value = servicio.id;
+        const opcion =
+            document.createElement("option");
+
+        opcion.value =
+            servicio.id;
 
         opcion.textContent =
             servicio.nombre +
             (
                 servicio.precio > 0
                     ? " - $" +
-                      Number(servicio.precio).toLocaleString("es-CO")
+                      Number(servicio.precio)
+                          .toLocaleString("es-CO")
                     : ""
             );
+
 
         selector.appendChild(opcion);
 
     });
 
+
     document
         .getElementById("zonaNegocio")
         .classList.remove("oculto");
-}
 
+}
 /* =========================
    RESERVAR
    ========================= */
