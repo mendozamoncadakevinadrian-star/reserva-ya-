@@ -460,6 +460,13 @@ if (window.supabase) {
 const SUPABASE_URL = "https://mjxiyzapdybzckurootw.supabase.co";
 
 console.log("URL de Supabase:", SUPABASE_URL);
+console.log("Probando conexión con Supabase...");
+
+if (window.supabase) {
+    console.log("✅ Supabase está listo.");
+} else {
+    console.log("❌ Supabase no está disponible.");
+    }    
 let negocioActual = null;
 
 let reservas = [];
