@@ -596,7 +596,115 @@ function mostrar(id) {
    CREAR CUENTA
    ========================= */
 
-function crearCuenta() {
+async function crearCuenta() {
+
+    const nombre =
+        document
+            .getElementById("registroNombre")
+            .value
+            .trim();
+
+    const email =
+        document
+            .getElementById("registroEmail")
+            .value
+            .trim();
+
+    const password =
+        document
+            .getElementById("registroPassword")
+            .value;
+
+    const mensaje =
+        document.getElementById("mensajeRegistro");
+
+
+    if (!nombre || !email || !password) {
+
+        mensaje.textContent =
+            "Completa todos los campos.";
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    if (!email.includes("@")) {
+
+        mensaje.textContent =
+            "Escribe un correo válido.";
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    if (password.length < 6) {
+
+        mensaje.textContent =
+            "La contraseña debe tener mínimo 6 caracteres.";
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    mensaje.textContent =
+        "Creando cuenta...";
+
+    mensaje.className =
+        "mensaje";
+
+
+    const resultado =
+        await supabaseClient.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+                data: {
+                    nombre: nombre
+                }
+            }
+        });
+
+
+    if (resultado.error) {
+
+        mensaje.textContent =
+            "Error: " + resultado.error.message;
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    mensaje.textContent =
+        "✅ Cuenta creada correctamente.";
+
+    mensaje.className =
+        "mensaje exito";
+
+
+    document
+        .getElementById("loginEmail")
+        .value = email;
+
+
+    setTimeout(function() {
+
+        mostrar("login");
+
+    }, 1000);
+
+}
 
     const nombre =
         document
