@@ -461,7 +461,12 @@ const SUPABASE_URL = "https://mjxiyzapdybzckurootw.supabase.co";
 
 console.log("URL de Supabase:", SUPABASE_URL);
 console.log("Probando conexión con Supabase...");
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    "PON_AQUI_LA_CLAVE_PUBLICA"
+);
 
+console.log("✅ Cliente de Supabase creado correctamente");
 if (window.supabase) {
     console.log("✅ Supabase está listo.");
 } else {
