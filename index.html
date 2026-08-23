@@ -467,6 +467,19 @@ const supabaseClient = window.supabase.createClient(
 );
 
 console.log("✅ Cliente de Supabase creado correctamente");
+ supabaseClient
+    .from("usuarios")
+    .select("*")
+    .limit(1)
+    .then(function(resultado) {
+
+        if (resultado.error) {
+            console.log("❌ Error al conectar con la tabla usuarios:", resultado.error);
+        } else {
+            console.log("✅ Conexión con la tabla usuarios funcionando.");
+        }
+
+    });   
 if (window.supabase) {
     console.log("✅ Supabase está listo.");
 } else {
