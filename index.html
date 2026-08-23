@@ -979,13 +979,36 @@ function reservar() {
     };
 
 
-    reservas.push(nuevaReserva);
+    const { data, error } = await supabaseClient
+    .from("Citas")
+    .insert([
+        {
+            negocio_id: null,
+            servicio_id: null,
+            nombre_cliente: usuarioActual.user_metadata?.nombre || usuarioActual.email,
+            telefono_cliente: "",
+            fecha: fecha,
+            hora: hora,
+            comentario: comentario,
+            estado: "Pendiente",
+            usuario: usuarioActual.id
+        }
+    ])
+    .select();
 
+if (error) {
+    console.error("Error al guardar la reserva:", error);
 
-    localStorage.setItem(
-        "reservaya_reservas",
-        JSON.stringify(reservas)
-    );
+    mensaje.textContent =
+        "Error al guardar la reserva: " + error.message;
+
+    mensaje.className =
+        "mensaje error";
+
+    return;
+}
+
+console.log("Reserva guardada en Supabase:", data);
 
 
     mensaje.textContent =
