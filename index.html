@@ -806,93 +806,105 @@ if (resultado.error) {
    SELECCIONAR NEGOCIO
    ========================= */
 
-function seleccionarNegocio(nombre) {
+async function seleccionarNegocio(nombre) {
 
     negocioActual = nombre;
 
+    document.getElementById("nombreNegocio").textContent = nombre;
 
-    document
-        .getElementById("nombreNegocio")
-        .textContent =
-            nombre;
-
-
-    const lista =
-        document.getElementById(
-            "listaServicios"
-        );
-
-
-    const selector =
-        document.getElementById(
-            "servicioReserva"
-        );
-
+    const lista = document.getElementById("listaServicios");
+    const selector = document.getElementById("servicioReserva");
 
     lista.innerHTML = "";
-
     selector.innerHTML = "";
 
+    // Buscar el negocio en Supabase
+    const { data: negocio, error: errorNegocio } =
+        await supabaseClient
+            .from("negocios")
+            .select("id, nombre")
+            .eq("nombre", nombre)
+            .single();
 
-    negocios[nombre].servicios.forEach(
-        function(servicio) {
+    if (errorNegocio) {
+        console.error("Error buscando negocio:", errorNegocio);
 
-            const div =
-                document.createElement("div");
+        lista.innerHTML =
+            "<p class='error'>No se pudo cargar el negocio.</p>";
 
-            div.className =
-                "servicio";
+        return;
+    }
 
+    // Guardamos el UUID real del negocio
+    negocioActual = negocio;
 
-            let precio =
+    // Buscar sus servicios
+    const { data: servicios, error: errorServicios } =
+        await supabaseClient
+            .from("servicios")
+            .select("id, nombre, precio, duracion")
+            .eq("negocio_id", negocio.id);
+
+    if (errorServicios) {
+        console.error("Error buscando servicios:", errorServicios);
+
+        lista.innerHTML =
+            "<p class='error'>No se pudieron cargar los servicios.</p>";
+
+        return;
+    }
+
+    if (!servicios || servicios.length === 0) {
+        lista.innerHTML =
+            "<p>No hay servicios disponibles.</p>";
+
+        return;
+    }
+
+    servicios.forEach(function(servicio) {
+
+        const div = document.createElement("div");
+
+        div.className = "servicio";
+
+        const precio =
+            servicio.precio > 0
+                ? "$" + Number(servicio.precio).toLocaleString("es-CO")
+                : "Reserva";
+
+        div.innerHTML =
+            "<strong>" +
+            servicio.nombre +
+            "</strong><br>" +
+            precio +
+            "<br>" +
+            "<span class='pequeno'>" +
+            servicio.duracion +
+            " minutos</span>";
+
+        lista.appendChild(div);
+
+        const opcion = document.createElement("option");
+
+        opcion.value = servicio.id;
+
+        opcion.textContent =
+            servicio.nombre +
+            (
                 servicio.precio > 0
-                    ? "$" +
-                      servicio.precio.toLocaleString(
-                          "es-CO"
-                      )
-                    : "Reserva";
-
-
-            div.innerHTML =
-                "<strong>" +
-                servicio.nombre +
-                "</strong><br>" +
-                precio;
-
-
-            lista.appendChild(div);
-
-
-            const opcion =
-                document.createElement("option");
-
-            opcion.value =
-                servicio.nombre;
-
-            opcion.textContent =
-                servicio.nombre +
-                (
-                    servicio.precio > 0
                     ? " - $" +
-                      servicio.precio.toLocaleString(
-                          "es-CO"
-                      )
+                      Number(servicio.precio).toLocaleString("es-CO")
                     : ""
-                );
+            );
 
+        selector.appendChild(opcion);
 
-            selector.appendChild(opcion);
-
-        }
-    );
-
+    });
 
     document
         .getElementById("zonaNegocio")
         .classList.remove("oculto");
-
 }
-
 
 /* =========================
    RESERVAR
