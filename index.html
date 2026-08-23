@@ -818,7 +818,7 @@ async function seleccionarNegocio(nombre) {
     // Buscar el negocio
     const { data: negocio, error: errorNegocio } =
         await supabaseClient
-            .from("public_negocios")
+            .from("negocios")
             .select("id, nombre")
             .eq("nombre", nombre)
             .single();
@@ -844,7 +844,7 @@ async function seleccionarNegocio(nombre) {
     // Buscar los servicios de ese negocio
     const { data: servicios, error: errorServicios } =
         await supabaseClient
-            .from("public_servicios")
+            .from("servicios")
             .select("id, nombre, precio, duracion")
             .eq("negocio_id", negocio.id);
 
