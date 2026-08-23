@@ -911,43 +911,33 @@ async function seleccionarNegocio(nombre) {
    ========================= */
 
 async function reservar() {
-    const servicio =
+
+    const servicioId =
         document
-            .getElementById(
-                "servicioReserva"
-            )
+            .getElementById("servicioReserva")
             .value;
 
     const fecha =
         document
-            .getElementById(
-                "fechaReserva"
-            )
+            .getElementById("fechaReserva")
             .value;
 
     const hora =
         document
-            .getElementById(
-                "horaReserva"
-            )
+            .getElementById("horaReserva")
             .value;
 
     const comentario =
         document
-            .getElementById(
-                "comentarioReserva"
-            )
+            .getElementById("comentarioReserva")
             .value
             .trim();
 
-
     const mensaje =
-        document.getElementById(
-            "mensajeReserva"
-        );
+        document.getElementById("mensajeReserva");
 
 
-    if (!servicio || !fecha || !hora) {
+    if (!servicioId || !fecha || !hora) {
 
         mensaje.textContent =
             "Selecciona servicio, fecha y hora.";
@@ -959,67 +949,88 @@ async function reservar() {
     }
 
 
-    const nuevaReserva = {
+    if (!usuarioActual) {
 
-        id: Date.now(),
+        mensaje.textContent =
+            "Debes iniciar sesión primero.";
 
-        cliente:
-            usuarioActual.nombre,
+        mensaje.className =
+            "mensaje error";
 
-        email:
-            usuarioActual.email,
-
-        negocio:
-            negocioActual,
-
-        servicio:
-            servicio,
-
-        fecha:
-            fecha,
-
-        hora:
-            hora,
-
-        comentario:
-            comentario,
-
-        estado:
-            "Pendiente"
-
-    };
+        return;
+    }
 
 
-    const { data, error } = await supabaseClient
-    .from("Citas")
-    .insert([
-        {
-            negocio_id: null,
-            servicio_id: null,
-            nombre_cliente: usuarioActual.user_metadata?.nombre || usuarioActual.email,
-            telefono_cliente: "",
-            fecha: fecha,
-            hora: hora,
-            comentario: comentario,
-            estado: "Pendiente",
-            usuario: usuarioActual.id
-        }
-    ])
-    .select();
+    if (!negocioActual || !negocioActual.id) {
 
-if (error) {
-    console.error("Error al guardar la reserva:", error);
+        mensaje.textContent =
+            "Selecciona un negocio primero.";
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
 
     mensaje.textContent =
-        "Error al guardar la reserva: " + error.message;
+        "Guardando reserva...";
 
     mensaje.className =
-        "mensaje error";
+        "mensaje";
 
-    return;
-}
 
-console.log("Reserva guardada en Supabase:", data);
+    const { data, error } =
+        await supabaseClient
+            .from("citas")
+            .insert([
+                {
+                    negocio_id: negocioActual.id,
+
+                    servicio_id: servicioId,
+
+                    nombre_cliente:
+                        usuarioActual.user_metadata?.nombre ||
+                        usuarioActual.email,
+
+                    telefono_cliente: "",
+
+                    fecha: fecha,
+
+                    hora: hora,
+
+                    comentario: comentario,
+
+                    estado: "Pendiente",
+
+                    usuario: usuarioActual.id
+                }
+            ])
+            .select();
+
+
+    if (error) {
+
+        console.error(
+            "Error al guardar la reserva:",
+            error
+        );
+
+        mensaje.textContent =
+            "Error al guardar la reserva: " +
+            error.message;
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    console.log(
+        "✅ Reserva guardada en Supabase:",
+        data
+    );
 
 
     mensaje.textContent =
@@ -1027,9 +1038,6 @@ console.log("Reserva guardada en Supabase:", data);
 
     mensaje.className =
         "mensaje exito";
-
-
-    mostrarReservasTrabajador();
 
 }
 
