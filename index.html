@@ -753,7 +753,7 @@ async function iniciarSesion() {
             email: email,
             password: password
         });
-
+console.log("RESULTADO DEL LOGIN:", resultado);
 if (resultado.error) {
 
     console.log("ERROR REAL DE SUPABASE:", resultado.error);
