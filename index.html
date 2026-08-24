@@ -819,10 +819,10 @@ async function seleccionarNegocio(nombre) {
     const { data: negociosEncontrados, error: errorNegocio } =
     await supabaseClient
         .from("negocios")
-        .select("id, nombre")
-        .eq("nombre", nombre)
-        .limit(1);
+        .select("id, nombre");
 
+console.log("NEGOCIOS QUE DEVUELVE SUPABASE:", negociosEncontrados);
+console.log("ERROR DE NEGOCIOS:", errorNegocio);
 if (errorNegocio) {
 
     console.error("Error buscando negocio:", errorNegocio);
