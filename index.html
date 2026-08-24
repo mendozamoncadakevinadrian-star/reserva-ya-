@@ -828,8 +828,9 @@ async function seleccionarNegocio(nombre) {
         console.error("Error buscando negocio:", errorNegocio);
 
         lista.innerHTML =
-            "<p class='error'>No se pudo cargar el negocio.</p>";
-
+    "<p class='error'>No se pudo cargar el negocio: " +
+    errorNegocio.message +
+    "</p>";
         document
             .getElementById("zonaNegocio")
             .classList.remove("oculto");
