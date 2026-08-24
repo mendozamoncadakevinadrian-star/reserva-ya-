@@ -1138,35 +1138,34 @@ async function reservar() {
 
     const datosReserva = {
 
-        negocio_id:
-            negocioActual.id,
+    negocio_id:
+        negocioActual.id,
 
-        servicio_id:
-            servicioId,
+    servicio_id:
+        servicioId,
 
-        nombre_cliente:
-            nombreCliente,
+    cliente_id:
+        usuarioActual.id,
 
-        telefono_cliente:
-            "",
+    nombre_cliente:
+        nombreCliente,
 
-        fecha:
-            fecha,
+    telefono_cliente:
+        "",
 
-        hora:
-            hora,
+    fecha:
+        fecha,
 
-        comentario:
-            comentario,
+    hora:
+        hora,
 
-        estado:
-            "Pendiente",
+    comentario:
+        comentario,
 
-        usuario:
-            usuarioActual.id
+    estado:
+        "Pendiente"
 
-    };
-
+};
 
     console.log(
         "📅 DATOS DE RESERVA:",
