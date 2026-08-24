@@ -820,9 +820,8 @@ async function seleccionarNegocio(nombre) {
     await supabaseClient
         .from("negocios")
         .select("id, nombre")
-        .eq("nombre", nombre)
+        .eq("id", "f3154126-c6a1-4d34-be89-91c9281653b4")
         .limit(1);
-
 console.log("NEGOCIOS QUE DEVUELVE SUPABASE:", negociosEncontrados);
 console.log("ERROR DE NEGOCIOS:", errorNegocio);
 if (errorNegocio) {
