@@ -855,23 +855,7 @@ const negocio = negociosEncontrados[0];
 
 negocioActual = negocio;
 
-    if (errorNegocio) {
-
-        console.error("Error buscando negocio:", errorNegocio);
-
-        lista.innerHTML =
-    "<p class='error'>No se pudo cargar el negocio: " +
-    errorNegocio.message +
-    "</p>";
-        document
-            .getElementById("zonaNegocio")
-            .classList.remove("oculto");
-
-        return;
-    }
-
-    // Guardamos el negocio con su UUID
-    negocioActual = negocio;
+    
 
 
     // Buscar los servicios de ese negocio
