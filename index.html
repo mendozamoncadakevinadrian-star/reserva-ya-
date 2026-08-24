@@ -862,7 +862,7 @@ negocioActual = negocio;
     const { data: servicios, error: errorServicios } =
         await supabaseClient
             .from("servicios")
-            .select("id, nombre, precio, duracion")
+            .select("*")
             .eq("negocio_id", negocio.id);
 
     if (errorServicios) {
