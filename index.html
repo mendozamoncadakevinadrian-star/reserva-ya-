@@ -1175,7 +1175,7 @@ async function reservar() {
 
     const resultado =
         await supabaseClient
-            .from("citas")
+            .from("reservar_citas")
             .insert([datosReserva])
             .select();
 
