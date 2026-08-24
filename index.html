@@ -1136,16 +1136,8 @@ async function reservar() {
         usuarioActual.email;
 
 
-    const datosReserva = {
-
-    negocio_id:
-        negocioActual.id,
-
-    servicio_id:
-        servicioId,
-
-    cliente_id:
-        usuarioActual.id,
+    console.log("USUARIO ACTUAL ID:", usuarioActual?.id);
+console.log("USUARIO ACTUAL:", usuarioActual);
 
     nombre_cliente:
         nombreCliente,
