@@ -816,12 +816,44 @@ async function seleccionarNegocio(nombre) {
     selector.innerHTML = "";
 
     // Buscar el negocio
-    const { data: negocio, error: errorNegocio } =
-        await supabaseClient
-            .from("negocios")
-            .select("id, nombre")
-            .eq("nombre", nombre)
-            .single();
+    const { data: negociosEncontrados, error: errorNegocio } =
+    await supabaseClient
+        .from("negocios")
+        .select("id, nombre")
+        .eq("nombre", nombre)
+        .limit(1);
+
+if (errorNegocio) {
+
+    console.error("Error buscando negocio:", errorNegocio);
+
+    lista.innerHTML =
+        "<p class='error'>No se pudo cargar el negocio: " +
+        errorNegocio.message +
+        "</p>";
+
+    document
+        .getElementById("zonaNegocio")
+        .classList.remove("oculto");
+
+    return;
+}
+
+if (!negociosEncontrados || negociosEncontrados.length === 0) {
+
+    lista.innerHTML =
+        "<p class='error'>No se encontró ese negocio en la tabla.</p>";
+
+    document
+        .getElementById("zonaNegocio")
+        .classList.remove("oculto");
+
+    return;
+}
+
+const negocio = negociosEncontrados[0];
+
+negocioActual = negocio;
 
     if (errorNegocio) {
 
