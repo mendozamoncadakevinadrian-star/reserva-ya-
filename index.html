@@ -132,22 +132,20 @@ button {
     text-align: center;
 }
 
-.nav {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 20px;
-}
-
-.nav button {
-    flex: 1;
-}
-
 .pequeno {
     color: #666;
     font-size: 14px;
 }
+
+.cargando {
+    text-align: center;
+    color: #666;
+    padding: 15px;
+}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>    
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 </head>
 
 <body>
@@ -159,9 +157,7 @@ button {
 
 <div class="contenedor">
 
-    <!-- =========================
-         INICIO
-         ========================= -->
+    <!-- INICIO -->
 
     <div id="inicio" class="tarjeta">
 
@@ -189,9 +185,7 @@ button {
     </div>
 
 
-    <!-- =========================
-         REGISTRO
-         ========================= -->
+    <!-- REGISTRO -->
 
     <div id="registro" class="tarjeta oculto">
 
@@ -240,9 +234,7 @@ button {
     </div>
 
 
-    <!-- =========================
-         LOGIN
-         ========================= -->
+    <!-- LOGIN -->
 
     <div id="login" class="tarjeta oculto">
 
@@ -283,15 +275,16 @@ button {
     </div>
 
 
-    <!-- =========================
-         CLIENTE
-         ========================= -->
+    <!-- CLIENTE -->
 
     <div id="cliente" class="oculto">
 
         <div class="tarjeta">
 
-            <h2>👋 Hola, <span id="nombreCliente"></span></h2>
+            <h2>
+                👋 Hola,
+                <span id="nombreCliente"></span>
+            </h2>
 
             <p>
                 Elige un negocio para reservar.
@@ -307,36 +300,29 @@ button {
         </div>
 
 
+        <!-- NEGOCIOS -->
+
         <div class="tarjeta">
 
             <h2>🏢 Negocios</h2>
 
-            <div
-                class="negocio"
-                onclick="seleccionarNegocio('Barbería estilo')"
-            >
-                <h3>💈 Barbería El Estilo</h3>
-                <p>Cortes y cuidado personal</p>
+            <div id="listaNegocios">
+
+                <div class="cargando">
+                    Cargando negocios...
+                </div>
+
             </div>
 
             <div
-                class="negocio"
-                onclick="seleccionarNegocio('Restaurante Sabor')"
-            >
-                <h3>🍽️ Restaurante Sabor</h3>
-                <p>Reserva tu mesa</p>
-            </div>
-
-            <div
-                class="negocio"
-                onclick="seleccionarNegocio('Belleza Glam')"
-            >
-                <h3>💅 Belleza Glam</h3>
-                <p>Servicios de belleza</p>
-            </div>
+                id="mensajeNegocios"
+                class="mensaje"
+            ></div>
 
         </div>
 
+
+        <!-- NEGOCIO SELECCIONADO -->
 
         <div
             id="zonaNegocio"
@@ -345,16 +331,28 @@ button {
 
             <h2 id="nombreNegocio"></h2>
 
+            <p
+                id="idNegocioMostrado"
+                class="pequeno"
+            ></p>
+
             <h3>Servicios</h3>
 
             <div id="listaServicios"></div>
+
 
             <h3>Reservar</h3>
 
             <label>Servicio</label>
 
             <select id="servicioReserva">
+
+                <option value="">
+                    Selecciona un servicio
+                </option>
+
             </select>
+
 
             <label>Fecha</label>
 
@@ -362,6 +360,7 @@ button {
                 id="fechaReserva"
                 type="date"
             >
+
 
             <label>Hora</label>
 
@@ -371,18 +370,19 @@ button {
                     Selecciona una hora
                 </option>
 
-                <option>09:00</option>
-                <option>10:00</option>
-                <option>11:00</option>
-                <option>12:00</option>
-                <option>13:00</option>
-                <option>14:00</option>
-                <option>15:00</option>
-                <option>16:00</option>
-                <option>17:00</option>
-                <option>18:00</option>
+                <option value="09:00">09:00</option>
+                <option value="10:00">10:00</option>
+                <option value="11:00">11:00</option>
+                <option value="12:00">12:00</option>
+                <option value="13:00">13:00</option>
+                <option value="14:00">14:00</option>
+                <option value="15:00">15:00</option>
+                <option value="16:00">16:00</option>
+                <option value="17:00">17:00</option>
+                <option value="18:00">18:00</option>
 
             </select>
+
 
             <label>Comentario</label>
 
@@ -391,12 +391,14 @@ button {
                 placeholder="Algo que quieras decirle al negocio"
             ></textarea>
 
+
             <button
                 class="boton"
                 onclick="reservar()"
             >
                 Confirmar reserva
             </button>
+
 
             <div
                 id="mensajeReserva"
@@ -407,158 +409,36 @@ button {
 
     </div>
 
-
-    <!-- =========================
-         PANEL TRABAJADOR
-         ========================= -->
-
-    <div
-        id="trabajador"
-        class="oculto"
-    >
-
-        <div class="tarjeta">
-
-            <h2>👨‍💼 Panel del negocio</h2>
-
-            <p>
-                Aquí el trabajador podrá administrar
-                las reservas de su negocio.
-            </p>
-
-            <button
-                class="secundario"
-                onclick="cerrarSesion()"
-            >
-                Cerrar sesión
-            </button>
-
-        </div>
-
-        <div class="tarjeta">
-
-            <h2>📅 Reservas</h2>
-
-            <div id="listaReservasTrabajador"></div>
-
-        </div>
-
-    </div>
-
 </div>
 
 
 <script>
 
+/* =========================================================
+   SUPABASE
+   ========================================================= */
+
+const SUPABASE_URL =
+    "https://mjxiyzapdybzckurootw.supabase.co";
+
+const SUPABASE_ANON_KEY =
+    "sb_publishable_Ox1Wz7UT2Gw6uHOP6SncjQ_sGapEEB-";
+
+
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+    );
+
 
 let usuarioActual = null;
-if (window.supabase) {
-    console.log("Supabase cargó correctamente");
-} else {
-    console.log("Supabase NO cargó");
-}
-const SUPABASE_URL = "https://mjxiyzapdybzckurootw.supabase.co";
-
-console.log("URL de Supabase:", SUPABASE_URL);
-console.log("Probando conexión con Supabase...");
-const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    "sb_publishable_Ox1Wz7UT2Gw6uHOP6SncjQ_sGapEEB-"
-);
-
-console.log("✅ Cliente de Supabase creado correctamente");
- supabaseClient
-    .from("usuarios")
-    .select("*")
-    .limit(1)
-    .then(function(resultado) {
-
-        if (resultado.error) {
-            console.log("❌ Error al conectar con la tabla usuarios:", resultado.error);
-        } else {
-            console.log("✅ Conexión con la tabla usuarios funcionando.");
-        }
-
-    });   
-if (window.supabase) {
-    console.log("✅ Supabase está listo.");
-} else {
-    console.log("❌ Supabase no está disponible.");
-    }    
 let negocioActual = null;
 
-let reservas = [];
 
-
-/* =========================
-   DATOS TEMPORALES
-   ========================= */
-
-const negocios = {
-
-    "Barbería El Estilo": {
-
-        servicios: [
-            {
-                nombre: "Corte",
-                precio: 25000
-            },
-            {
-                nombre: "Corte + barba",
-                precio: 35000
-            },
-            {
-                nombre: "Diseño completo",
-                precio: 45000
-            }
-        ]
-
-    },
-
-    "Restaurante Sabor": {
-
-        servicios: [
-            {
-                nombre: "Mesa para 2 personas",
-                precio: 0
-            },
-            {
-                nombre: "Mesa para 4 personas",
-                precio: 0
-            },
-            {
-                nombre: "Mesa para 6 personas",
-                precio: 0
-            }
-        ]
-
-    },
-
-    "Belleza Glam": {
-
-        servicios: [
-            {
-                nombre: "Manicure",
-                precio: 20000
-            },
-            {
-                nombre: "Pedicure",
-                precio: 25000
-            },
-            {
-                nombre: "Servicio completo",
-                precio: 50000
-            }
-        ]
-
-    }
-
-};
-
-
-/* =========================
+/* =========================================================
    CAMBIAR PANTALLA
-   ========================= */
+   ========================================================= */
 
 function mostrar(id) {
 
@@ -566,8 +446,7 @@ function mostrar(id) {
         "inicio",
         "registro",
         "login",
-        "cliente",
-        "trabajador"
+        "cliente"
     ];
 
     secciones.forEach(function(seccion) {
@@ -592,9 +471,9 @@ function mostrar(id) {
 }
 
 
-/* =========================
-   CREAR CUENTA
-   ========================= */
+/* =========================================================
+   REGISTRO
+   ========================================================= */
 
 async function crearCuenta() {
 
@@ -631,18 +510,6 @@ async function crearCuenta() {
     }
 
 
-    if (!email.includes("@")) {
-
-        mensaje.textContent =
-            "Escribe un correo válido.";
-
-        mensaje.className =
-            "mensaje error";
-
-        return;
-    }
-
-
     if (password.length < 6) {
 
         mensaje.textContent =
@@ -664,20 +531,32 @@ async function crearCuenta() {
 
     const resultado =
         await supabaseClient.auth.signUp({
+
             email: email,
+
             password: password,
+
             options: {
+
                 data: {
                     nombre: nombre
                 }
+
             }
+
         });
 
 
     if (resultado.error) {
 
+        console.error(
+            "ERROR REGISTRO:",
+            resultado.error
+        );
+
         mensaje.textContent =
-            "Error: " + resultado.error.message;
+            "Error: " +
+            resultado.error.message;
 
         mensaje.className =
             "mensaje error";
@@ -704,13 +583,12 @@ async function crearCuenta() {
 
     }, 1000);
 
-    
 }
 
 
-/* =========================
-   INICIAR SESIÓN
-   ========================= */
+/* =========================================================
+   LOGIN
+   ========================================================= */
 
 async function iniciarSesion() {
 
@@ -750,34 +628,40 @@ async function iniciarSesion() {
 
     const resultado =
         await supabaseClient.auth.signInWithPassword({
+
             email: email,
+
             password: password
+
         });
-console.log("RESULTADO DEL LOGIN:", resultado);
-if (resultado.error) {
-
-    console.log("ERROR REAL DE SUPABASE:", resultado.error);
-
-    mensaje.textContent =
-        "Error: " + resultado.error.message;
-
-    mensaje.className =
-        "mensaje error";
-
-    return;
-}
 
 
-    const usuario =
+    console.log(
+        "RESULTADO LOGIN:",
+        resultado
+    );
+
+
+    if (resultado.error) {
+
+        mensaje.textContent =
+            "Error: " +
+            resultado.error.message;
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    usuarioActual =
         resultado.data.user;
 
 
-    usuarioActual = usuario;
-
-
     const nombre =
-        usuario.user_metadata?.nombre ||
-        usuario.email;
+        usuarioActual.user_metadata?.nombre ||
+        usuarioActual.email;
 
 
     document
@@ -793,110 +677,276 @@ if (resultado.error) {
         "mensaje exito";
 
 
-    setTimeout(function() {
+    setTimeout(async function() {
 
         mostrar("cliente");
 
+        await cargarNegocios();
+
     }, 500);
 
-    }
-
-
-/* =========================
-   SELECCIONAR NEGOCIO
-   ========================= */
-async function seleccionarNegocio(nombre) {
-
-    document.getElementById("nombreNegocio").textContent = nombre;
-
-    const lista = document.getElementById("listaServicios");
-    const selector = document.getElementById("servicioReserva");
-
-    lista.innerHTML = "";
-    selector.innerHTML = "";
-
-    // Buscar el negocio
-    const { data: negociosEncontrados, error: errorNegocio } =
-    await supabaseClient
-        .from("negocios")
-        .select("id, nombre");
-
-console.log("TODOS LOS NEGOCIOS:", negociosEncontrados);
-console.log("ERROR DE NEGOCIOS:", errorNegocio);
-console.log("NEGOCIOS QUE DEVUELVE SUPABASE:", negociosEncontrados);
-console.log("ERROR DE NEGOCIOS:", errorNegocio);
-if (errorNegocio) {
-
-    console.error("Error buscando negocio:", errorNegocio);
-
-    lista.innerHTML =
-        "<p class='error'>No se pudo cargar el negocio: " +
-        errorNegocio.message +
-        "</p>";
-
-    document
-        .getElementById("zonaNegocio")
-        .classList.remove("oculto");
-
-    return;
 }
 
-if (!negociosEncontrados || negociosEncontrados.length === 0) {
+
+/* =========================================================
+   CARGAR NEGOCIOS DESDE SUPABASE
+   ========================================================= */
+
+async function cargarNegocios() {
+
+    const lista =
+        document.getElementById("listaNegocios");
+
+    const mensaje =
+        document.getElementById("mensajeNegocios");
+
 
     lista.innerHTML =
-        "<p class='error'>No se encontró ese negocio en la tabla.</p>";
+        "<div class='cargando'>Cargando negocios...</div>";
 
-    document
-        .getElementById("zonaNegocio")
-        .classList.remove("oculto");
-
-    return;
-}
-
-const negocio = negociosEncontrados[0];
-
-negocioActual = negocio;
-
-    
+    mensaje.textContent = "";
 
 
-    // Buscar los servicios de ese negocio
-    const { data: servicios, error: errorServicios } =
+    console.log(
+        "🔎 BUSCANDO NEGOCIOS EN SUPABASE..."
+    );
+
+
+    const resultado =
         await supabaseClient
-            .from("servicios")
-            .select("*")
-            .eq("negocio_id", negocio.id);
+            .from("negocios")
+            .select("id, nombre")
+            .order("nombre");
 
-    if (errorServicios) {
+
+    console.log(
+        "📦 RESULTADO NEGOCIOS:",
+        resultado
+    );
+
+
+    if (resultado.error) {
 
         console.error(
-            "Error buscando servicios:",
-            errorServicios
+            "❌ ERROR NEGOCIOS:",
+            resultado.error
         );
 
-        lista.innerHTML =
-            "<p class='error'>No se pudieron cargar los servicios.</p>";
 
-        document
-            .getElementById("zonaNegocio")
-            .classList.remove("oculto");
+        lista.innerHTML = "";
+
+
+        mensaje.textContent =
+            "Error cargando negocios: " +
+            resultado.error.message;
+
+        mensaje.className =
+            "mensaje error";
 
         return;
     }
 
-console.log("SERVICIOS QUE DEVUELVE SUPABASE:", servicios);
-console.log("ERROR DE SERVICIOS:", errorServicios);
+
+    const negocios =
+        resultado.data;
+
+
+    console.log(
+        "🏢 NEGOCIOS ENCONTRADOS:",
+        negocios
+    );
+
+
+    if (!negocios || negocios.length === 0) {
+
+        lista.innerHTML =
+            "<p class='error'>" +
+            "No hay negocios registrados en Supabase." +
+            "</p>";
+
+        return;
+    }
+
+
+    lista.innerHTML = "";
+
+
+    negocios.forEach(function(negocio) {
+
+        const tarjeta =
+            document.createElement("div");
+
+
+        tarjeta.className =
+            "negocio";
+
+
+        tarjeta.innerHTML =
+
+            "<h3>🏢 " +
+            escaparHTML(negocio.nombre) +
+            "</h3>" +
+
+            "<p>" +
+            "Toca para ver sus servicios." +
+            "</p>";
+
+
+        tarjeta.onclick =
+            function() {
+
+                seleccionarNegocio(negocio);
+
+            };
+
+
+        lista.appendChild(tarjeta);
+
+    });
+
+}
+
+
+/* =========================================================
+   SELECCIONAR NEGOCIO
+   ========================================================= */
+
+async function seleccionarNegocio(negocio) {
+
+    negocioActual =
+        negocio;
+
+
+    console.log(
+        "🏢 NEGOCIO SELECCIONADO:",
+        negocio
+    );
+
+
+    document
+        .getElementById("zonaNegocio")
+        .classList
+        .remove("oculto");
+
+
+    document
+        .getElementById("nombreNegocio")
+        .textContent =
+            negocio.nombre;
+
+
+    document
+        .getElementById("idNegocioMostrado")
+        .textContent =
+            "ID: " + negocio.id;
+
+
+    const lista =
+        document.getElementById("listaServicios");
+
+
+    const selector =
+        document.getElementById("servicioReserva");
+
+
+    lista.innerHTML =
+        "<div class='cargando'>Cargando servicios...</div>";
+
+
+    selector.innerHTML =
+
+        "<option value=''>" +
+        "Cargando servicios..." +
+        "</option>";
+
+
+    document
+        .getElementById("mensajeReserva")
+        .textContent = "";
+
+
+    console.log(
+        "🔎 BUSCANDO SERVICIOS PARA NEGOCIO:",
+        negocio.id
+    );
+
+
+    const resultado =
+        await supabaseClient
+            .from("servicios")
+            .select("id, nombre, precio, duracion, negocio_id")
+            .eq("negocio_id", negocio.id)
+            .order("nombre");
+
+
+    console.log(
+        "📦 RESULTADO SERVICIOS:",
+        resultado
+    );
+
+
+    if (resultado.error) {
+
+        console.error(
+            "❌ ERROR SERVICIOS:",
+            resultado.error
+        );
+
+
+        lista.innerHTML =
+            "<p class='error'>" +
+            "Error al cargar servicios: " +
+            escaparHTML(resultado.error.message) +
+            "</p>";
+
+
+        selector.innerHTML =
+            "<option value=''>" +
+            "Error cargando servicios" +
+            "</option>";
+
+
+        return;
+    }
+
+
+    const servicios =
+        resultado.data;
+
+
+    console.log(
+        "🛠️ SERVICIOS ENCONTRADOS:",
+        servicios
+    );
+
+
     if (!servicios || servicios.length === 0) {
 
         lista.innerHTML =
-            "<p>No hay servicios disponibles para este negocio.</p>";
+            "<p class='error'>" +
+            "Este negocio no tiene servicios registrados " +
+            "con este negocio_id." +
+            "</p>";
 
-        document
-            .getElementById("zonaNegocio")
-            .classList.remove("oculto");
+
+        selector.innerHTML =
+            "<option value=''>" +
+            "No hay servicios disponibles" +
+            "</option>";
+
 
         return;
     }
+
+
+    lista.innerHTML = "";
+
+
+    selector.innerHTML =
+
+        "<option value=''>" +
+        "Selecciona un servicio" +
+        "</option>";
 
 
     servicios.forEach(function(servicio) {
@@ -904,27 +954,50 @@ console.log("ERROR DE SERVICIOS:", errorServicios);
         const div =
             document.createElement("div");
 
+
         div.className =
             "servicio";
 
 
-        const precio =
-            servicio.precio > 0
-                ? "$" +
-                  Number(servicio.precio)
-                      .toLocaleString("es-CO")
-                : "Reserva";
+        let precioTexto =
+            "Reserva";
+
+
+        if (
+            servicio.precio !== null &&
+            servicio.precio !== undefined &&
+            Number(servicio.precio) > 0
+        ) {
+
+            precioTexto =
+                "$" +
+                Number(servicio.precio)
+                    .toLocaleString("es-CO");
+
+        }
 
 
         div.innerHTML =
+
             "<strong>" +
-            servicio.nombre +
+            escaparHTML(servicio.nombre) +
             "</strong><br>" +
-            precio +
+
+            precioTexto +
             "<br>" +
+
             "<span class='pequeno'>" +
-            servicio.duracion +
-            " minutos</span>";
+
+            (
+                servicio.duracion
+                    ? escaparHTML(
+                        String(servicio.duracion)
+                      ) +
+                      " minutos"
+                    : "Duración no especificada"
+            ) +
+
+            "</span>";
 
 
         lista.appendChild(div);
@@ -933,16 +1006,18 @@ console.log("ERROR DE SERVICIOS:", errorServicios);
         const opcion =
             document.createElement("option");
 
+
         opcion.value =
             servicio.id;
+
 
         opcion.textContent =
             servicio.nombre +
             (
-                servicio.precio > 0
+                Number(servicio.precio) > 0
                     ? " - $" +
                       Number(servicio.precio)
-                          .toLocaleString("es-CO")
+                        .toLocaleString("es-CO")
                     : ""
             );
 
@@ -951,15 +1026,12 @@ console.log("ERROR DE SERVICIOS:", errorServicios);
 
     });
 
-
-    document
-        .getElementById("zonaNegocio")
-        .classList.remove("oculto");
-
 }
-/* =========================
+
+
+/* =========================================================
    RESERVAR
-   ========================= */
+   ========================================================= */
 
 async function reservar() {
 
@@ -968,15 +1040,18 @@ async function reservar() {
             .getElementById("servicioReserva")
             .value;
 
+
     const fecha =
         document
             .getElementById("fechaReserva")
             .value;
 
+
     const hora =
         document
             .getElementById("horaReserva")
             .value;
+
 
     const comentario =
         document
@@ -984,14 +1059,51 @@ async function reservar() {
             .value
             .trim();
 
+
     const mensaje =
         document.getElementById("mensajeReserva");
 
 
-    if (!servicioId || !fecha || !hora) {
+    if (!negocioActual) {
 
         mensaje.textContent =
-            "Selecciona servicio, fecha y hora.";
+            "Selecciona un negocio.";
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    if (!servicioId) {
+
+        mensaje.textContent =
+            "Selecciona un servicio.";
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    if (!fecha) {
+
+        mensaje.textContent =
+            "Selecciona una fecha.";
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    if (!hora) {
+
+        mensaje.textContent =
+            "Selecciona una hora.";
 
         mensaje.className =
             "mensaje error";
@@ -1003,19 +1115,7 @@ async function reservar() {
     if (!usuarioActual) {
 
         mensaje.textContent =
-            "Debes iniciar sesión primero.";
-
-        mensaje.className =
-            "mensaje error";
-
-        return;
-    }
-
-
-    if (!negocioActual || !negocioActual.id) {
-
-        mensaje.textContent =
-            "Selecciona un negocio primero.";
+            "Debes iniciar sesión.";
 
         mensaje.className =
             "mensaje error";
@@ -1031,45 +1131,73 @@ async function reservar() {
         "mensaje";
 
 
-    const { data, error } =
+    const nombreCliente =
+        usuarioActual.user_metadata?.nombre ||
+        usuarioActual.email;
+
+
+    const datosReserva = {
+
+        negocio_id:
+            negocioActual.id,
+
+        servicio_id:
+            servicioId,
+
+        nombre_cliente:
+            nombreCliente,
+
+        telefono_cliente:
+            "",
+
+        fecha:
+            fecha,
+
+        hora:
+            hora,
+
+        comentario:
+            comentario,
+
+        estado:
+            "Pendiente",
+
+        usuario:
+            usuarioActual.id
+
+    };
+
+
+    console.log(
+        "📅 DATOS DE RESERVA:",
+        datosReserva
+    );
+
+
+    const resultado =
         await supabaseClient
             .from("citas")
-            .insert([
-                {
-                    negocio_id: negocioActual.id,
-
-                    servicio_id: servicioId,
-
-                    nombre_cliente:
-                        usuarioActual.user_metadata?.nombre ||
-                        usuarioActual.email,
-
-                    telefono_cliente: "",
-
-                    fecha: fecha,
-
-                    hora: hora,
-
-                    comentario: comentario,
-
-                    estado: "Pendiente",
-
-                    usuario: usuarioActual.id
-                }
-            ])
+            .insert([datosReserva])
             .select();
 
 
-    if (error) {
+    console.log(
+        "📦 RESULTADO RESERVA:",
+        resultado
+    );
+
+
+    if (resultado.error) {
 
         console.error(
-            "Error al guardar la reserva:",
-            error
+            "❌ ERROR GUARDANDO RESERVA:",
+            resultado.error
         );
+
 
         mensaje.textContent =
             "Error al guardar la reserva: " +
-            error.message;
+            resultado.error.message;
 
         mensaje.className =
             "mensaje error";
@@ -1078,125 +1206,122 @@ async function reservar() {
     }
 
 
-    console.log(
-        "✅ Reserva guardada en Supabase:",
-        data
-    );
-
-
     mensaje.textContent =
         "✅ Reserva realizada correctamente.";
 
     mensaje.className =
         "mensaje exito";
 
-}
+
+    document
+        .getElementById("servicioReserva")
+        .value = "";
 
 
-/* =========================
-   MOSTRAR RESERVAS
-   ========================= */
-
-function mostrarReservasTrabajador() {
-
-    const lista =
-        document.getElementById(
-            "listaReservasTrabajador"
-        );
+    document
+        .getElementById("fechaReserva")
+        .value = "";
 
 
-    lista.innerHTML = "";
+    document
+        .getElementById("horaReserva")
+        .value = "";
 
 
-    if (reservas.length === 0) {
-
-        lista.innerHTML =
-            "<p>No hay reservas todavía.</p>";
-
-        return;
-    }
-
-
-    reservas.forEach(function(reserva) {
-
-        const div =
-            document.createElement("div");
-
-        div.className =
-            "reserva";
-
-
-        div.innerHTML =
-
-            "<strong>" +
-            reserva.negocio +
-            "</strong><br><br>" +
-
-            "👤 Cliente: " +
-            reserva.cliente +
-            "<br>" +
-
-            "📧 Correo: " +
-            reserva.email +
-            "<br>" +
-
-            "✂️ Servicio: " +
-            reserva.servicio +
-            "<br>" +
-
-            "📅 Fecha: " +
-            reserva.fecha +
-            "<br>" +
-
-            "🕐 Hora: " +
-            reserva.hora +
-            "<br>" +
-
-            "📌 Estado: " +
-            reserva.estado;
-
-
-        lista.appendChild(div);
-
-    });
+    document
+        .getElementById("comentarioReserva")
+        .value = "";
 
 }
 
 
-/* =========================
+/* =========================================================
    CERRAR SESIÓN
-   ========================= */
+   ========================================================= */
 
-function cerrarSesion() {
+async function cerrarSesion() {
+
+    await supabaseClient.auth.signOut();
 
     usuarioActual = null;
+
+    negocioActual = null;
 
     mostrar("inicio");
 
 }
 
 
-/* =========================
-   CARGAR RESERVAS
-   ========================= */
+/* =========================================================
+   SEGURIDAD BÁSICA PARA TEXTO MOSTRADO EN HTML
+   ========================================================= */
 
-const reservasGuardadas =
-    localStorage.getItem(
-        "reservaya_reservas"
-    );
+function escaparHTML(texto) {
+
+    if (texto === null || texto === undefined) {
+        return "";
+    }
 
 
-if (reservasGuardadas) {
-
-    reservas =
-        JSON.parse(
-            reservasGuardadas
-        );
+    return String(texto)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 
 }
 
 
-mostrar("inicio");
+/* =========================================================
+   COMPROBAR SESIÓN AL CARGAR
+   ========================================================= */
+
+async function comprobarSesion() {
+
+    const resultado =
+        await supabaseClient.auth.getSession();
+
+
+    if (
+        resultado.data &&
+        resultado.data.session &&
+        resultado.data.session.user
+    ) {
+
+        usuarioActual =
+            resultado.data.session.user;
+
+
+        const nombre =
+            usuarioActual.user_metadata?.nombre ||
+            usuarioActual.email;
+
+
+        document
+            .getElementById("nombreCliente")
+            .textContent =
+                nombre;
+
+
+        mostrar("cliente");
+
+        await cargarNegocios();
+
+    } else {
+
+        mostrar("inicio");
+
+    }
+
+}
+
+
+/* =========================================================
+   INICIO
+   ========================================================= */
+
+comprobarSesion();
 
 </script>
 
