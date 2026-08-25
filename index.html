@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>ReservaYa</title>
 
 <style>
+
 * {
     box-sizing: border-box;
 }
@@ -112,9 +114,14 @@ button {
 
 .reserva {
     border: 1px solid #ddd;
-    padding: 14px;
+    padding: 16px;
     border-radius: 12px;
     margin-bottom: 12px;
+    background: #fff;
+}
+
+.reserva h3 {
+    margin-top: 0;
 }
 
 .exito {
@@ -142,6 +149,22 @@ button {
     color: #666;
     padding: 15px;
 }
+
+.estado {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: #e5e7eb;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.separador {
+    height: 1px;
+    background: #ddd;
+    margin: 20px 0;
+}
+
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -151,1216 +174,1450 @@ button {
 <body>
 
 <header>
-    <h1>📅 ReservaYa</h1>
-    <p>Reserva servicios de tus negocios favoritos</p>
+
+<h1>📅 ReservaYa</h1>
+
+<p>
+Reserva servicios de tus negocios favoritos
+</p>
+
 </header>
+
 
 <div class="contenedor">
 
-    <!-- =========================
-         INICIO
-    ========================== -->
 
-    <div id="inicio" class="tarjeta">
-
-        <h2>Bienvenido</h2>
-
-        <p>
-            Reserva citas y servicios de diferentes negocios
-            desde un solo lugar.
-        </p>
-
-        <button
-            class="boton"
-            onclick="mostrar('login')">
-            Iniciar sesión
-        </button>
-
-        <button
-            class="secundario"
-            onclick="mostrar('registro')">
-            Crear una cuenta
-        </button>
-
-    </div>
-
-
-    <!-- =========================
-         REGISTRO
-    ========================== -->
-
-    <div id="registro" class="tarjeta oculto">
-
-        <h2>Crear cuenta</h2>
-
-        <label>Nombre</label>
-
-        <input
-            id="registroNombre"
-            type="text"
-            placeholder="Tu nombre">
-
-        <label>Correo</label>
-
-        <input
-            id="registroEmail"
-            type="email"
-            placeholder="tu@email.com">
-
-        <label>Contraseña</label>
-
-        <input
-            id="registroPassword"
-            type="password"
-            placeholder="Contraseña">
-
-        <button
-            class="boton"
-            onclick="crearCuenta()">
-            Registrarme
-        </button>
-
-        <button
-            class="secundario"
-            onclick="mostrar('inicio')">
-            Volver
-        </button>
-
-        <div
-            id="mensajeRegistro"
-            class="mensaje">
-        </div>
-
-    </div>
-
-
-    <!-- =========================
-         LOGIN
-    ========================== -->
-
-    <div id="login" class="tarjeta oculto">
-
-        <h2>Iniciar sesión</h2>
-
-        <label>Correo</label>
-
-        <input
-            id="loginEmail"
-            type="email"
-            placeholder="tu@email.com">
-
-        <label>Contraseña</label>
-
-        <input
-            id="loginPassword"
-            type="password"
-            placeholder="Contraseña">
-
-        <button
-            class="boton"
-            onclick="iniciarSesion()">
-            Iniciar sesión
-        </button>
-
-        <button
-            class="secundario"
-            onclick="mostrar('inicio')">
-            Volver
-        </button>
-
-        <div
-            id="mensajeLogin"
-            class="mensaje">
-        </div>
-
-    </div>
-
-
-    <!-- =========================
-         CLIENTE
-    ========================== -->
-
-    <div id="cliente" class="oculto">
-
-        <div class="tarjeta">
-
-            <h2>
-                👋 Hola,
-                <span id="nombreCliente"></span>
-            </h2>
-
-            <p>
-                Elige un negocio para reservar.
-            </p>
-
-            <button
-                class="secundario"
-                onclick="cerrarSesion()">
-                Cerrar sesión
-            </button>
-
-        </div>
-
-
-        <!-- =========================
-             NEGOCIOS
-        ========================== -->
-
-        <div class="tarjeta">
-
-            <h2>🏢 Negocios</h2>
-
-            <div id="listaNegocios">
-
-                <div class="cargando">
-                    Cargando negocios...
-                </div>
-
-            </div>
-
-            <div
-                id="mensajeNegocios"
-                class="mensaje">
-            </div>
-
-        </div>
-
-
-        <!-- =========================
-             NEGOCIO SELECCIONADO
-        ========================== -->
-
-        <div
-            id="zonaNegocio"
-            class="tarjeta oculto">
-
-            <h2 id="nombreNegocio"></h2>
-
-            <p
-                id="idNegocioMostrado"
-                class="pequeno">
-            </p>
-
-            <h3>Servicios</h3>
-
-            <div id="listaServicios"></div>
-
-            <h3>Reservar</h3>
-
-            <label>Servicio</label>
-
-            <select id="servicioReserva">
-
-                <option value="">
-                    Selecciona un servicio
-                </option>
-
-            </select>
-
-
-            <label>Fecha</label>
-
-            <input
-                id="fechaReserva"
-                type="date">
-
-
-            <label>Hora</label>
-
-            <select id="horaReserva">
-
-                <option value="">
-                    Selecciona una hora
-                </option>
-
-                <option value="09:00">09:00</option>
-                <option value="10:00">10:00</option>
-                <option value="11:00">11:00</option>
-                <option value="12:00">12:00</option>
-                <option value="13:00">13:00</option>
-                <option value="14:00">14:00</option>
-                <option value="15:00">15:00</option>
-                <option value="16:00">16:00</option>
-                <option value="17:00">17:00</option>
-                <option value="18:00">18:00</option>
-
-            </select>
-
-
-            <label>Comentario</label>
-
-            <textarea
-                id="comentarioReserva"
-                placeholder="Algo que quieras decirle al negocio"></textarea>
-
-
-            <button
-                class="boton"
-                onclick="reservar()">
-                Confirmar reserva
-            </button>
-
-
-            <div
-                id="mensajeReserva"
-                class="mensaje">
-            </div>
-
-        </div>
-
-    </div>
+<!-- =========================
+     INICIO
+========================= -->
+
+<div id="inicio" class="tarjeta">
+
+<h2>Bienvenido</h2>
+
+<p>
+Reserva citas y servicios de diferentes negocios
+desde un solo lugar.
+</p>
+
+<button
+class="boton"
+onclick="mostrar('login')">
+Iniciar sesión
+</button>
+
+<button
+class="secundario"
+onclick="mostrar('registro')">
+Crear una cuenta
+</button>
 
 </div>
+
+
+
+<!-- =========================
+     REGISTRO
+========================= -->
+
+<div id="registro" class="tarjeta oculto">
+
+<h2>Crear cuenta</h2>
+
+<label>Nombre</label>
+
+<input
+id="registroNombre"
+type="text"
+placeholder="Tu nombre">
+
+<label>Correo</label>
+
+<input
+id="registroEmail"
+type="email"
+placeholder="tu@email.com">
+
+<label>Contraseña</label>
+
+<input
+id="registroPassword"
+type="password"
+placeholder="Contraseña">
+
+<button
+class="boton"
+onclick="crearCuenta()">
+Registrarme
+</button>
+
+<button
+class="secundario"
+onclick="mostrar('inicio')">
+Volver
+</button>
+
+<div
+id="mensajeRegistro"
+class="mensaje">
+</div>
+
+</div>
+
+
+
+<!-- =========================
+     LOGIN
+========================= -->
+
+<div id="login" class="tarjeta oculto">
+
+<h2>Iniciar sesión</h2>
+
+<label>Correo</label>
+
+<input
+id="loginEmail"
+type="email"
+placeholder="tu@email.com">
+
+<label>Contraseña</label>
+
+<input
+id="loginPassword"
+type="password"
+placeholder="Contraseña">
+
+<button
+class="boton"
+onclick="iniciarSesion()">
+Iniciar sesión
+</button>
+
+<button
+class="secundario"
+onclick="mostrar('inicio')">
+Volver
+</button>
+
+<div
+id="mensajeLogin"
+class="mensaje">
+</div>
+
+</div>
+
+
+
+<!-- =========================
+     CLIENTE
+========================= -->
+
+<div id="cliente" class="oculto">
+
+
+<!-- DATOS CLIENTE -->
+
+<div class="tarjeta">
+
+<h2>
+👋 Hola,
+<span id="nombreCliente"></span>
+</h2>
+
+<p>
+Elige un negocio para reservar.
+</p>
+
+<button
+class="boton"
+onclick="mostrarMisReservas()">
+📋 Mis reservas
+</button>
+
+<button
+class="secundario"
+onclick="cerrarSesion()">
+Cerrar sesión
+</button>
+
+</div>
+
+
+
+<!-- =========================
+     NEGOCIOS
+========================= -->
+
+<div class="tarjeta">
+
+<h2>🏢 Negocios</h2>
+
+<div id="listaNegocios">
+
+<div class="cargando">
+Cargando negocios...
+</div>
+
+</div>
+
+<div
+id="mensajeNegocios"
+class="mensaje">
+</div>
+
+</div>
+
+
+
+<!-- =========================
+     NEGOCIO SELECCIONADO
+========================= -->
+
+<div
+id="zonaNegocio"
+class="tarjeta oculto">
+
+<h2 id="nombreNegocio"></h2>
+
+<p
+id="idNegocioMostrado"
+class="pequeno">
+</p>
+
+
+<h3>Servicios</h3>
+
+<div id="listaServicios"></div>
+
+
+<div class="separador"></div>
+
+
+<h3>Reservar</h3>
+
+
+<label>Servicio</label>
+
+<select id="servicioReserva">
+
+<option value="">
+Selecciona un servicio
+</option>
+
+</select>
+
+
+
+<label>Fecha</label>
+
+<input
+id="fechaReserva"
+type="date">
+
+
+
+<label>Hora</label>
+
+<select id="horaReserva">
+
+<option value="">
+Selecciona una hora
+</option>
+
+<option value="09:00">09:00</option>
+<option value="10:00">10:00</option>
+<option value="11:00">11:00</option>
+<option value="12:00">12:00</option>
+<option value="13:00">13:00</option>
+<option value="14:00">14:00</option>
+<option value="15:00">15:00</option>
+<option value="16:00">16:00</option>
+<option value="17:00">17:00</option>
+<option value="18:00">18:00</option>
+
+</select>
+
+
+
+<label>Comentario</label>
+
+<textarea
+id="comentarioReserva"
+placeholder="Algo que quieras decirle al negocio"></textarea>
+
+
+<button
+class="boton"
+onclick="reservar()">
+Confirmar reserva
+</button>
+
+
+<div
+id="mensajeReserva"
+class="mensaje">
+</div>
+
+</div>
+
+
+
+<!-- =========================
+     MIS RESERVAS
+========================= -->
+
+<div
+id="zonaReservas"
+class="tarjeta oculto">
+
+<h2>📋 Mis reservas</h2>
+
+<div id="listaReservas">
+
+<div class="cargando">
+Cargando reservas...
+</div>
+
+</div>
+
+<div
+id="mensajeReservas"
+class="mensaje">
+</div>
+
+</div>
+
+
+</div>
+
+</div>
+
 
 
 <script>
 
 /* =========================================================
    SUPABASE
-   ========================================================= */
+========================================================= */
 
 const SUPABASE_URL =
-    "https://mjxiyzapdybzckurootw.supabase.co";
+"https://mjxiyzapdybzckurootw.supabase.co";
 
 const SUPABASE_ANON_KEY =
-    "sb_publishable_Ox1Wz7UT2Gw6uHOP6SncjQ_sGapEEB-";
+"sb_publishable_Ox1Wz7UT2Gw6uHOP6SncjQ_sGapEEB-";
 
 
 const supabaseClient =
-    window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_ANON_KEY
-    );
+window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY
+);
 
 
 let usuarioActual = null;
+
 let negocioActual = null;
 
 
+
 /* =========================================================
-   CAMBIAR PANTALLA
-   ========================================================= */
+   MOSTRAR PANTALLA
+========================================================= */
 
 function mostrar(id) {
 
-    const secciones = [
-        "inicio",
-        "registro",
-        "login",
-        "cliente"
-    ];
-
-    secciones.forEach(function(seccion) {
-
-        const elemento =
-            document.getElementById(seccion);
-
-        if (elemento) {
-            elemento.classList.add("oculto");
-        }
-
-    });
+const secciones = [
+"inicio",
+"registro",
+"login",
+"cliente"
+];
 
 
-    const destino =
-        document.getElementById(id);
+secciones.forEach(function(seccion) {
 
-    if (destino) {
-        destino.classList.remove("oculto");
-    }
+const elemento =
+document.getElementById(seccion);
+
+if (elemento) {
+
+elemento.classList.add("oculto");
 
 }
+
+});
+
+
+const destino =
+document.getElementById(id);
+
+if (destino) {
+
+destino.classList.remove("oculto");
+
+}
+
+}
+
 
 
 /* =========================================================
    REGISTRO
-   ========================================================= */
+========================================================= */
 
 async function crearCuenta() {
 
-    const nombre =
-        document
-            .getElementById("registroNombre")
-            .value
-            .trim();
-
-    const email =
-        document
-            .getElementById("registroEmail")
-            .value
-            .trim();
-
-    const password =
-        document
-            .getElementById("registroPassword")
-            .value;
-
-    const mensaje =
-        document.getElementById("mensajeRegistro");
+const nombre =
+document
+.getElementById("registroNombre")
+.value
+.trim();
 
 
-    if (!nombre || !email || !password) {
-
-        mensaje.textContent =
-            "Completa todos los campos.";
-
-        mensaje.className =
-            "mensaje error";
-
-        return;
-    }
+const email =
+document
+.getElementById("registroEmail")
+.value
+.trim();
 
 
-    if (password.length < 6) {
-
-        mensaje.textContent =
-            "La contraseña debe tener mínimo 6 caracteres.";
-
-        mensaje.className =
-            "mensaje error";
-
-        return;
-    }
+const password =
+document
+.getElementById("registroPassword")
+.value;
 
 
-    mensaje.textContent =
-        "Creando cuenta...";
-
-    mensaje.className =
-        "mensaje";
+const mensaje =
+document.getElementById("mensajeRegistro");
 
 
-    const resultado =
-        await supabaseClient.auth.signUp({
+if (!nombre || !email || !password) {
 
-            email: email,
+mensaje.textContent =
+"Completa todos los campos.";
 
-            password: password,
+mensaje.className =
+"mensaje error";
 
-            options: {
-
-                data: {
-                    nombre: nombre
-                }
-
-            }
-
-        });
-
-
-    if (resultado.error) {
-
-        console.error(
-            "ERROR REGISTRO:",
-            resultado.error
-        );
-
-        mensaje.textContent =
-            "Error: " +
-            resultado.error.message;
-
-        mensaje.className =
-            "mensaje error";
-
-        return;
-    }
-
-
-    mensaje.textContent =
-        "✅ Cuenta creada correctamente.";
-
-    mensaje.className =
-        "mensaje exito";
-
-
-    document
-        .getElementById("loginEmail")
-        .value = email;
-
-
-    setTimeout(function() {
-
-        mostrar("login");
-
-    }, 1000);
+return;
 
 }
+
+
+if (password.length < 6) {
+
+mensaje.textContent =
+"La contraseña debe tener mínimo 6 caracteres.";
+
+mensaje.className =
+"mensaje error";
+
+return;
+
+}
+
+
+mensaje.textContent =
+"Creando cuenta...";
+
+
+const resultado =
+await supabaseClient.auth.signUp({
+
+email: email,
+
+password: password,
+
+options: {
+
+data: {
+
+nombre: nombre
+
+}
+
+}
+
+});
+
+
+if (resultado.error) {
+
+mensaje.textContent =
+"Error: " +
+resultado.error.message;
+
+mensaje.className =
+"mensaje error";
+
+return;
+
+}
+
+
+mensaje.textContent =
+"✅ Cuenta creada correctamente.";
+
+mensaje.className =
+"mensaje exito";
+
+
+document
+.getElementById("loginEmail")
+.value = email;
+
+
+setTimeout(function() {
+
+mostrar("login");
+
+}, 1000);
+
+}
+
 
 
 /* =========================================================
    LOGIN
-   ========================================================= */
+========================================================= */
 
 async function iniciarSesion() {
 
-    const email =
-        document
-            .getElementById("loginEmail")
-            .value
-            .trim();
-
-    const password =
-        document
-            .getElementById("loginPassword")
-            .value;
-
-    const mensaje =
-        document.getElementById("mensajeLogin");
+const email =
+document
+.getElementById("loginEmail")
+.value
+.trim();
 
 
-    if (!email || !password) {
-
-        mensaje.textContent =
-            "Completa correo y contraseña.";
-
-        mensaje.className =
-            "mensaje error";
-
-        return;
-    }
+const password =
+document
+.getElementById("loginPassword")
+.value;
 
 
-    mensaje.textContent =
-        "Iniciando sesión...";
-
-    mensaje.className =
-        "mensaje";
+const mensaje =
+document.getElementById("mensajeLogin");
 
 
-    const resultado =
-        await supabaseClient.auth.signInWithPassword({
+if (!email || !password) {
 
-            email: email,
+mensaje.textContent =
+"Completa correo y contraseña.";
 
-            password: password
+mensaje.className =
+"mensaje error";
 
-        });
-
-
-    if (resultado.error) {
-
-        console.error(
-            "ERROR LOGIN:",
-            resultado.error
-        );
-
-        mensaje.textContent =
-            "Error: " +
-            resultado.error.message;
-
-        mensaje.className =
-            "mensaje error";
-
-        return;
-    }
-
-
-    usuarioActual =
-        resultado.data.user;
-
-
-    const nombre =
-        usuarioActual.user_metadata?.nombre ||
-        usuarioActual.email ||
-        "Cliente";
-
-
-    document
-        .getElementById("nombreCliente")
-        .textContent =
-            nombre;
-
-
-    mensaje.textContent =
-        "✅ Sesión iniciada correctamente.";
-
-    mensaje.className =
-        "mensaje exito";
-
-
-    mostrar("cliente");
-
-    await cargarNegocios();
+return;
 
 }
+
+
+mensaje.textContent =
+"Iniciando sesión...";
+
+
+const resultado =
+await supabaseClient.auth.signInWithPassword({
+
+email: email,
+
+password: password
+
+});
+
+
+if (resultado.error) {
+
+mensaje.textContent =
+"Error: " +
+resultado.error.message;
+
+mensaje.className =
+"mensaje error";
+
+return;
+
+}
+
+
+usuarioActual =
+resultado.data.user;
+
+
+document
+.getElementById("nombreCliente")
+.textContent =
+usuarioActual.user_metadata?.nombre ||
+usuarioActual.email;
+
+
+mostrar("cliente");
+
+
+await cargarNegocios();
+
+}
+
 
 
 /* =========================================================
    CARGAR NEGOCIOS
-   ========================================================= */
+========================================================= */
 
 async function cargarNegocios() {
 
-    const lista =
-        document.getElementById("listaNegocios");
+const lista =
+document.getElementById("listaNegocios");
 
-    const mensaje =
-        document.getElementById("mensajeNegocios");
-
-
-    lista.innerHTML =
-        "<div class='cargando'>Cargando negocios...</div>";
-
-    mensaje.textContent = "";
+const mensaje =
+document.getElementById("mensajeNegocios");
 
 
-    const resultado =
-        await supabaseClient
-            .from("negocios")
-            .select("id, nombre")
-            .order("nombre");
+lista.innerHTML =
+"<div class='cargando'>Cargando negocios...</div>";
+
+mensaje.textContent = "";
 
 
-    if (resultado.error) {
-
-        console.error(
-            "ERROR NEGOCIOS:",
-            resultado.error
-        );
-
-        lista.innerHTML = "";
-
-        mensaje.textContent =
-            "Error cargando negocios: " +
-            resultado.error.message;
-
-        mensaje.className =
-            "mensaje error";
-
-        return;
-    }
+const resultado =
+await supabaseClient
+.from("negocios")
+.select("id, nombre")
+.order("nombre");
 
 
-    const negocios =
-        resultado.data;
+if (resultado.error) {
 
+lista.innerHTML = "";
 
-    if (!negocios || negocios.length === 0) {
+mensaje.textContent =
+"Error cargando negocios: " +
+resultado.error.message;
 
-        lista.innerHTML =
-            "<p class='error'>" +
-            "No hay negocios registrados." +
-            "</p>";
+mensaje.className =
+"mensaje error";
 
-        return;
-    }
-
-
-    lista.innerHTML = "";
-
-
-    negocios.forEach(function(negocio) {
-
-        const tarjeta =
-            document.createElement("div");
-
-
-        tarjeta.className =
-            "negocio";
-
-
-        tarjeta.innerHTML =
-            "<h3>🏢 " +
-            escaparHTML(negocio.nombre) +
-            "</h3>" +
-
-            "<p>Toca para ver sus servicios.</p>";
-
-
-        tarjeta.onclick =
-            function() {
-
-                seleccionarNegocio(negocio);
-
-            };
-
-
-        lista.appendChild(tarjeta);
-
-    });
+return;
 
 }
+
+
+const negocios =
+resultado.data;
+
+
+if (!negocios || negocios.length === 0) {
+
+lista.innerHTML =
+"<p class='error'>No hay negocios registrados.</p>";
+
+return;
+
+}
+
+
+lista.innerHTML = "";
+
+
+negocios.forEach(function(negocio) {
+
+const tarjeta =
+document.createElement("div");
+
+
+tarjeta.className =
+"negocio";
+
+
+tarjeta.innerHTML =
+
+"<h3>🏢 " +
+escaparHTML(negocio.nombre) +
+"</h3>" +
+
+"<p>Toca para ver sus servicios.</p>";
+
+
+tarjeta.onclick =
+function() {
+
+seleccionarNegocio(negocio);
+
+};
+
+
+lista.appendChild(tarjeta);
+
+});
+
+}
+
 
 
 /* =========================================================
    SELECCIONAR NEGOCIO
-   ========================================================= */
+========================================================= */
 
 async function seleccionarNegocio(negocio) {
 
-    negocioActual =
-        negocio;
+negocioActual =
+negocio;
 
 
-    document
-        .getElementById("zonaNegocio")
-        .classList
-        .remove("oculto");
+document
+.getElementById("zonaNegocio")
+.classList
+.remove("oculto");
 
 
-    document
-        .getElementById("nombreNegocio")
-        .textContent =
-            negocio.nombre;
+document
+.getElementById("nombreNegocio")
+.textContent =
+negocio.nombre;
 
 
-    document
-        .getElementById("idNegocioMostrado")
-        .textContent =
-            "ID: " + negocio.id;
+document
+.getElementById("idNegocioMostrado")
+.textContent =
+"ID: " + negocio.id;
 
 
-    const lista =
-        document.getElementById("listaServicios");
-
-    const selector =
-        document.getElementById("servicioReserva");
+const lista =
+document.getElementById("listaServicios");
 
 
-    lista.innerHTML =
-        "<div class='cargando'>Cargando servicios...</div>";
+const selector =
+document.getElementById("servicioReserva");
 
 
-    selector.innerHTML =
-        "<option value=''>Cargando servicios...</option>";
+lista.innerHTML =
+"<div class='cargando'>Cargando servicios...</div>";
 
 
-    const resultado =
-        await supabaseClient
-            .from("servicios")
-            .select(
-                "id, nombre, precio, duracion, negocio_id"
-            )
-            .eq("negocio_id", negocio.id)
-            .order("nombre");
+selector.innerHTML =
+"<option value=''>Cargando servicios...</option>";
 
 
-    if (resultado.error) {
-
-        console.error(
-            "ERROR SERVICIOS:",
-            resultado.error
-        );
-
-        lista.innerHTML =
-            "<p class='error'>" +
-            "Error al cargar servicios: " +
-            escaparHTML(resultado.error.message) +
-            "</p>";
-
-        selector.innerHTML =
-            "<option value=''>Error cargando servicios</option>";
-
-        return;
-    }
+const resultado =
+await supabaseClient
+.from("servicios")
+.select(
+"id, nombre, precio, duracion, negocio_id"
+)
+.eq("negocio_id", negocio.id)
+.order("nombre");
 
 
-    const servicios =
-        resultado.data;
+if (resultado.error) {
 
+lista.innerHTML =
+"<p class='error'>" +
+"Error al cargar servicios: " +
+escaparHTML(resultado.error.message) +
+"</p>";
 
-    if (!servicios || servicios.length === 0) {
-
-        lista.innerHTML =
-            "<p class='error'>" +
-            "Este negocio no tiene servicios registrados." +
-            "</p>";
-
-        selector.innerHTML =
-            "<option value=''>No hay servicios disponibles</option>";
-
-        return;
-    }
-
-
-    lista.innerHTML = "";
-
-    selector.innerHTML =
-        "<option value=''>Selecciona un servicio</option>";
-
-
-    servicios.forEach(function(servicio) {
-
-        const div =
-            document.createElement("div");
-
-
-        div.className =
-            "servicio";
-
-
-        let precioTexto =
-            "Reserva";
-
-
-        if (
-            servicio.precio !== null &&
-            servicio.precio !== undefined &&
-            Number(servicio.precio) > 0
-        ) {
-
-            precioTexto =
-                "$" +
-                Number(servicio.precio)
-                    .toLocaleString("es-CO");
-
-        }
-
-
-        div.innerHTML =
-            "<strong>" +
-            escaparHTML(servicio.nombre) +
-            "</strong><br>" +
-
-            precioTexto +
-            "<br>" +
-
-            "<span class='pequeno'>" +
-
-            (
-                servicio.duracion
-                    ? escaparHTML(
-                        String(servicio.duracion)
-                    ) +
-                    " minutos"
-                    : "Duración no especificada"
-            ) +
-
-            "</span>";
-
-
-        lista.appendChild(div);
-
-
-        const opcion =
-            document.createElement("option");
-
-
-        opcion.value =
-            servicio.id;
-
-
-        opcion.textContent =
-            servicio.nombre +
-            (
-                Number(servicio.precio) > 0
-                    ? " - $" +
-                      Number(servicio.precio)
-                        .toLocaleString("es-CO")
-                    : ""
-            );
-
-
-        selector.appendChild(opcion);
-
-    });
+return;
 
 }
+
+
+const servicios =
+resultado.data;
+
+
+if (!servicios || servicios.length === 0) {
+
+lista.innerHTML =
+"<p class='error'>" +
+"Este negocio no tiene servicios registrados." +
+"</p>";
+
+return;
+
+}
+
+
+lista.innerHTML = "";
+
+selector.innerHTML =
+"<option value=''>Selecciona un servicio</option>";
+
+
+servicios.forEach(function(servicio) {
+
+const div =
+document.createElement("div");
+
+
+div.className =
+"servicio";
+
+
+let precioTexto =
+"Reserva";
+
+
+if (
+servicio.precio !== null &&
+servicio.precio !== undefined &&
+Number(servicio.precio) > 0
+) {
+
+precioTexto =
+"$" +
+Number(servicio.precio)
+.toLocaleString("es-CO");
+
+}
+
+
+div.innerHTML =
+
+"<strong>" +
+escaparHTML(servicio.nombre) +
+"</strong><br>" +
+
+precioTexto +
+"<br>" +
+
+"<span class='pequeno'>" +
+
+(
+servicio.duracion
+?
+escaparHTML(
+String(servicio.duracion)
+) +
+" minutos"
+:
+"Duración no especificada"
+) +
+
+"</span>";
+
+
+lista.appendChild(div);
+
+
+const opcion =
+document.createElement("option");
+
+
+opcion.value =
+servicio.id;
+
+
+opcion.textContent =
+servicio.nombre;
+
+
+if (
+Number(servicio.precio) > 0
+) {
+
+opcion.textContent +=
+" - $" +
+Number(servicio.precio)
+.toLocaleString("es-CO");
+
+}
+
+
+selector.appendChild(opcion);
+
+});
+
+}
+
 
 
 /* =========================================================
    RESERVAR
-   ========================================================= */
+========================================================= */
 
 async function reservar() {
 
-    const mensaje =
-        document.getElementById("mensajeReserva");
+const mensaje =
+document.getElementById("mensajeReserva");
 
 
-    try {
+const servicioId =
+document
+.getElementById("servicioReserva")
+.value;
 
-        /* -----------------------------
-           OBTENER SESIÓN REAL
-        ----------------------------- */
 
-        const resultadoUsuario =
-            await supabaseClient.auth.getUser();
+const fecha =
+document
+.getElementById("fechaReserva")
+.value;
 
 
-        const user =
-            resultadoUsuario.data?.user;
+const hora =
+document
+.getElementById("horaReserva")
+.value;
 
 
-        console.log(
-            "👤 USUARIO SUPABASE:",
-            user
-        );
+const comentario =
+document
+.getElementById("comentarioReserva")
+.value
+.trim();
 
 
-        console.log(
-            "🆔 UUID:",
-            user?.id
-        );
 
+/* COMPROBAR USUARIO */
 
-        if (
-            resultadoUsuario.error ||
-            !user
-        ) {
+const resultadoUsuario =
+await supabaseClient.auth.getUser();
 
-            mensaje.textContent =
-                "Tu sesión no está activa. Inicia sesión nuevamente.";
 
-            mensaje.className =
-                "mensaje error";
+const user =
+resultadoUsuario.data?.user;
 
-            return;
-        }
 
+if (
+resultadoUsuario.error ||
+!user
+) {
 
-        usuarioActual =
-            user;
+mensaje.textContent =
+"Debes iniciar sesión.";
 
+mensaje.className =
+"mensaje error";
 
-        /* -----------------------------
-           OBTENER DATOS DEL FORMULARIO
-        ----------------------------- */
-
-        const servicioId =
-            document
-                .getElementById("servicioReserva")
-                .value;
-
-
-        const fecha =
-            document
-                .getElementById("fechaReserva")
-                .value;
-
-
-        const hora =
-            document
-                .getElementById("horaReserva")
-                .value;
-
-
-        const comentario =
-            document
-                .getElementById("comentarioReserva")
-                .value
-                .trim();
-
-
-        /* -----------------------------
-           VALIDACIONES
-        ----------------------------- */
-
-        if (!negocioActual) {
-
-            mensaje.textContent =
-                "Selecciona un negocio.";
-
-            mensaje.className =
-                "mensaje error";
-
-            return;
-        }
-
-
-        if (!servicioId) {
-
-            mensaje.textContent =
-                "Selecciona un servicio.";
-
-            mensaje.className =
-                "mensaje error";
-
-            return;
-        }
-
-
-        if (!fecha) {
-
-            mensaje.textContent =
-                "Selecciona una fecha.";
-
-            mensaje.className =
-                "mensaje error";
-
-            return;
-        }
-
-
-        if (!hora) {
-
-            mensaje.textContent =
-                "Selecciona una hora.";
-
-            mensaje.className =
-                "mensaje error";
-
-            return;
-        }
-
-
-        mensaje.textContent =
-            "Guardando reserva...";
-
-        mensaje.className =
-            "mensaje";
-
-
-        /* -----------------------------
-           NOMBRE DEL CLIENTE
-        ----------------------------- */
-
-        const nombreCliente =
-            user.user_metadata?.nombre ||
-            user.email ||
-            "Cliente";
-
-
-        /* -----------------------------
-           DATOS PARA LA TABLA CITAS
-           
-           IMPORTANTE:
-           La tabla es "Citas".
-           
-           La columna del usuario es:
-           "usuario"
-           
-           NO usamos:
-           cliente_id
-           teléfono_cliente
-        ----------------------------- */
-
-        const datosReserva = {
-
-            negocio_id:
-                negocioActual.id,
-
-            servicio_id:
-                servicioId,
-
-            nombre_cliente:
-                nombreCliente,
-
-            fecha:
-                fecha,
-
-            hora:
-                hora,
-
-            comentario:
-                comentario,
-
-            estado:
-                "Pendiente",
-
-            usuario:
-                user.id
-
-        };
-
-
-        console.log(
-            "📅 DATOS DE RESERVA:",
-            datosReserva
-        );
-
-
-        /* -----------------------------
-           GUARDAR EN CITAS
-        ----------------------------- */
-
-        const resultado =
-            await supabaseClient
-                .from("Citas")
-                .insert(datosReserva);
-
-
-        console.log(
-            "📦 RESULTADO SUPABASE:",
-            resultado
-        );
-
-
-        /* -----------------------------
-           ERROR
-        ----------------------------- */
-
-        if (resultado.error) {
-
-            console.error(
-                "❌ ERROR GUARDANDO CITA:",
-                resultado.error
-            );
-
-
-            mensaje.textContent =
-                "Error al guardar la reserva: " +
-                resultado.error.message;
-
-            mensaje.className =
-                "mensaje error";
-
-            return;
-        }
-
-
-        /* -----------------------------
-           ÉXITO
-        ----------------------------- */
-
-        mensaje.textContent =
-            "✅ ¡Reserva realizada correctamente!";
-
-        mensaje.className =
-            "mensaje exito";
-
-
-        /* -----------------------------
-           LIMPIAR FORMULARIO
-        ----------------------------- */
-
-        document
-            .getElementById("servicioReserva")
-            .value = "";
-
-
-        document
-            .getElementById("fechaReserva")
-            .value = "";
-
-
-        document
-            .getElementById("horaReserva")
-            .value = "";
-
-
-        document
-            .getElementById("comentarioReserva")
-            .value = "";
-
-
-        console.log(
-            "✅ CITA GUARDADA CORRECTAMENTE"
-        );
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "❌ ERROR INESPERADO:",
-            error
-        );
-
-
-        mensaje.textContent =
-            "Ocurrió un error inesperado: " +
-            error.message;
-
-        mensaje.className =
-            "mensaje error";
-
-    }
+return;
 
 }
+
+
+usuarioActual =
+user;
+
+
+
+/* VALIDACIONES */
+
+if (!negocioActual) {
+
+mensaje.textContent =
+"Selecciona un negocio.";
+
+mensaje.className =
+"mensaje error";
+
+return;
+
+}
+
+
+if (!servicioId) {
+
+mensaje.textContent =
+"Selecciona un servicio.";
+
+mensaje.className =
+"mensaje error";
+
+return;
+
+}
+
+
+if (!fecha) {
+
+mensaje.textContent =
+"Selecciona una fecha.";
+
+mensaje.className =
+"mensaje error";
+
+return;
+
+}
+
+
+if (!hora) {
+
+mensaje.textContent =
+"Selecciona una hora.";
+
+mensaje.className =
+"mensaje error";
+
+return;
+
+}
+
+
+mensaje.textContent =
+"Guardando reserva...";
+
+mensaje.className =
+"mensaje";
+
+
+
+/*
+IMPORTANTE:
+
+Tu tabla funciona con:
+
+Citas
+
+Y la columna del usuario es:
+
+usuario
+
+NO usamos:
+
+cliente_id
+
+NO usamos:
+
+teléfono_cliente
+*/
+
+
+const nombreCliente =
+user.user_metadata?.nombre ||
+user.email ||
+"Cliente";
+
+
+const datosReserva = {
+
+negocio_id:
+negocioActual.id,
+
+servicio_id:
+servicioId,
+
+nombre_cliente:
+nombreCliente,
+
+fecha:
+fecha,
+
+hora:
+hora,
+
+comentario:
+comentario,
+
+estado:
+"Pendiente",
+
+usuario:
+user.id
+
+};
+
+
+console.log(
+"DATOS DE RESERVA:",
+datosReserva
+);
+
+
+
+/* INSERTAR */
+
+const resultado =
+await supabaseClient
+.from("Citas")
+.insert(datosReserva);
+
+
+if (resultado.error) {
+
+console.error(
+"ERROR GUARDANDO CITA:",
+resultado.error
+);
+
+
+mensaje.textContent =
+"Error al guardar la reserva: " +
+resultado.error.message;
+
+mensaje.className =
+"mensaje error";
+
+return;
+
+}
+
+
+
+/* ÉXITO */
+
+mensaje.textContent =
+"✅ ¡Reserva realizada correctamente!";
+
+mensaje.className =
+"mensaje exito";
+
+
+document
+.getElementById("servicioReserva")
+.value = "";
+
+
+document
+.getElementById("fechaReserva")
+.value = "";
+
+
+document
+.getElementById("horaReserva")
+.value = "";
+
+
+document
+.getElementById("comentarioReserva")
+.value = "";
+
+
+console.log(
+"✅ CITA GUARDADA"
+);
+
+
+/* Actualizar mis reservas */
+
+await cargarMisReservas();
+
+}
+
+
+
+/* =========================================================
+   MIS RESERVAS
+========================================================= */
+
+async function mostrarMisReservas() {
+
+const zona =
+document.getElementById("zonaReservas");
+
+
+if (
+zona.classList.contains("oculto")
+) {
+
+zona.classList.remove("oculto");
+
+} else {
+
+zona.classList.add("oculto");
+
+return;
+
+}
+
+
+await cargarMisReservas();
+
+}
+
+
+
+/* =========================================================
+   CARGAR MIS RESERVAS
+========================================================= */
+
+async function cargarMisReservas() {
+
+const lista =
+document.getElementById("listaReservas");
+
+
+const mensaje =
+document.getElementById("mensajeReservas");
+
+
+lista.innerHTML =
+"<div class='cargando'>Cargando reservas...</div>";
+
+mensaje.textContent = "";
+
+
+/* Usuario actual */
+
+const resultadoUsuario =
+await supabaseClient.auth.getUser();
+
+
+const user =
+resultadoUsuario.data?.user;
+
+
+if (!user) {
+
+lista.innerHTML = "";
+
+mensaje.textContent =
+"Debes iniciar sesión.";
+
+mensaje.className =
+"mensaje error";
+
+return;
+
+}
+
+
+/*
+La consulta utiliza la columna:
+
+usuario
+
+que es la que tenemos en Citas.
+*/
+
+
+const resultado =
+await supabaseClient
+.from("Citas")
+.select(
+"negocio_id, servicio_id, nombre_cliente, fecha, hora, comentario, estado"
+)
+.eq("usuario", user.id)
+.order("fecha", {
+ascending: false
+})
+.order("hora", {
+ascending: false
+});
+
+
+console.log(
+"MIS RESERVAS:",
+resultado
+);
+
+
+if (resultado.error) {
+
+lista.innerHTML = "";
+
+mensaje.textContent =
+"Error cargando reservas: " +
+resultado.error.message;
+
+mensaje.className =
+"mensaje error";
+
+return;
+
+}
+
+
+const reservas =
+resultado.data;
+
+
+if (
+!reservas ||
+reservas.length === 0
+) {
+
+lista.innerHTML =
+"<p class='pequeno'>" +
+"Todavía no tienes reservas." +
+"</p>";
+
+return;
+
+}
+
+
+lista.innerHTML = "";
+
+
+/* Mostrar reservas */
+
+reservas.forEach(function(reserva) {
+
+const div =
+document.createElement("div");
+
+
+div.className =
+"reserva";
+
+
+div.innerHTML =
+
+"<h3>📅 Reserva</h3>" +
+
+"<p>" +
+"<strong>Fecha:</strong> " +
+escaparHTML(reserva.fecha) +
+"</p>" +
+
+"<p>" +
+"<strong>Hora:</strong> " +
+escaparHTML(reserva.hora) +
+"</p>" +
+
+"<p>" +
+"<strong>Negocio:</strong> " +
+escaparHTML(reserva.negocio_id) +
+"</p>" +
+
+"<p>" +
+"<strong>Servicio:</strong> " +
+escaparHTML(reserva.servicio_id) +
+"</p>" +
+
+(
+reserva.comentario
+?
+"<p>" +
+"<strong>Comentario:</strong> " +
+escaparHTML(reserva.comentario) +
+"</p>"
+:
+""
+) +
+
+"<p>" +
+"<strong>Estado:</strong> " +
+"<span class='estado'>" +
+escaparHTML(reserva.estado || "Pendiente") +
+"</span>" +
+"</p>";
+
+
+lista.appendChild(div);
+
+});
+
+}
+
 
 
 /* =========================================================
    CERRAR SESIÓN
-   ========================================================= */
+========================================================= */
 
 async function cerrarSesion() {
 
-    await supabaseClient.auth.signOut();
+await supabaseClient.auth.signOut();
 
-    usuarioActual = null;
 
-    negocioActual = null;
+usuarioActual = null;
 
-    document
-        .getElementById("zonaNegocio")
-        .classList
-        .add("oculto");
+negocioActual = null;
 
-    mostrar("inicio");
+
+mostrar("inicio");
 
 }
+
 
 
 /* =========================================================
    ESCAPAR HTML
-   ========================================================= */
+========================================================= */
 
 function escaparHTML(texto) {
 
-    if (
-        texto === null ||
-        texto === undefined
-    ) {
-        return "";
-    }
+if (
+texto === null ||
+texto === undefined
+) {
 
-
-    return String(texto)
-
-        .replace(/&/g, "&amp;")
-
-        .replace(/</g, "&lt;")
-
-        .replace(/>/g, "&gt;")
-
-        .replace(/"/g, "&quot;")
-
-        .replace(/'/g, "&#039;");
+return "";
 
 }
+
+
+return String(texto)
+
+.replace(
+/&/g,
+"&amp;"
+)
+
+.replace(
+/</g,
+"&lt;"
+)
+
+.replace(
+/>/g,
+"&gt;"
+)
+
+.replace(
+/"/g,
+"&quot;"
+)
+
+.replace(
+/'/g,
+"&#039;"
+);
+
+}
+
 
 
 /* =========================================================
-   COMPROBAR SESIÓN AL ABRIR
-   ========================================================= */
+   COMPROBAR SESIÓN
+========================================================= */
 
 async function comprobarSesion() {
 
-    const resultado =
-        await supabaseClient.auth.getSession();
+const resultado =
+await supabaseClient.auth.getSession();
 
 
-    if (
-        resultado.data &&
-        resultado.data.session &&
-        resultado.data.session.user
-    ) {
-
-        usuarioActual =
-            resultado.data.session.user;
+const sesion =
+resultado.data?.session;
 
 
-        const nombre =
-            usuarioActual.user_metadata?.nombre ||
-            usuarioActual.email ||
-            "Cliente";
+if (
+sesion &&
+sesion.user
+) {
+
+usuarioActual =
+sesion.user;
 
 
-        document
-            .getElementById("nombreCliente")
-            .textContent =
-                nombre;
+document
+.getElementById("nombreCliente")
+.textContent =
+usuarioActual.user_metadata?.nombre ||
+usuarioActual.email;
 
 
-        mostrar("cliente");
+mostrar("cliente");
 
-        await cargarNegocios();
 
-    }
+await cargarNegocios();
 
-    else {
+} else {
 
-        mostrar("inicio");
-
-    }
+mostrar("inicio");
 
 }
+
+}
+
 
 
 /* =========================================================
    INICIAR
-   ========================================================= */
+========================================================= */
 
 comprobarSesion();
 
