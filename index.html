@@ -1,12 +1,21 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
 <title>ReservaYa</title>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
+
 * {
     box-sizing: border-box;
 }
@@ -21,16 +30,22 @@ body {
 header {
     background: #111827;
     color: white;
-    padding: 18px;
+    padding: 20px;
     text-align: center;
 }
 
 header h1 {
     margin: 0;
+    font-size: 28px;
+}
+
+header p {
+    margin-bottom: 0;
+    color: #d1d5db;
 }
 
 .contenedor {
-    max-width: 650px;
+    max-width: 700px;
     margin: auto;
     padding: 20px;
 }
@@ -51,6 +66,10 @@ h2 {
     margin-top: 0;
 }
 
+h3 {
+    margin-top: 20px;
+}
+
 input,
 select,
 textarea {
@@ -61,10 +80,12 @@ textarea {
     border: 1px solid #ccc;
     border-radius: 10px;
     font-size: 16px;
+    background: white;
 }
 
 textarea {
     min-height: 90px;
+    resize: vertical;
 }
 
 button {
@@ -77,6 +98,11 @@ button {
     cursor: pointer;
 }
 
+button:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
 .boton {
     background: #111827;
     color: white;
@@ -87,16 +113,26 @@ button {
     color: #111827;
 }
 
+.peligro {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
 .negocio {
     border: 1px solid #ddd;
     border-radius: 14px;
     padding: 16px;
     margin-bottom: 12px;
     cursor: pointer;
+    transition: .2s;
 }
 
 .negocio:hover {
     background: #f9fafb;
+}
+
+.negocio.seleccionado {
+    border: 2px solid #111827;
 }
 
 .negocio h3 {
@@ -112,9 +148,15 @@ button {
 
 .reserva {
     border: 1px solid #ddd;
-    padding: 14px;
-    border-radius: 12px;
+    padding: 16px;
+    border-radius: 14px;
     margin-bottom: 12px;
+    background: white;
+}
+
+.reserva strong {
+    display: inline-block;
+    margin-bottom: 5px;
 }
 
 .exito {
@@ -142,272 +184,375 @@ button {
     color: #666;
     padding: 15px;
 }
-</style>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+.vacio {
+    text-align: center;
+    color: #666;
+    padding: 20px;
+}
+
+.separador {
+    border: 0;
+    border-top: 1px solid #eee;
+    margin: 20px 0;
+}
+
+.etiqueta {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 8px;
+    background: #e5e7eb;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+</style>
 
 </head>
 
 <body>
 
 <header>
+
     <h1>📅 ReservaYa</h1>
-    <p>Reserva servicios de tus negocios favoritos</p>
+
+    <p>
+        Reserva servicios de tus negocios favoritos
+    </p>
+
 </header>
+
 
 <div class="contenedor">
 
-    <!-- INICIO -->
 
-    <div id="inicio" class="tarjeta">
+<!-- =====================================================
+     INICIO
+===================================================== -->
 
-        <h2>Bienvenido</h2>
+<div id="inicio" class="tarjeta">
 
-        <p>
-            Reserva citas y servicios de diferentes negocios
-            desde un solo lugar.
+    <h2>Bienvenido 👋</h2>
+
+    <p>
+        Reserva citas y servicios de diferentes negocios
+        desde un solo lugar.
+    </p>
+
+    <button
+        class="boton"
+        onclick="mostrar('login')"
+    >
+        Iniciar sesión
+    </button>
+
+    <button
+        class="secundario"
+        onclick="mostrar('registro')"
+    >
+        Crear una cuenta
+    </button>
+
+</div>
+
+
+<!-- =====================================================
+     REGISTRO
+===================================================== -->
+
+<div id="registro" class="tarjeta oculto">
+
+    <h2>Crear cuenta</h2>
+
+    <label>Nombre</label>
+
+    <input
+        id="registroNombre"
+        type="text"
+        placeholder="Tu nombre"
+        autocomplete="name"
+    >
+
+    <label>Correo</label>
+
+    <input
+        id="registroEmail"
+        type="email"
+        placeholder="tu@email.com"
+        autocomplete="email"
+    >
+
+    <label>Contraseña</label>
+
+    <input
+        id="registroPassword"
+        type="password"
+        placeholder="Mínimo 6 caracteres"
+        autocomplete="new-password"
+    >
+
+    <button
+        id="botonRegistro"
+        class="boton"
+        onclick="crearCuenta()"
+    >
+        Registrarme
+    </button>
+
+    <button
+        class="secundario"
+        onclick="mostrar('inicio')"
+    >
+        Volver
+    </button>
+
+    <div
+        id="mensajeRegistro"
+        class="mensaje"
+    ></div>
+
+</div>
+
+
+<!-- =====================================================
+     LOGIN
+===================================================== -->
+
+<div id="login" class="tarjeta oculto">
+
+    <h2>Iniciar sesión</h2>
+
+    <label>Correo</label>
+
+    <input
+        id="loginEmail"
+        type="email"
+        placeholder="tu@email.com"
+        autocomplete="email"
+    >
+
+    <label>Contraseña</label>
+
+    <input
+        id="loginPassword"
+        type="password"
+        placeholder="Contraseña"
+        autocomplete="current-password"
+    >
+
+    <button
+        id="botonLogin"
+        class="boton"
+        onclick="iniciarSesion()"
+    >
+        Iniciar sesión
+    </button>
+
+    <button
+        class="secundario"
+        onclick="mostrar('inicio')"
+    >
+        Volver
+    </button>
+
+    <div
+        id="mensajeLogin"
+        class="mensaje"
+    ></div>
+
+</div>
+
+
+<!-- =====================================================
+     CLIENTE
+===================================================== -->
+
+<div id="cliente" class="oculto">
+
+
+    <!-- PERFIL -->
+
+    <div class="tarjeta">
+
+        <h2>
+            👋 Hola,
+            <span id="nombreCliente"></span>
+        </h2>
+
+        <p
+            id="correoCliente"
+            class="pequeno"
+        ></p>
+
+        <button
+            class="secundario"
+            onclick="mostrarMisReservas()"
+        >
+            📋 Mis reservas
+        </button>
+
+        <button
+            class="secundario"
+            onclick="cerrarSesion()"
+        >
+            🚪 Cerrar sesión
+        </button>
+
+    </div>
+
+
+    <!-- =================================================
+         NEGOCIOS
+    ================================================= -->
+
+    <div class="tarjeta">
+
+        <h2>🏢 Negocios</h2>
+
+        <p class="pequeno">
+            Selecciona un negocio para ver sus servicios.
         </p>
 
-        <button
-            class="boton"
-            onclick="mostrar('login')"
-        >
-            Iniciar sesión
-        </button>
+        <div id="listaNegocios">
 
-        <button
-            class="secundario"
-            onclick="mostrar('registro')"
-        >
-            Crear una cuenta
-        </button>
-
-    </div>
-
-
-    <!-- REGISTRO -->
-
-    <div id="registro" class="tarjeta oculto">
-
-        <h2>Crear cuenta</h2>
-
-        <label>Nombre</label>
-
-        <input
-            id="registroNombre"
-            type="text"
-            placeholder="Tu nombre"
-        >
-
-        <label>Correo</label>
-
-        <input
-            id="registroEmail"
-            type="email"
-            placeholder="tu@email.com"
-        >
-
-        <label>Contraseña</label>
-
-        <input
-            id="registroPassword"
-            type="password"
-            placeholder="Contraseña"
-        >
-
-        <button
-            class="boton"
-            onclick="crearCuenta()"
-        >
-            Registrarme
-        </button>
-
-        <button
-            class="secundario"
-            onclick="mostrar('inicio')"
-        >
-            Volver
-        </button>
-
-        <div id="mensajeRegistro" class="mensaje"></div>
-
-    </div>
-
-
-    <!-- LOGIN -->
-
-    <div id="login" class="tarjeta oculto">
-
-        <h2>Iniciar sesión</h2>
-
-        <label>Correo</label>
-
-        <input
-            id="loginEmail"
-            type="email"
-            placeholder="tu@email.com"
-        >
-
-        <label>Contraseña</label>
-
-        <input
-            id="loginPassword"
-            type="password"
-            placeholder="Contraseña"
-        >
-
-        <button
-            class="boton"
-            onclick="iniciarSesion()"
-        >
-            Iniciar sesión
-        </button>
-
-        <button
-            class="secundario"
-            onclick="mostrar('inicio')"
-        >
-            Volver
-        </button>
-
-        <div id="mensajeLogin" class="mensaje"></div>
-
-    </div>
-
-
-    <!-- CLIENTE -->
-
-    <div id="cliente" class="oculto">
-
-        <div class="tarjeta">
-
-            <h2>
-                👋 Hola,
-                <span id="nombreCliente"></span>
-            </h2>
-
-            <p>
-                Elige un negocio para reservar.
-            </p>
-
-            <button
-                class="secundario"
-                onclick="cerrarSesion()"
-            >
-                Cerrar sesión
-            </button>
-
-        </div>
-
-
-        <!-- NEGOCIOS -->
-
-        <div class="tarjeta">
-
-            <h2>🏢 Negocios</h2>
-
-            <div id="listaNegocios">
-
-                <div class="cargando">
-                    Cargando negocios...
-                </div>
-
+            <div class="cargando">
+                Cargando negocios...
             </div>
 
-            <div
-                id="mensajeNegocios"
-                class="mensaje"
-            ></div>
-
         </div>
-
-
-        <!-- NEGOCIO SELECCIONADO -->
 
         <div
-            id="zonaNegocio"
-            class="tarjeta oculto"
+            id="mensajeNegocios"
+            class="mensaje"
+        ></div>
+
+    </div>
+
+
+    <!-- =================================================
+         NEGOCIO SELECCIONADO
+    ================================================= -->
+
+    <div
+        id="zonaNegocio"
+        class="tarjeta oculto"
+    >
+
+        <h2 id="nombreNegocio"></h2>
+
+        <p
+            id="idNegocioMostrado"
+            class="pequeno"
+        ></p>
+
+
+        <h3>🛠️ Servicios</h3>
+
+        <div id="listaServicios"></div>
+
+
+        <hr class="separador">
+
+
+        <h3>📅 Reservar cita</h3>
+
+
+        <label>Servicio</label>
+
+        <select id="servicioReserva">
+
+            <option value="">
+                Selecciona un servicio
+            </option>
+
+        </select>
+
+
+        <label>Fecha</label>
+
+        <input
+            id="fechaReserva"
+            type="date"
         >
 
-            <h2 id="nombreNegocio"></h2>
 
-            <p
-                id="idNegocioMostrado"
-                class="pequeno"
-            ></p>
+        <label>Hora</label>
 
-            <h3>Servicios</h3>
+        <select id="horaReserva">
 
-            <div id="listaServicios"></div>
+            <option value="">
+                Selecciona una hora
+            </option>
 
+            <option value="09:00">09:00</option>
+            <option value="10:00">10:00</option>
+            <option value="11:00">11:00</option>
+            <option value="12:00">12:00</option>
+            <option value="13:00">13:00</option>
+            <option value="14:00">14:00</option>
+            <option value="15:00">15:00</option>
+            <option value="16:00">16:00</option>
+            <option value="17:00">17:00</option>
+            <option value="18:00">18:00</option>
 
-            <h3>Reservar</h3>
-
-            <label>Servicio</label>
-
-            <select id="servicioReserva">
-
-                <option value="">
-                    Selecciona un servicio
-                </option>
-
-            </select>
+        </select>
 
 
-            <label>Fecha</label>
+        <label>Comentario</label>
 
-            <input
-                id="fechaReserva"
-                type="date"
-            >
-
-
-            <label>Hora</label>
-
-            <select id="horaReserva">
-
-                <option value="">
-                    Selecciona una hora
-                </option>
-
-                <option value="09:00">09:00</option>
-                <option value="10:00">10:00</option>
-                <option value="11:00">11:00</option>
-                <option value="12:00">12:00</option>
-                <option value="13:00">13:00</option>
-                <option value="14:00">14:00</option>
-                <option value="15:00">15:00</option>
-                <option value="16:00">16:00</option>
-                <option value="17:00">17:00</option>
-                <option value="18:00">18:00</option>
-
-            </select>
+        <textarea
+            id="comentarioReserva"
+            placeholder="Algo que quieras decirle al negocio"
+        ></textarea>
 
 
-            <label>Comentario</label>
-
-            <textarea
-                id="comentarioReserva"
-                placeholder="Algo que quieras decirle al negocio"
-            ></textarea>
-
-
-            <button
-                class="boton"
-                onclick="reservar()"
-            >
-                Confirmar reserva
-            </button>
+        <button
+            id="botonReserva"
+            class="boton"
+            onclick="reservar()"
+        >
+            ✅ Confirmar reserva
+        </button>
 
 
-            <div
-                id="mensajeReserva"
-                class="mensaje"
-            ></div>
+        <div
+            id="mensajeReserva"
+            class="mensaje"
+        ></div>
+
+    </div>
+
+
+    <!-- =================================================
+         MIS RESERVAS
+    ================================================= -->
+
+    <div
+        id="zonaReservas"
+        class="tarjeta oculto"
+    >
+
+        <h2>📋 Mis reservas</h2>
+
+        <div id="listaReservas">
+
+            <div class="cargando">
+                Cargando reservas...
+            </div>
 
         </div>
 
+        <button
+            class="secundario"
+            onclick="ocultarMisReservas()"
+        >
+            Volver
+        </button>
+
     </div>
+
+
+</div>
 
 </div>
 
@@ -415,8 +560,8 @@ button {
 <script>
 
 /* =========================================================
-   SUPABASE
-   ========================================================= */
+   CONFIGURACIÓN SUPABASE
+========================================================= */
 
 const SUPABASE_URL =
     "https://mjxiyzapdybzckurootw.supabase.co";
@@ -432,13 +577,20 @@ const supabaseClient =
     );
 
 
+/* =========================================================
+   VARIABLES
+========================================================= */
+
 let usuarioActual = null;
+
 let negocioActual = null;
+
+let serviciosActuales = [];
 
 
 /* =========================================================
    CAMBIAR PANTALLA
-   ========================================================= */
+========================================================= */
 
 function mostrar(id) {
 
@@ -472,8 +624,22 @@ function mostrar(id) {
 
 
 /* =========================================================
+   MENSAJES
+========================================================= */
+
+function mensaje(elemento, texto, tipo = "") {
+
+    elemento.textContent = texto;
+
+    elemento.className =
+        "mensaje " + tipo;
+
+}
+
+
+/* =========================================================
    REGISTRO
-   ========================================================= */
+========================================================= */
 
 async function crearCuenta() {
 
@@ -494,17 +660,24 @@ async function crearCuenta() {
             .getElementById("registroPassword")
             .value;
 
-    const mensaje =
-        document.getElementById("mensajeRegistro");
+    const mensajeRegistro =
+        document.getElementById(
+            "mensajeRegistro"
+        );
+
+    const boton =
+        document.getElementById(
+            "botonRegistro"
+        );
 
 
     if (!nombre || !email || !password) {
 
-        mensaje.textContent =
-            "Completa todos los campos.";
-
-        mensaje.className =
-            "mensaje error";
+        mensaje(
+            mensajeRegistro,
+            "Completa todos los campos.",
+            "error"
+        );
 
         return;
     }
@@ -512,21 +685,22 @@ async function crearCuenta() {
 
     if (password.length < 6) {
 
-        mensaje.textContent =
-            "La contraseña debe tener mínimo 6 caracteres.";
-
-        mensaje.className =
-            "mensaje error";
+        mensaje(
+            mensajeRegistro,
+            "La contraseña debe tener mínimo 6 caracteres.",
+            "error"
+        );
 
         return;
     }
 
 
-    mensaje.textContent =
-        "Creando cuenta...";
+    boton.disabled = true;
 
-    mensaje.className =
-        "mensaje";
+    mensaje(
+        mensajeRegistro,
+        "Creando cuenta..."
+    );
 
 
     const resultado =
@@ -547,6 +721,9 @@ async function crearCuenta() {
         });
 
 
+    boton.disabled = false;
+
+
     if (resultado.error) {
 
         console.error(
@@ -554,22 +731,22 @@ async function crearCuenta() {
             resultado.error
         );
 
-        mensaje.textContent =
+        mensaje(
+            mensajeRegistro,
             "Error: " +
-            resultado.error.message;
-
-        mensaje.className =
-            "mensaje error";
+            resultado.error.message,
+            "error"
+        );
 
         return;
     }
 
 
-    mensaje.textContent =
-        "✅ Cuenta creada correctamente.";
-
-    mensaje.className =
-        "mensaje exito";
+    mensaje(
+        mensajeRegistro,
+        "✅ Cuenta creada correctamente.",
+        "exito"
+    );
 
 
     document
@@ -588,7 +765,7 @@ async function crearCuenta() {
 
 /* =========================================================
    LOGIN
-   ========================================================= */
+========================================================= */
 
 async function iniciarSesion() {
 
@@ -603,27 +780,35 @@ async function iniciarSesion() {
             .getElementById("loginPassword")
             .value;
 
-    const mensaje =
-        document.getElementById("mensajeLogin");
+    const mensajeLogin =
+        document.getElementById(
+            "mensajeLogin"
+        );
+
+    const boton =
+        document.getElementById(
+            "botonLogin"
+        );
 
 
     if (!email || !password) {
 
-        mensaje.textContent =
-            "Completa correo y contraseña.";
-
-        mensaje.className =
-            "mensaje error";
+        mensaje(
+            mensajeLogin,
+            "Completa correo y contraseña.",
+            "error"
+        );
 
         return;
     }
 
 
-    mensaje.textContent =
-        "Iniciando sesión...";
+    boton.disabled = true;
 
-    mensaje.className =
-        "mensaje";
+    mensaje(
+        mensajeLogin,
+        "Iniciando sesión..."
+    );
 
 
     const resultado =
@@ -636,20 +821,22 @@ async function iniciarSesion() {
         });
 
 
-    console.log(
-        "RESULTADO LOGIN:",
-        resultado
-    );
+    boton.disabled = false;
 
 
     if (resultado.error) {
 
-        mensaje.textContent =
-            "Error: " +
-            resultado.error.message;
+        console.error(
+            "ERROR LOGIN:",
+            resultado.error
+        );
 
-        mensaje.className =
-            "mensaje error";
+        mensaje(
+            mensajeLogin,
+            "Error: " +
+            resultado.error.message,
+            "error"
+        );
 
         return;
     }
@@ -659,22 +846,14 @@ async function iniciarSesion() {
         resultado.data.user;
 
 
-    const nombre =
-        usuarioActual.user_metadata?.nombre ||
-        usuarioActual.email;
+    prepararCliente();
 
 
-    document
-        .getElementById("nombreCliente")
-        .textContent =
-            nombre;
-
-
-    mensaje.textContent =
-        "✅ Sesión iniciada correctamente.";
-
-    mensaje.className =
-        "mensaje exito";
+    mensaje(
+        mensajeLogin,
+        "✅ Sesión iniciada.",
+        "exito"
+    );
 
 
     setTimeout(async function() {
@@ -683,33 +862,66 @@ async function iniciarSesion() {
 
         await cargarNegocios();
 
-    }, 500);
+    }, 300);
 
 }
 
 
 /* =========================================================
-   CARGAR NEGOCIOS DESDE SUPABASE
-   ========================================================= */
+   PREPARAR CLIENTE
+========================================================= */
+
+function prepararCliente() {
+
+    if (!usuarioActual) {
+        return;
+    }
+
+
+    const nombre =
+        usuarioActual.user_metadata?.nombre ||
+        usuarioActual.email ||
+        "Cliente";
+
+
+    document
+        .getElementById("nombreCliente")
+        .textContent =
+            nombre;
+
+
+    document
+        .getElementById("correoCliente")
+        .textContent =
+            usuarioActual.email || "";
+
+}
+
+
+/* =========================================================
+   CARGAR NEGOCIOS
+========================================================= */
 
 async function cargarNegocios() {
 
     const lista =
-        document.getElementById("listaNegocios");
+        document.getElementById(
+            "listaNegocios"
+        );
 
-    const mensaje =
-        document.getElementById("mensajeNegocios");
+    const mensajeNegocios =
+        document.getElementById(
+            "mensajeNegocios"
+        );
 
 
     lista.innerHTML =
-        "<div class='cargando'>Cargando negocios...</div>";
+        "<div class='cargando'>" +
+        "Cargando negocios..." +
+        "</div>";
 
-    mensaje.textContent = "";
 
-
-    console.log(
-        "🔎 BUSCANDO NEGOCIOS EN SUPABASE..."
-    );
+    mensajeNegocios.textContent = "";
 
 
     const resultado =
@@ -719,16 +931,10 @@ async function cargarNegocios() {
             .order("nombre");
 
 
-    console.log(
-        "📦 RESULTADO NEGOCIOS:",
-        resultado
-    );
-
-
     if (resultado.error) {
 
         console.error(
-            "❌ ERROR NEGOCIOS:",
+            "ERROR NEGOCIOS:",
             resultado.error
         );
 
@@ -736,33 +942,27 @@ async function cargarNegocios() {
         lista.innerHTML = "";
 
 
-        mensaje.textContent =
+        mensaje(
+            mensajeNegocios,
             "Error cargando negocios: " +
-            resultado.error.message;
-
-        mensaje.className =
-            "mensaje error";
+            resultado.error.message,
+            "error"
+        );
 
         return;
     }
 
 
     const negocios =
-        resultado.data;
+        resultado.data || [];
 
 
-    console.log(
-        "🏢 NEGOCIOS ENCONTRADOS:",
-        negocios
-    );
-
-
-    if (!negocios || negocios.length === 0) {
+    if (negocios.length === 0) {
 
         lista.innerHTML =
-            "<p class='error'>" +
-            "No hay negocios registrados en Supabase." +
-            "</p>";
+            "<div class='vacio'>" +
+            "No hay negocios registrados." +
+            "</div>";
 
         return;
     }
@@ -795,7 +995,9 @@ async function cargarNegocios() {
         tarjeta.onclick =
             function() {
 
-                seleccionarNegocio(negocio);
+                seleccionarNegocio(
+                    negocio
+                );
 
             };
 
@@ -809,7 +1011,7 @@ async function cargarNegocios() {
 
 /* =========================================================
    SELECCIONAR NEGOCIO
-   ========================================================= */
+========================================================= */
 
 async function seleccionarNegocio(negocio) {
 
@@ -817,16 +1019,13 @@ async function seleccionarNegocio(negocio) {
         negocio;
 
 
-    console.log(
-        "🏢 NEGOCIO SELECCIONADO:",
-        negocio
-    );
+    const zona =
+        document.getElementById(
+            "zonaNegocio"
+        );
 
 
-    document
-        .getElementById("zonaNegocio")
-        .classList
-        .remove("oculto");
+    zona.classList.remove("oculto");
 
 
     document
@@ -842,19 +1041,24 @@ async function seleccionarNegocio(negocio) {
 
 
     const lista =
-        document.getElementById("listaServicios");
+        document.getElementById(
+            "listaServicios"
+        );
 
 
     const selector =
-        document.getElementById("servicioReserva");
+        document.getElementById(
+            "servicioReserva"
+        );
 
 
     lista.innerHTML =
-        "<div class='cargando'>Cargando servicios...</div>";
+        "<div class='cargando'>" +
+        "Cargando servicios..." +
+        "</div>";
 
 
     selector.innerHTML =
-
         "<option value=''>" +
         "Cargando servicios..." +
         "</option>";
@@ -865,38 +1069,33 @@ async function seleccionarNegocio(negocio) {
         .textContent = "";
 
 
-    console.log(
-        "🔎 BUSCANDO SERVICIOS PARA NEGOCIO:",
-        negocio.id
-    );
-
-
     const resultado =
         await supabaseClient
             .from("servicios")
-            .select("id, nombre, precio, duracion, negocio_id")
-            .eq("negocio_id", negocio.id)
+            .select(
+                "id, nombre, precio, duracion, negocio_id"
+            )
+            .eq(
+                "negocio_id",
+                negocio.id
+            )
             .order("nombre");
-
-
-    console.log(
-        "📦 RESULTADO SERVICIOS:",
-        resultado
-    );
 
 
     if (resultado.error) {
 
         console.error(
-            "❌ ERROR SERVICIOS:",
+            "ERROR SERVICIOS:",
             resultado.error
         );
 
 
         lista.innerHTML =
             "<p class='error'>" +
-            "Error al cargar servicios: " +
-            escaparHTML(resultado.error.message) +
+            "Error cargando servicios: " +
+            escaparHTML(
+                resultado.error.message
+            ) +
             "</p>";
 
 
@@ -905,35 +1104,30 @@ async function seleccionarNegocio(negocio) {
             "Error cargando servicios" +
             "</option>";
 
-
         return;
     }
 
 
     const servicios =
-        resultado.data;
+        resultado.data || [];
 
 
-    console.log(
-        "🛠️ SERVICIOS ENCONTRADOS:",
-        servicios
-    );
+    serviciosActuales =
+        servicios;
 
 
-    if (!servicios || servicios.length === 0) {
+    if (servicios.length === 0) {
 
         lista.innerHTML =
-            "<p class='error'>" +
-            "Este negocio no tiene servicios registrados " +
-            "con este negocio_id." +
-            "</p>";
+            "<div class='vacio'>" +
+            "Este negocio no tiene servicios disponibles." +
+            "</div>";
 
 
         selector.innerHTML =
             "<option value=''>" +
-            "No hay servicios disponibles" +
+            "No hay servicios" +
             "</option>";
-
 
         return;
     }
@@ -943,13 +1137,15 @@ async function seleccionarNegocio(negocio) {
 
 
     selector.innerHTML =
-
         "<option value=''>" +
         "Selecciona un servicio" +
         "</option>";
 
 
     servicios.forEach(function(servicio) {
+
+
+        /* TARJETA DEL SERVICIO */
 
         const div =
             document.createElement("div");
@@ -960,7 +1156,7 @@ async function seleccionarNegocio(negocio) {
 
 
         let precioTexto =
-            "Reserva";
+            "Precio no especificado";
 
 
         if (
@@ -977,34 +1173,50 @@ async function seleccionarNegocio(negocio) {
         }
 
 
+        let duracionTexto =
+            "Duración no especificada";
+
+
+        if (
+            servicio.duracion !== null &&
+            servicio.duracion !== undefined
+        ) {
+
+            duracionTexto =
+                servicio.duracion +
+                " minutos";
+
+        }
+
+
         div.innerHTML =
 
             "<strong>" +
-            escaparHTML(servicio.nombre) +
-            "</strong><br>" +
+            escaparHTML(
+                servicio.nombre
+            ) +
+            "</strong>" +
+
+            "<br>" +
 
             precioTexto +
+
             "<br>" +
 
             "<span class='pequeno'>" +
-
-            (
-                servicio.duracion
-                    ? escaparHTML(
-                        String(servicio.duracion)
-                      ) +
-                      " minutos"
-                    : "Duración no especificada"
-            ) +
-
+            duracionTexto +
             "</span>";
 
 
         lista.appendChild(div);
 
 
+        /* OPCIÓN DEL SELECT */
+
         const opcion =
-            document.createElement("option");
+            document.createElement(
+                "option"
+            );
 
 
         opcion.value =
@@ -1012,14 +1224,21 @@ async function seleccionarNegocio(negocio) {
 
 
         opcion.textContent =
-            servicio.nombre +
-            (
-                Number(servicio.precio) > 0
-                    ? " - $" +
-                      Number(servicio.precio)
-                        .toLocaleString("es-CO")
-                    : ""
-            );
+            servicio.nombre;
+
+
+        if (
+            servicio.precio !== null &&
+            servicio.precio !== undefined &&
+            Number(servicio.precio) > 0
+        ) {
+
+            opcion.textContent +=
+                " - $" +
+                Number(servicio.precio)
+                    .toLocaleString("es-CO");
+
+        }
 
 
         selector.appendChild(opcion);
@@ -1031,58 +1250,91 @@ async function seleccionarNegocio(negocio) {
 
 /* =========================================================
    RESERVAR
-   ========================================================= */
+========================================================= */
 
 async function reservar() {
 
-    const servicioId =
-        document
-            .getElementById("servicioReserva")
-            .value;
+    const mensajeReserva =
+        document.getElementById(
+            "mensajeReserva"
+        );
+
+    const boton =
+        document.getElementById(
+            "botonReserva"
+        );
 
 
-    const fecha =
-        document
-            .getElementById("fechaReserva")
-            .value;
+    /* COMPROBAR USUARIO */
 
+    if (!usuarioActual) {
 
-    const hora =
-        document
-            .getElementById("horaReserva")
-            .value;
-
-
-    const comentario =
-        document
-            .getElementById("comentarioReserva")
-            .value
-            .trim();
-
-
-    const mensaje =
-        document.getElementById("mensajeReserva");
-
-
-    if (!negocioActual) {
-
-        mensaje.textContent =
-            "Selecciona un negocio.";
-
-        mensaje.className =
-            "mensaje error";
+        mensaje(
+            mensajeReserva,
+            "Debes iniciar sesión.",
+            "error"
+        );
 
         return;
     }
 
 
+    /* COMPROBAR NEGOCIO */
+
+    if (!negocioActual) {
+
+        mensaje(
+            mensajeReserva,
+            "Selecciona un negocio.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    const servicioId =
+        document
+            .getElementById(
+                "servicioReserva"
+            )
+            .value;
+
+
+    const fecha =
+        document
+            .getElementById(
+                "fechaReserva"
+            )
+            .value;
+
+
+    const hora =
+        document
+            .getElementById(
+                "horaReserva"
+            )
+            .value;
+
+
+    const comentario =
+        document
+            .getElementById(
+                "comentarioReserva"
+            )
+            .value
+            .trim();
+
+
+    /* VALIDACIONES */
+
     if (!servicioId) {
 
-        mensaje.textContent =
-            "Selecciona un servicio.";
-
-        mensaje.className =
-            "mensaje error";
+        mensaje(
+            mensajeReserva,
+            "Selecciona un servicio.",
+            "error"
+        );
 
         return;
     }
@@ -1090,11 +1342,11 @@ async function reservar() {
 
     if (!fecha) {
 
-        mensaje.textContent =
-            "Selecciona una fecha.";
-
-        mensaje.className =
-            "mensaje error";
+        mensaje(
+            mensajeReserva,
+            "Selecciona una fecha.",
+            "error"
+        );
 
         return;
     }
@@ -1102,154 +1354,517 @@ async function reservar() {
 
     if (!hora) {
 
-        mensaje.textContent =
-            "Selecciona una hora.";
-
-        mensaje.className =
-            "mensaje error";
-
-        return;
-    }
-
-
-    if (!usuarioActual) {
-
-        mensaje.textContent =
-            "Debes iniciar sesión.";
-
-        mensaje.className =
-            "mensaje error";
+        mensaje(
+            mensajeReserva,
+            "Selecciona una hora.",
+            "error"
+        );
 
         return;
     }
 
 
-    mensaje.textContent =
-        "Guardando reserva...";
+    /* EVITAR FECHAS PASADAS */
 
-    mensaje.className =
-        "mensaje";
+    const hoy =
+        new Date();
 
+
+    const fechaHoy =
+        hoy.toISOString()
+            .split("T")[0];
+
+
+    if (fecha < fechaHoy) {
+
+        mensaje(
+            mensajeReserva,
+            "No puedes reservar una fecha pasada.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    /* OBTENER NOMBRE */
 
     const nombreCliente =
         usuarioActual.user_metadata?.nombre ||
-        usuarioActual.email;
+        usuarioActual.email ||
+        "Cliente";
 
-console.log("USUARIO ACTUAL ID:", usuarioActual?.id);
-console.log("USUARIO ACTUAL:", usuarioActual);
-    alert("ID DEL USUARIO:\n" + usuarioActual?.id);   
+
+    /*
+       =====================================================
+       IMPORTANTE
+
+       La columna es:
+
+       usuario
+
+       NO cliente_id
+       =====================================================
+    */
+
     const datosReserva = {
 
-    negocio_id:
-        negocioActual.id,
+        negocio_id:
+            negocioActual.id,
 
-    servicio_id:
-        servicioId,
+        servicio_id:
+            servicioId,
 
-    usuario:
-    usuarioActual.id,
+        usuario:
+            usuarioActual.id,
 
-    nombre_cliente:
-        nombreCliente,
+        nombre_cliente:
+            nombreCliente,
 
-    telefono_cliente:
-        "",
+        "teléfono_cliente":
+            "",
 
-    fecha:
-        fecha,
+        fecha:
+            fecha,
 
-    hora:
-        hora,
+        hora:
+            hora,
 
-    comentario:
-        comentario,
+        comentario:
+            comentario,
 
-    estado:
-        "Pendiente"
+        estado:
+            "Pendiente"
 
-};
+    };
+
 
     console.log(
-        "📅 DATOS DE RESERVA:",
+        "USUARIO AUTENTICADO:",
+        usuarioActual.id
+    );
+
+
+    console.log(
+        "DATOS DE RESERVA:",
         datosReserva
     );
 
-alert(
-    "usuario que se va a guardar:\n" +
-    datosReserva.usuario
-);
+
+    boton.disabled = true;
+
+
+    mensaje(
+        mensajeReserva,
+        "Guardando reserva..."
+    );
+
+
+    /*
+       =====================================================
+       INSERTAR EN public."Citas"
+       =====================================================
+    */
+
     const resultado =
         await supabaseClient
             .from("Citas")
-            .insert([datosReserva])
-            .select();
+            .insert([
+                datosReserva
+            ]);
 
 
     console.log(
-        "📦 RESULTADO RESERVA:",
+        "RESULTADO INSERT:",
         resultado
     );
+
+
+    boton.disabled = false;
 
 
     if (resultado.error) {
 
         console.error(
-            "❌ ERROR GUARDANDO RESERVA:",
+            "ERROR RESERVA:",
             resultado.error
         );
 
 
-        mensaje.textContent =
+        mensaje(
+            mensajeReserva,
             "Error al guardar la reserva: " +
-            resultado.error.message;
-
-        mensaje.className =
-            "mensaje error";
+            resultado.error.message,
+            "error"
+        );
 
         return;
     }
 
 
-    mensaje.textContent =
-        "✅ Reserva realizada correctamente.";
+    /* ÉXITO */
 
-    mensaje.className =
-        "mensaje exito";
+    mensaje(
+        mensajeReserva,
+        "✅ Reserva realizada correctamente.",
+        "exito"
+    );
 
+
+    /* LIMPIAR */
 
     document
-        .getElementById("servicioReserva")
+        .getElementById(
+            "servicioReserva"
+        )
         .value = "";
 
 
     document
-        .getElementById("fechaReserva")
+        .getElementById(
+            "fechaReserva"
+        )
         .value = "";
 
 
     document
-        .getElementById("horaReserva")
+        .getElementById(
+            "horaReserva"
+        )
         .value = "";
 
 
     document
-        .getElementById("comentarioReserva")
+        .getElementById(
+            "comentarioReserva"
+        )
         .value = "";
 
 }
 
 
 /* =========================================================
+   MIS RESERVAS
+========================================================= */
+
+async function mostrarMisReservas() {
+
+    const zona =
+        document.getElementById(
+            "zonaReservas"
+        );
+
+
+    const lista =
+        document.getElementById(
+            "listaReservas"
+        );
+
+
+    zona.classList.remove("oculto");
+
+
+    lista.innerHTML =
+        "<div class='cargando'>" +
+        "Cargando reservas..." +
+        "</div>";
+
+
+    if (!usuarioActual) {
+
+        lista.innerHTML =
+            "<p class='error'>" +
+            "Debes iniciar sesión." +
+            "</p>";
+
+        return;
+    }
+
+
+    const resultado =
+        await supabaseClient
+            .from("Citas")
+            .select(
+                "id, negocio_id, servicio_id, nombre_cliente, fecha, hora, comentario, estado"
+            )
+            .eq(
+                "usuario",
+                usuarioActual.id
+            )
+            .order(
+                "fecha",
+                {
+                    ascending: false
+                }
+            )
+            .order(
+                "hora",
+                {
+                    ascending: false
+                }
+            );
+
+
+    if (resultado.error) {
+
+        console.error(
+            "ERROR MIS RESERVAS:",
+            resultado.error
+        );
+
+
+        lista.innerHTML =
+            "<p class='error'>" +
+            "Error cargando reservas: " +
+            escaparHTML(
+                resultado.error.message
+            ) +
+            "</p>";
+
+        return;
+    }
+
+
+    const reservas =
+        resultado.data || [];
+
+
+    if (reservas.length === 0) {
+
+        lista.innerHTML =
+            "<div class='vacio'>" +
+            "Todavía no tienes reservas." +
+            "</div>";
+
+        return;
+    }
+
+
+    lista.innerHTML = "";
+
+
+    reservas.forEach(function(reserva) {
+
+        const div =
+            document.createElement(
+                "div"
+            );
+
+
+        div.className =
+            "reserva";
+
+
+        div.innerHTML =
+
+            "<strong>📅 " +
+            escaparHTML(
+                reserva.fecha
+            ) +
+            "</strong>" +
+
+            "<br>" +
+
+            "🕐 " +
+            escaparHTML(
+                reserva.hora
+            ) +
+
+            "<br>" +
+
+            "🏢 Negocio ID: " +
+            escaparHTML(
+                String(reserva.negocio_id)
+            ) +
+
+            "<br>" +
+
+            "🛠️ Servicio ID: " +
+            escaparHTML(
+                String(reserva.servicio_id)
+            ) +
+
+            "<br>" +
+
+            "<span class='etiqueta'>" +
+            escaparHTML(
+                reserva.estado || "Pendiente"
+            ) +
+            "</span>";
+
+
+        if (reserva.comentario) {
+
+            div.innerHTML +=
+
+                "<p class='pequeno'>" +
+                "💬 " +
+                escaparHTML(
+                    reserva.comentario
+                ) +
+                "</p>";
+
+        }
+
+
+        if (
+            reserva.estado &&
+            reserva.estado.toLowerCase() !==
+                "cancelada"
+        ) {
+
+            const boton =
+                document.createElement(
+                    "button"
+                );
+
+
+            boton.className =
+                "peligro";
+
+
+            boton.textContent =
+                "Cancelar reserva";
+
+
+            boton.onclick =
+                function() {
+
+                    cancelarReserva(
+                        reserva.id
+                    );
+
+                };
+
+
+            div.appendChild(
+                boton
+            );
+
+        }
+
+
+        lista.appendChild(
+            div
+        );
+
+    });
+
+}
+
+
+/* =========================================================
+   CANCELAR RESERVA
+========================================================= */
+
+async function cancelarReserva(id) {
+
+    if (!usuarioActual) {
+        return;
+    }
+
+
+    const confirmar =
+        window.confirm(
+            "¿Quieres cancelar esta reserva?"
+        );
+
+
+    if (!confirmar) {
+        return;
+    }
+
+
+    const resultado =
+        await supabaseClient
+            .from("Citas")
+            .update({
+                estado: "Cancelada"
+            })
+            .eq(
+                "id",
+                id
+            )
+            .eq(
+                "usuario",
+                usuarioActual.id
+            );
+
+
+    if (resultado.error) {
+
+        alert(
+            "No se pudo cancelar: " +
+            resultado.error.message
+        );
+
+        return;
+    }
+
+
+    await mostrarMisReservas();
+
+}
+
+
+/* =========================================================
+   OCULTAR MIS RESERVAS
+========================================================= */
+
+function ocultarMisReservas() {
+
+    document
+        .getElementById(
+            "zonaReservas"
+        )
+        .classList
+        .add("oculto");
+
+}
+
+
+/* =========================================================
    CERRAR SESIÓN
-   ========================================================= */
+========================================================= */
 
 async function cerrarSesion() {
 
-    await supabaseClient.auth.signOut();
+    const resultado =
+        await supabaseClient.auth.signOut();
+
+
+    if (resultado.error) {
+
+        console.error(
+            "ERROR CERRANDO SESIÓN:",
+            resultado.error
+        );
+
+    }
+
 
     usuarioActual = null;
 
     negocioActual = null;
+
+    serviciosActuales = [];
+
+
+    document
+        .getElementById(
+            "zonaNegocio"
+        )
+        .classList
+        .add("oculto");
+
+
+    document
+        .getElementById(
+            "zonaReservas"
+        )
+        .classList
+        .add("oculto");
+
 
     mostrar("inicio");
 
@@ -1257,29 +1872,54 @@ async function cerrarSesion() {
 
 
 /* =========================================================
-   SEGURIDAD BÁSICA PARA TEXTO MOSTRADO EN HTML
-   ========================================================= */
+   SEGURIDAD BÁSICA
+========================================================= */
 
 function escaparHTML(texto) {
 
-    if (texto === null || texto === undefined) {
+    if (
+        texto === null ||
+        texto === undefined
+    ) {
+
         return "";
+
     }
 
 
     return String(texto)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 
 }
 
 
 /* =========================================================
-   COMPROBAR SESIÓN AL CARGAR
-   ========================================================= */
+   COMPROBAR SESIÓN
+========================================================= */
 
 async function comprobarSesion() {
 
@@ -1297,18 +1937,11 @@ async function comprobarSesion() {
             resultado.data.session.user;
 
 
-        const nombre =
-            usuarioActual.user_metadata?.nombre ||
-            usuarioActual.email;
-
-
-        document
-            .getElementById("nombreCliente")
-            .textContent =
-                nombre;
+        prepararCliente();
 
 
         mostrar("cliente");
+
 
         await cargarNegocios();
 
@@ -1322,12 +1955,93 @@ async function comprobarSesion() {
 
 
 /* =========================================================
+   ESCUCHAR CAMBIOS DE AUTENTICACIÓN
+========================================================= */
+
+supabaseClient.auth.onAuthStateChange(
+
+    function(event, session) {
+
+        if (
+            session &&
+            session.user
+        ) {
+
+            usuarioActual =
+                session.user;
+
+            prepararCliente();
+
+        }
+
+    }
+
+);
+
+
+/* =========================================================
+   FECHA MÍNIMA = HOY
+========================================================= */
+
+function configurarFechaMinima() {
+
+    const input =
+        document.getElementById(
+            "fechaReserva"
+        );
+
+
+    if (!input) {
+        return;
+    }
+
+
+    const hoy =
+        new Date();
+
+
+    const año =
+        hoy.getFullYear();
+
+
+    const mes =
+        String(
+            hoy.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const dia =
+        String(
+            hoy.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    input.min =
+        año +
+        "-" +
+        mes +
+        "-" +
+        dia;
+
+}
+
+
+/* =========================================================
    INICIO
-   ========================================================= */
+========================================================= */
+
+configurarFechaMinima();
 
 comprobarSesion();
 
 </script>
 
 </body>
+
 </html>
