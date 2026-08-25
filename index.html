@@ -1135,7 +1135,8 @@ async function reservar() {
         usuarioActual.user_metadata?.nombre ||
         usuarioActual.email;
 
-
+console.log("USUARIO ACTUAL ID:", usuarioActual?.id);
+console.log("USUARIO ACTUAL:", usuarioActual);
     const datosReserva = {
 
     negocio_id:
