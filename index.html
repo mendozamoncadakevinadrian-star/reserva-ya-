@@ -1146,8 +1146,8 @@ console.log("USUARIO ACTUAL:", usuarioActual);
     servicio_id:
         servicioId,
 
-    cliente_id:
-        usuarioActual.id,
+    usuario:
+    usuarioActual.id,
 
     nombre_cliente:
         nombreCliente,
@@ -1177,7 +1177,7 @@ console.log("USUARIO ACTUAL:", usuarioActual);
 
     const resultado =
         await supabaseClient
-            .from("reserva_citas")
+            .from("citas")
             .insert([datosReserva])
             .select();
 
