@@ -1438,71 +1438,176 @@ return;
 
 
 lista.innerHTML = "";
+/* =========================================================
+   CARGAR NOMBRES DE NEGOCIOS Y SERVICIOS
+========================================================= */
+
+const negociosIds =
+    [...new Set(
+        reservas
+            .map(function(reserva) {
+                return reserva.negocio_id;
+            })
+            .filter(Boolean)
+    )];
+
+const serviciosIds =
+    [...new Set(
+        reservas
+            .map(function(reserva) {
+                return reserva.servicio_id;
+            })
+            .filter(Boolean)
+    )];
 
 
-/* Mostrar reservas */
+let negocios = [];
 
-reservas.forEach(function(reserva) {
+if (negociosIds.length > 0) {
 
-const div =
-document.createElement("div");
+    const resultadoNegocios =
+        await supabaseClient
+            .from("negocios")
+            .select("id, nombre")
+            .in("id", negociosIds);
 
+    if (resultadoNegocios.error) {
 
-div.className =
-"reserva";
+        console.error(
+            "Error cargando negocios:",
+            resultadoNegocios.error
+        );
 
+    } else {
 
-div.innerHTML =
+        negocios =
+            resultadoNegocios.data || [];
 
-"<h3>📅 Reserva</h3>" +
-
-"<p>" +
-"<strong>Fecha:</strong> " +
-escaparHTML(reserva.fecha) +
-"</p>" +
-
-"<p>" +
-"<strong>Hora:</strong> " +
-escaparHTML(reserva.hora) +
-"</p>" +
-
-"<p>" +
-"<strong>Negocio:</strong> " +
-escaparHTML(reserva.negocio_id) +
-"</p>" +
-
-"<p>" +
-"<strong>Servicio:</strong> " +
-escaparHTML(reserva.servicio_id) +
-"</p>" +
-
-(
-reserva.comentario
-?
-"<p>" +
-"<strong>Comentario:</strong> " +
-escaparHTML(reserva.comentario) +
-"</p>"
-:
-""
-) +
-
-"<p>" +
-"<strong>Estado:</strong> " +
-"<span class='estado'>" +
-escaparHTML(reserva.estado || "Pendiente") +
-"</span>" +
-"</p>";
-
-
-lista.appendChild(div);
-
-});
-
+    }
 }
 
 
+let servicios = [];
 
+if (serviciosIds.length > 0) {
+
+    const resultadoServicios =
+        await supabaseClient
+            .from("servicios")
+            .select("id, nombre")
+            .in("id", serviciosIds);
+
+    if (resultadoServicios.error) {
+
+        console.error(
+            "Error cargando servicios:",
+            resultadoServicios.error
+        );
+
+    } else {
+
+        servicios =
+            resultadoServicios.data || [];
+
+    }
+}
+
+
+/* =========================================================
+   MOSTRAR RESERVAS
+========================================================= */
+
+lista.innerHTML = "";
+
+
+reservas.forEach(function(reserva) {
+
+    const negocio =
+        negocios.find(function(item) {
+
+            return item.id === reserva.negocio_id;
+
+        });
+
+
+    const servicio =
+        servicios.find(function(item) {
+
+            return item.id === reserva.servicio_id;
+
+        });
+
+
+    const nombreNegocio =
+        negocio
+            ? negocio.nombre
+            : "Negocio no encontrado";
+
+
+    const nombreServicio =
+        servicio
+            ? servicio.nombre
+            : "Servicio no encontrado";
+
+
+    const div =
+        document.createElement("div");
+
+
+    div.className =
+        "reserva";
+
+
+    div.innerHTML =
+
+        "<h3>📅 Reserva</h3>" +
+
+        "<p>" +
+        "<strong>🏢 Negocio:</strong> " +
+        escaparHTML(nombreNegocio) +
+        "</p>" +
+
+        "<p>" +
+        "<strong>✂️ Servicio:</strong> " +
+        escaparHTML(nombreServicio) +
+        "</p>" +
+
+        "<p>" +
+        "<strong>📅 Fecha:</strong> " +
+        escaparHTML(reserva.fecha) +
+        "</p>" +
+
+        "<p>" +
+        "<strong>🕐 Hora:</strong> " +
+        escaparHTML(reserva.hora) +
+        "</p>" +
+
+        (
+            reserva.comentario
+                ?
+                "<p>" +
+                "<strong>💬 Comentario:</strong> " +
+                escaparHTML(reserva.comentario) +
+                "</p>"
+                :
+                ""
+        ) +
+
+        "<p>" +
+        "<strong>Estado:</strong> " +
+        "<span class='estado'>" +
+        escaparHTML(
+            reserva.estado || "Pendiente"
+        ) +
+        "</span>" +
+        "</p>";
+
+
+    lista.appendChild(div);
+
+});
+
+}    
 /* =========================================================
    CERRAR SESIÓN
 ========================================================= */
