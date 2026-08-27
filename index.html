@@ -1835,10 +1835,12 @@ async function cargarPanelNegocio() {
 
 
     const negocio =
-        resultado.data;
+    resultado.data;
 
+negocioActual =
+    negocio;
 
-    if (!negocio) {
+if (!negocio) {
 
         info.innerHTML =
             "<p class='pequeno'>" +
@@ -1872,6 +1874,166 @@ async function cargarPanelNegocio() {
     mensaje.className =
         "mensaje exito";
 }
+/* =========================================================
+   AGREGAR SERVICIO
+========================================================= */
+
+async function agregarServicio() {
+
+    const nombre =
+        document
+            .getElementById("nuevoServicioNombre")
+            .value
+            .trim();
+
+    const precio =
+        document
+            .getElementById("nuevoServicioPrecio")
+            .value;
+
+    const duracion =
+        document
+            .getElementById("nuevoServicioDuracion")
+            .value;
+
+    const mensaje =
+        document.getElementById("mensajeServiciosPanel");
+
+
+    /* COMPROBAR NEGOCIO */
+
+    if (!negocioActual) {
+
+        mensaje.textContent =
+            "No se encontró el negocio.";
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    /* VALIDAR NOMBRE */
+
+    if (!nombre) {
+
+        mensaje.textContent =
+            "Escribe el nombre del servicio.";
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    /* VALIDAR PRECIO */
+
+    if (precio === "" || Number(precio) < 0) {
+
+        mensaje.textContent =
+            "Escribe un precio válido.";
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    /* VALIDAR DURACIÓN */
+
+    if (duracion === "" || Number(duracion) <= 0) {
+
+        mensaje.textContent =
+            "Escribe una duración válida.";
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    mensaje.textContent =
+        "Guardando servicio...";
+
+    mensaje.className =
+        "mensaje";
+
+
+    /* INSERTAR EN SUPABASE */
+
+    const resultado =
+        await supabaseClient
+            .from("servicios")
+            .insert({
+
+                negocio_id:
+                    negocioActual.id,
+
+                nombre:
+                    nombre,
+
+                precio:
+                    Number(precio),
+
+                duracion:
+                    Number(duracion)
+
+            });
+
+
+    /* COMPROBAR ERROR */
+
+    if (resultado.error) {
+
+        console.error(
+            "ERROR GUARDANDO SERVICIO:",
+            resultado.error
+        );
+
+        mensaje.textContent =
+            "Error al guardar el servicio: " +
+            resultado.error.message;
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    /* ÉXITO */
+
+    mensaje.textContent =
+        "✅ Servicio agregado correctamente.";
+
+    mensaje.className =
+        "mensaje exito";
+
+
+    /* LIMPIAR FORMULARIO */
+
+    document
+        .getElementById("nuevoServicioNombre")
+        .value = "";
+
+    document
+        .getElementById("nuevoServicioPrecio")
+        .value = "";
+
+    document
+        .getElementById("nuevoServicioDuracion")
+        .value = "";
+
+
+    /* ACTUALIZAR PANEL */
+
+    await cargarPanelNegocio();
+
+}    
 /* =========================================================
    CERRAR SESIÓN
 ========================================================= */
