@@ -1602,12 +1602,57 @@ reservas.forEach(function(reserva) {
         "</span>" +
         "</p>";
 
+const botonCancelar = document.createElement("button");
 
+botonCancelar.textContent = "❌ Cancelar cita";
+botonCancelar.className = "secundario";
+
+botonCancelar.onclick = function() {
+    cancelarCita(reserva.id);
+};
+
+div.appendChild(botonCancelar);
     lista.appendChild(div);
 
 });
 
 }    
+/* =========================================================
+   CANCELAR CITA
+========================================================= */
+
+async function cancelarCita(idCita) {
+
+    const confirmar =
+        confirm("¿Seguro que quieres cancelar esta cita?");
+
+    if (!confirmar) {
+        return;
+    }
+
+    const resultado =
+        await supabaseClient
+            .from("Citas")
+            .update({
+                estado: "Cancelada"
+            })
+            .eq("id", idCita)
+            .eq("usuario", usuarioActual.id);
+
+    if (resultado.error) {
+
+        alert(
+            "Error al cancelar la cita: " +
+            resultado.error.message
+        );
+
+        return;
+    }
+
+    alert("✅ Cita cancelada correctamente.");
+
+    await cargarMisReservas();
+}
 /* =========================================================
    CERRAR SESIÓN
 ========================================================= */
