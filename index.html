@@ -1385,7 +1385,7 @@ const resultado =
 await supabaseClient
 .from("Citas")
 .select(
-"negocio_id, servicio_id, nombre_cliente, fecha, hora, comentario, estado"
+"id, negocio_id, servicio_id, nombre_cliente, fecha, hora, comentario, estado"
 )
 .eq("usuario", user.id)
 .order("fecha", {
