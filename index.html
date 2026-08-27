@@ -1695,6 +1695,138 @@ async function cancelarCita(idCita) {
     await cargarMisReservas();
 }
 /* =========================================================
+   PANEL DEL NEGOCIO
+========================================================= */
+
+function mostrarPanelNegocio() {
+
+    const zona =
+        document.getElementById("zonaPanelNegocio");
+
+    if (!zona) {
+        return;
+    }
+
+    zona.classList.remove("oculto");
+
+    cargarPanelNegocio();
+}
+
+
+async function cargarPanelNegocio() {
+
+    const info =
+        document.getElementById("infoMiNegocio");
+
+    const mensaje =
+        document.getElementById("mensajePanelNegocio");
+
+    if (!info || !mensaje) {
+        return;
+    }
+
+    info.innerHTML =
+        "<div class='cargando'>" +
+        "Buscando tu negocio..." +
+        "</div>";
+
+    mensaje.textContent = "";
+    mensaje.className = "mensaje";
+
+
+    const resultadoUsuario =
+        await supabaseClient.auth.getUser();
+
+    const user =
+        resultadoUsuario.data?.user;
+
+
+    if (!user) {
+
+        info.innerHTML = "";
+
+        mensaje.textContent =
+            "Debes iniciar sesión.";
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    /*
+       POR AHORA BUSCAMOS EL NEGOCIO
+       QUE TENGA TU usuario_id.
+    */
+
+    const resultado =
+        await supabaseClient
+            .from("negocios")
+            .select("id, nombre, usuario_id")
+            .eq("usuario_id", user.id)
+            .maybeSingle();
+
+
+    if (resultado.error) {
+
+        console.error(
+            "ERROR CARGANDO NEGOCIO:",
+            resultado.error
+        );
+
+        info.innerHTML = "";
+
+        mensaje.textContent =
+            "Error cargando tu negocio: " +
+            resultado.error.message;
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    const negocio =
+        resultado.data;
+
+
+    if (!negocio) {
+
+        info.innerHTML =
+            "<p class='pequeno'>" +
+            "Todavía no tienes un negocio asociado a tu cuenta." +
+            "</p>";
+
+        return;
+    }
+
+
+    info.innerHTML =
+
+        "<h3>🏢 " +
+        escaparHTML(negocio.nombre) +
+        "</h3>" +
+
+        "<p>" +
+        "<strong>ID del negocio:</strong> " +
+        escaparHTML(String(negocio.id)) +
+        "</p>" +
+
+        "<p>" +
+        "<strong>Usuario propietario:</strong> " +
+        escaparHTML(String(negocio.usuario_id)) +
+        "</p>";
+
+
+    mensaje.textContent =
+        "✅ Negocio encontrado correctamente.";
+
+    mensaje.className =
+        "mensaje exito";
+}
+/* =========================================================
    CERRAR SESIÓN
 ========================================================= */
 
