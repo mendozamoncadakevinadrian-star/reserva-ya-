@@ -513,11 +513,57 @@ Cargando información del negocio...
 
 <div class="separador"></div>
 
-<h3>⚙️ Administración</h3>
+<h3>⚙️ Administración de servicios</h3>
 
 <p class="pequeno">
-Desde aquí podrás administrar tu negocio, servicios y reservas.
+Aquí puedes administrar los servicios que ofrece tu negocio.
 </p>
+
+<div id="listaServiciosPanel">
+
+    <div class="cargando">
+        Cargando servicios...
+    </div>
+
+</div>
+
+<div class="separador"></div>
+
+<h3>➕ Agregar servicio</h3>
+
+<label>Nombre del servicio</label>
+
+<input
+    id="nuevoServicioNombre"
+    type="text"
+    placeholder="Ejemplo: Corte de cabello">
+
+<label>Precio</label>
+
+<input
+    id="nuevoServicioPrecio"
+    type="number"
+    min="0"
+    placeholder="Ejemplo: 25000">
+
+<label>Duración en minutos</label>
+
+<input
+    id="nuevoServicioDuracion"
+    type="number"
+    min="1"
+    placeholder="Ejemplo: 30">
+
+<button
+    class="boton"
+    onclick="agregarServicio()">
+    ➕ Agregar servicio
+</button>
+
+<div
+    id="mensajeServiciosPanel"
+    class="mensaje">
+</div>
 
 <button
 class="boton"
