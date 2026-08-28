@@ -2057,6 +2057,47 @@ async function cargarServiciosPanel() {
 
 });
 
+}
+/* =========================================================
+   ELIMINAR SERVICIO
+========================================================= */
+
+async function eliminarServicio(idServicio) {
+
+    const confirmar =
+        confirm("¿Seguro que quieres eliminar este servicio?");
+
+    if (!confirmar) {
+        return;
+    }
+
+
+    const resultado =
+        await supabaseClient
+            .from("servicios")
+            .delete()
+            .eq("id", idServicio);
+
+
+    if (resultado.error) {
+
+        console.error(
+            "ERROR ELIMINANDO SERVICIO:",
+            resultado.error
+        );
+
+        alert(
+            "Error al eliminar el servicio: " +
+            resultado.error.message
+        );
+
+        return;
+    }
+
+
+    alert("✅ Servicio eliminado correctamente.");
+
+    await cargarServiciosPanel();
 }    
 /* =========================================================
    AGREGAR SERVICIO
