@@ -924,6 +924,26 @@ tarjeta.innerHTML =
 escaparHTML(negocio.nombre) +
 "</h3>" +
 
+(
+    negocio.direccion
+        ?
+        "<p>📍 " +
+        escaparHTML(negocio.direccion) +
+        "</p>"
+        :
+        ""
+) +
+
+(
+    negocio.descripcion
+        ?
+        "<p>📝 " +
+        escaparHTML(negocio.descripcion) +
+        "</p>"
+        :
+        ""
+) +
+
 "<p>Toca para ver sus servicios.</p>";
 
 
