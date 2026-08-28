@@ -1830,7 +1830,7 @@ async function cargarPanelNegocio() {
     const resultado =
         await supabaseClient
             .from("negocios")
-            .select("id, nombre, usuario_id")
+            .select("id, nombre, direccion, descripcion, usuario_id")
             .eq("usuario_id", user.id)
             .maybeSingle();
 
