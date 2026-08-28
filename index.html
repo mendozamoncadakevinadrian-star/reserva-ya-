@@ -871,7 +871,7 @@ mensaje.textContent = "";
 const resultado =
 await supabaseClient
 .from("negocios")
-.select("id, nombre")
+.select("id, nombre, direccion, descripcion")
 .order("nombre");
 
 
