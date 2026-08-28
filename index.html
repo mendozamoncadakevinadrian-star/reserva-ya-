@@ -1874,19 +1874,38 @@ if (!negocio) {
 
     info.innerHTML =
 
-        "<h3>🏢 " +
-        escaparHTML(negocio.nombre) +
-        "</h3>" +
+    "<h3>✏️ Editar información del negocio</h3>" +
 
-        "<p>" +
-        "<strong>ID del negocio:</strong> " +
-        escaparHTML(String(negocio.id)) +
-        "</p>" +
+    "<label>Nombre del negocio</label>" +
 
-        "<p>" +
-        "<strong>Usuario propietario:</strong> " +
-        escaparHTML(String(negocio.usuario_id)) +
-        "</p>";
+    "<input " +
+    "id='editarNombreNegocio' " +
+    "type='text' " +
+    "value='" +
+    escaparHTML(negocio.nombre || "") +
+    "'>" +
+
+    "<label>📍 Dirección</label>" +
+
+    "<input " +
+    "id='editarDireccionNegocio' " +
+    "type='text' " +
+    "value='" +
+    escaparHTML(negocio.direccion || "") +
+    "'>" +
+
+    "<label>📝 Descripción</label>" +
+
+    "<textarea " +
+    "id='editarDescripcionNegocio'>" +
+    escaparHTML(negocio.descripcion || "") +
+    "</textarea>" +
+
+    "<button " +
+    "class='boton' " +
+    "onclick='guardarInformacionNegocio()'>" +
+    "💾 Guardar cambios" +
+    "</button>";
 
 
     mensaje.textContent =
@@ -1895,6 +1914,141 @@ if (!negocio) {
     mensaje.className =
         "mensaje exito";
 }
+/* =========================================================
+   GUARDAR INFORMACIÓN DEL NEGOCIO
+========================================================= */
+
+async function guardarInformacionNegocio() {
+
+    const nombre =
+        document
+            .getElementById("editarNombreNegocio")
+            .value
+            .trim();
+
+    const direccion =
+        document
+            .getElementById("editarDireccionNegocio")
+            .value
+            .trim();
+
+    const descripcion =
+        document
+            .getElementById("editarDescripcionNegocio")
+            .value
+            .trim();
+
+    const mensaje =
+        document.getElementById("mensajePanelNegocio");
+
+
+    /* VALIDAR NOMBRE */
+
+    if (!nombre) {
+
+        mensaje.textContent =
+            "Escribe el nombre del negocio.";
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    mensaje.textContent =
+        "Guardando cambios...";
+
+    mensaje.className =
+        "mensaje";
+
+
+    /* COMPROBAR USUARIO */
+
+    const resultadoUsuario =
+        await supabaseClient.auth.getUser();
+
+    const user =
+        resultadoUsuario.data?.user;
+
+
+    if (!user) {
+
+        mensaje.textContent =
+            "Debes iniciar sesión.";
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    /* ACTUALIZAR NEGOCIO */
+
+    const resultado =
+        await supabaseClient
+            .from("negocios")
+            .update({
+
+                nombre:
+                    nombre,
+
+                direccion:
+                    direccion,
+
+                descripcion:
+                    descripcion
+
+            })
+            .eq("id", negocioActual.id)
+            .eq("usuario_id", user.id);
+
+
+    /* COMPROBAR ERROR */
+
+    if (resultado.error) {
+
+        console.error(
+            "ERROR ACTUALIZANDO NEGOCIO:",
+            resultado.error
+        );
+
+        mensaje.textContent =
+            "Error guardando los cambios: " +
+            resultado.error.message;
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    /* ACTUALIZAR NEGOCIO ACTUAL */
+
+    negocioActual.nombre =
+        nombre;
+
+    negocioActual.direccion =
+        direccion;
+
+    negocioActual.descripcion =
+        descripcion;
+
+
+    mensaje.textContent =
+        "✅ Información del negocio actualizada correctamente.";
+
+    mensaje.className =
+        "mensaje exito";
+
+
+    /* ACTUALIZAR LISTA DE NEGOCIOS */
+
+    await cargarNegocios();
+
+}    
 /* =========================================================
    CARGAR SERVICIOS DEL PANEL
 ========================================================= */
