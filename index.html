@@ -101,7 +101,10 @@ button {
     text-align: left;
     padding: 16px;
     border-radius: 14px;
-}  
+}
+.boton-agregar {
+    margin-top: 0;
+}
 
 .negocio {
     border: 1px solid #ddd;
@@ -642,7 +645,7 @@ placeholder="Ejemplo: 30">
 
 
 <button
-class="boton"
+class="boton boton-agregar"
 onclick="agregarServicio()">
 ➕ Agregar servicio
 </button>
@@ -655,14 +658,14 @@ class="mensaje">
 
 
 <button
-class="boton"
+class="secundario boton-actualizar"
 onclick="cargarServiciosPanel()">
 🔄 Actualizar servicios
 </button>
 
 
 <button
-class="secundario"
+class="secundario boton-volver"
 onclick="volverMenuPanel()">
 ⬅️ Volver
 </button>
