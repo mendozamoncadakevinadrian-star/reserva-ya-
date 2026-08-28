@@ -88,6 +88,15 @@ button {
     background: #e5e7eb;
     color: #111827;
 }
+.menu-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.menu-panel button {
+    margin-top: 0;
+}    
 
 .negocio {
     border: 1px solid #ddd;
@@ -493,6 +502,7 @@ class="mensaje">
 </div>
 
 
+
 <!-- =========================
      PANEL DEL NEGOCIO
 ========================= -->
@@ -503,6 +513,49 @@ class="tarjeta oculto">
 
 <h2>🏢 Panel de mi negocio</h2>
 
+<p class="pequeno">
+Administra tu negocio desde aquí.
+</p>
+
+
+<!-- OPCIONES DEL PANEL -->
+
+<div id="menuPanelNegocio" class="menu-panel">
+
+<button
+class="boton"
+onclick="mostrarSeccionPanel('informacionNegocio')">
+✏️ Información del negocio
+</button>
+
+
+<button
+class="boton"
+onclick="mostrarSeccionPanel('serviciosNegocio')">
+⚙️ Mis servicios
+</button>
+
+
+<button
+class="boton"
+onclick="mostrarSeccionPanel('reservasNegocio')">
+📅 Reservas
+</button>
+
+</div>
+
+
+
+<!-- =========================
+     INFORMACIÓN DEL NEGOCIO
+========================= -->
+
+<div
+id="informacionNegocio"
+class="oculto">
+
+<h3>✏️ Información del negocio</h3>
+
 <div id="infoMiNegocio">
 
 <div class="cargando">
@@ -511,7 +564,29 @@ Cargando información del negocio...
 
 </div>
 
-<div class="separador"></div>
+<div
+id="mensajePanelNegocio"
+class="mensaje">
+</div>
+
+
+<button
+class="secundario"
+onclick="volverMenuPanel()">
+⬅️ Volver
+</button>
+
+</div>
+
+
+
+<!-- =========================
+     SERVICIOS
+========================= -->
+
+<div
+id="serviciosNegocio"
+class="oculto">
 
 <h3>⚙️ Administración de servicios</h3>
 
@@ -519,70 +594,116 @@ Cargando información del negocio...
 Aquí puedes administrar los servicios que ofrece tu negocio.
 </p>
 
+
 <div id="listaServiciosPanel">
 
-    <div class="cargando">
-        Cargando servicios...
-    </div>
+<div class="cargando">
+Cargando servicios...
+</div>
 
 </div>
 
+
 <div class="separador"></div>
 
+
 <h3>➕ Agregar servicio</h3>
+
 
 <label>Nombre del servicio</label>
 
 <input
-    id="nuevoServicioNombre"
-    type="text"
-    placeholder="Ejemplo: Corte de cabello">
+id="nuevoServicioNombre"
+type="text"
+placeholder="Ejemplo: Corte de cabello">
+
 
 <label>Precio</label>
 
 <input
-    id="nuevoServicioPrecio"
-    type="number"
-    min="0"
-    placeholder="Ejemplo: 25000">
+id="nuevoServicioPrecio"
+type="number"
+min="0"
+placeholder="Ejemplo: 25000">
+
 
 <label>Duración en minutos</label>
 
 <input
-    id="nuevoServicioDuracion"
-    type="number"
-    min="1"
-    placeholder="Ejemplo: 30">
+id="nuevoServicioDuracion"
+type="number"
+min="1"
+placeholder="Ejemplo: 30">
 
-<button
-    class="boton"
-    onclick="agregarServicio()">
-    ➕ Agregar servicio
-</button>
-
-<div
-    id="mensajeServiciosPanel"
-    class="mensaje">
-</div>
 
 <button
 class="boton"
-onclick="cargarPanelNegocio()">
-🔄 Actualizar panel
+onclick="agregarServicio()">
+➕ Agregar servicio
 </button>
 
+
 <div
-id="mensajePanelNegocio"
+id="mensajeServiciosPanel"
 class="mensaje">
 </div>
 
-</div>
+
+<button
+class="boton"
+onclick="cargarServiciosPanel()">
+🔄 Actualizar servicios
+</button>
+
+
+<button
+class="secundario"
+onclick="volverMenuPanel()">
+⬅️ Volver
+</button>
 
 </div>
 
 
+
+<!-- =========================
+     RESERVAS
+========================= -->
+
+<div
+id="reservasNegocio"
+class="oculto">
+
+<h3>📅 Reservas</h3>
+
+<p class="pequeno">
+Aquí veremos las reservas realizadas en tu negocio.
+</p>
+
+
+<div
+id="listaReservasNegocio">
+
+<p class="pequeno">
+Próximamente podremos administrar las reservas desde aquí.
+</p>
+
+</div>
+
+
+<button
+class="secundario"
+onclick="volverMenuPanel()">
+⬅️ Volver
+</button>
+
+</div>
+
+</div>
 
 <script>
+
+
 
 /* =========================================================
    SUPABASE
@@ -1778,6 +1899,84 @@ function mostrarPanelNegocio() {
     cargarPanelNegocio();
     cargarServiciosPanel();
 }
+/* =========================================================
+   NAVEGACIÓN DEL PANEL DEL NEGOCIO
+========================================================= */
+
+function mostrarSeccionPanel(id) {
+
+    const menu =
+        document.getElementById("menuPanelNegocio");
+
+    const secciones = [
+        "informacionNegocio",
+        "serviciosNegocio",
+        "reservasNegocio"
+    ];
+
+    if (menu) {
+        menu.classList.add("oculto");
+    }
+
+    secciones.forEach(function(seccion) {
+
+        const elemento =
+            document.getElementById(seccion);
+
+        if (elemento) {
+            elemento.classList.add("oculto");
+        }
+
+    });
+
+    const destino =
+        document.getElementById(id);
+
+    if (destino) {
+        destino.classList.remove("oculto");
+    }
+
+    if (id === "informacionNegocio") {
+        cargarPanelNegocio();
+    }
+
+    if (id === "serviciosNegocio") {
+        cargarServiciosPanel();
+    }
+}
+
+
+/* =========================================================
+   VOLVER AL MENÚ DEL PANEL
+========================================================= */
+
+function volverMenuPanel() {
+
+    const menu =
+        document.getElementById("menuPanelNegocio");
+
+    const secciones = [
+        "informacionNegocio",
+        "serviciosNegocio",
+        "reservasNegocio"
+    ];
+
+    secciones.forEach(function(seccion) {
+
+        const elemento =
+            document.getElementById(seccion);
+
+        if (elemento) {
+            elemento.classList.add("oculto");
+        }
+
+    });
+
+    if (menu) {
+        menu.classList.remove("oculto");
+    }
+
+}    
 
 
 async function cargarPanelNegocio() {
