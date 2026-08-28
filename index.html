@@ -2002,43 +2002,60 @@ async function cargarServiciosPanel() {
 
     servicios.forEach(function(servicio) {
 
-        const div =
-            document.createElement("div");
+    const div =
+        document.createElement("div");
 
-        div.className =
-            "servicio";
+    div.className =
+        "servicio";
 
+    const precio =
+        Number(servicio.precio)
+            .toLocaleString("es-CO");
 
-        const precio =
-            Number(servicio.precio)
-                .toLocaleString("es-CO");
+    div.innerHTML =
 
+        "<strong>✂️ " +
+        escaparHTML(servicio.nombre) +
+        "</strong>" +
 
-        div.innerHTML =
+        "<br>" +
 
-            "<strong>✂️ " +
-            escaparHTML(servicio.nombre) +
-            "</strong>" +
+        "💰 $" +
+        precio +
 
-            "<br>" +
+        "<br>" +
 
-            "💰 $" +
-            precio +
-
-            "<br>" +
-
-            "<span class='pequeno'>" +
-            "⏱️ " +
-            escaparHTML(
-                String(servicio.duracion)
-            ) +
-            " minutos" +
-            "</span>";
+        "<span class='pequeno'>" +
+        "⏱️ " +
+        escaparHTML(
+            String(servicio.duracion)
+        ) +
+        " minutos" +
+        "</span>";
 
 
-        lista.appendChild(div);
+    /* BOTÓN ELIMINAR */
 
-    });
+    const botonEliminar =
+        document.createElement("button");
+
+    botonEliminar.textContent =
+        "🗑️ Eliminar servicio";
+
+    botonEliminar.className =
+        "secundario";
+
+    botonEliminar.onclick =
+        function() {
+            eliminarServicio(servicio.id);
+        };
+
+
+    div.appendChild(botonEliminar);
+
+    lista.appendChild(div);
+
+});
 
 }    
 /* =========================================================
