@@ -1756,6 +1756,7 @@ function mostrarPanelNegocio() {
     zona.classList.remove("oculto");
 
     cargarPanelNegocio();
+    cargarServiciosPanel();
 }
 
 
@@ -1874,6 +1875,172 @@ if (!negocio) {
     mensaje.className =
         "mensaje exito";
 }
+/* =========================================================
+   CARGAR SERVICIOS DEL PANEL
+========================================================= */
+
+async function cargarServiciosPanel() {
+
+    const lista =
+        document.getElementById("listaServiciosPanel");
+
+    if (!lista) {
+        return;
+    }
+
+    lista.innerHTML =
+        "<div class='cargando'>Cargando servicios...</div>";
+
+
+    /* BUSCAR USUARIO */
+
+    const resultadoUsuario =
+        await supabaseClient.auth.getUser();
+
+    const user =
+        resultadoUsuario.data?.user;
+
+
+    if (!user) {
+
+        lista.innerHTML =
+            "<p class='error'>Debes iniciar sesión.</p>";
+
+        return;
+    }
+
+
+    /* BUSCAR NEGOCIO DEL USUARIO */
+
+    const resultadoNegocio =
+        await supabaseClient
+            .from("negocios")
+            .select("id")
+            .eq("usuario_id", user.id)
+            .maybeSingle();
+
+
+    if (resultadoNegocio.error) {
+
+        console.error(
+            "ERROR BUSCANDO NEGOCIO:",
+            resultadoNegocio.error
+        );
+
+        lista.innerHTML =
+            "<p class='error'>" +
+            "Error buscando tu negocio." +
+            "</p>";
+
+        return;
+    }
+
+
+    const negocio =
+        resultadoNegocio.data;
+
+
+    if (!negocio) {
+
+        lista.innerHTML =
+            "<p class='error'>" +
+            "No tienes un negocio asociado." +
+            "</p>";
+
+        return;
+    }
+
+
+    /* BUSCAR SERVICIOS */
+
+    const resultadoServicios =
+        await supabaseClient
+            .from("servicios")
+            .select("id, nombre, precio, duracion, negocio_id")
+            .eq("negocio_id", negocio.id)
+            .order("nombre");
+
+
+    if (resultadoServicios.error) {
+
+        console.error(
+            "ERROR CARGANDO SERVICIOS:",
+            resultadoServicios.error
+        );
+
+        lista.innerHTML =
+            "<p class='error'>" +
+            "Error cargando servicios: " +
+            escaparHTML(
+                resultadoServicios.error.message
+            ) +
+            "</p>";
+
+        return;
+    }
+
+
+    const servicios =
+        resultadoServicios.data || [];
+
+
+    if (servicios.length === 0) {
+
+        lista.innerHTML =
+            "<p class='pequeno'>" +
+            "Todavía no tienes servicios registrados." +
+            "</p>";
+
+        return;
+    }
+
+
+    /* MOSTRAR SERVICIOS */
+
+    lista.innerHTML = "";
+
+
+    servicios.forEach(function(servicio) {
+
+        const div =
+            document.createElement("div");
+
+        div.className =
+            "servicio";
+
+
+        const precio =
+            Number(servicio.precio)
+                .toLocaleString("es-CO");
+
+
+        div.innerHTML =
+
+            "<strong>✂️ " +
+            escaparHTML(servicio.nombre) +
+            "</strong>" +
+
+            "<br>" +
+
+            "💰 $" +
+            precio +
+
+            "<br>" +
+
+            "<span class='pequeno'>" +
+            "⏱️ " +
+            escaparHTML(
+                String(servicio.duracion)
+            ) +
+            " minutos" +
+            "</span>";
+
+
+        lista.appendChild(div);
+
+    });
+
+}    
 /* =========================================================
    AGREGAR SERVICIO
 ========================================================= */
