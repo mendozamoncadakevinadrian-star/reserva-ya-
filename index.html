@@ -2776,34 +2776,38 @@ async function cargarReservasNegocio() {
         new Date();
 
     const proximasReservas =
-        reservas.filter(function(reserva) {
+    reservas.filter(function(reserva) {
 
-            const fechaHora =
-                new Date(
-                    reserva.fecha +
-                    "T" +
-                    reserva.hora
-                );
+        const fechaHora =
+            new Date(
+                reserva.fecha +
+                "T" +
+                reserva.hora
+            );
 
-            return fechaHora >= ahora;
+        return (
+            fechaHora >= ahora &&
+            reserva.estado !== "Cancelada"
+        );
 
-        });
-
+    });
 
     const reservasAnteriores =
-        reservas.filter(function(reserva) {
+    reservas.filter(function(reserva) {
 
-            const fechaHora =
-                new Date(
-                    reserva.fecha +
-                    "T" +
-                    reserva.hora
-                );
+        const fechaHora =
+            new Date(
+                reserva.fecha +
+                "T" +
+                reserva.hora
+            );
 
-            return fechaHora < ahora;
+        return (
+            fechaHora < ahora ||
+            reserva.estado === "Cancelada"
+        );
 
-        });
-
+    });
 
     lista.innerHTML = "";
 
