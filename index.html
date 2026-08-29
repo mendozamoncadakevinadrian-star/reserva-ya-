@@ -2725,7 +2725,43 @@ async function cargarReservasNegocio() {
 
     const reservas =
         resultadoReservas.data || [];
+    const serviciosIds =
+        [...new Set(
+            reservas
+                .map(function(reserva) {
+                    return reserva.servicio_id;
+                })
+                .filter(Boolean)
+        )];
 
+
+    let servicios = [];
+
+
+    if (serviciosIds.length > 0) {
+
+        const resultadoServicios =
+            await supabaseClient
+                .from("servicios")
+                .select("id, nombre")
+                .in("id", serviciosIds);
+
+
+        if (resultadoServicios.error) {
+
+            console.error(
+                "Error cargando servicios:",
+                resultadoServicios.error
+            );
+
+        } else {
+
+            servicios =
+                resultadoServicios.data || [];
+
+        }
+
+    }
 
     if (reservas.length === 0) {
 
@@ -2742,7 +2778,18 @@ async function cargarReservasNegocio() {
 
 
     reservas.forEach(function(reserva) {
+const servicio =
+    servicios.find(function(item) {
 
+        return item.id === reserva.servicio_id;
+
+    });
+
+
+const nombreServicio =
+    servicio
+        ? servicio.nombre
+        : "Servicio no encontrado";
         const div =
             document.createElement("div");
 
@@ -2759,6 +2806,11 @@ async function cargarReservasNegocio() {
             escaparHTML(
                 reserva.nombre_cliente || "Cliente"
             ) +
+            "</p>" +
+            
+            "<p>" +
+            "<strong>🛠️ Servicio:</strong> " +
+            escaparHTML(nombreServicio) +
             "</p>" +
 
             "<p>" +
