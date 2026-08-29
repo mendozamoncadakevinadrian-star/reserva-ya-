@@ -2778,45 +2778,49 @@ async function cargarReservasNegocio() {
             "</p>";
 
 
-        const botonAceptar =
-    document.createElement("button");
+if (reserva.estado === "Pendiente") {
 
-botonAceptar.textContent =
-    "✅ Aceptar cita";
+    const botonAceptar =
+        document.createElement("button");
 
-botonAceptar.className =
-    "boton";
+    botonAceptar.textContent =
+        "✅ Aceptar cita";
 
-botonAceptar.onclick =
-    function() {
-        cambiarEstadoCita(
-            reserva.id,
-            "Aceptada"
-        );
-    };
+    botonAceptar.className =
+        "boton";
 
-
-const botonCancelar =
-    document.createElement("button");
-
-botonCancelar.textContent =
-    "❌ Cancelar cita";
-
-botonCancelar.className =
-    "secundario";
-
-botonCancelar.onclick =
-    function() {
-        cambiarEstadoCita(
-            reserva.id,
-            "Cancelada"
-        );
-    };
+    botonAceptar.onclick =
+        function() {
+            cambiarEstadoCita(
+                reserva.id,
+                "Aceptada"
+            );
+        };
 
 
-div.appendChild(botonAceptar);
+    const botonCancelar =
+        document.createElement("button");
 
-div.appendChild(botonCancelar);
+    botonCancelar.textContent =
+        "❌ Cancelar cita";
+
+    botonCancelar.className =
+        "secundario";
+
+    botonCancelar.onclick =
+        function() {
+            cambiarEstadoCita(
+                reserva.id,
+                "Cancelada"
+            );
+        };
+
+
+    div.appendChild(botonAceptar);
+
+    div.appendChild(botonCancelar);
+
+}
 
 lista.appendChild(div);
 
