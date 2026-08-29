@@ -2940,6 +2940,95 @@ lista.appendChild(div);
 
   }
 
+if (reservasAnteriores.length > 0) {
+
+    const tituloAnteriores =
+        document.createElement("h3");
+
+    tituloAnteriores.textContent =
+        "🗂️ Citas anteriores";
+
+    lista.appendChild(tituloAnteriores);
+        reservasAnteriores.forEach(function(reserva) {
+
+        const servicio =
+            servicios.find(function(item) {
+
+                return item.id === reserva.servicio_id;
+
+            });
+
+
+        const nombreServicio =
+            servicio
+                ? servicio.nombre
+                : "Servicio no encontrado";
+
+
+        const div =
+            document.createElement("div");
+
+        div.className =
+            "reserva";
+
+
+        div.innerHTML =
+
+            "<h3>📅 Reserva anterior</h3>" +
+
+            "<p>" +
+            "<strong>👤 Cliente:</strong> " +
+            escaparHTML(
+                reserva.nombre_cliente || "Cliente"
+            ) +
+            "</p>" +
+
+            "<p>" +
+            "<strong>🛠️ Servicio:</strong> " +
+            escaparHTML(nombreServicio) +
+            "</p>" +
+
+            "<p>" +
+            "<strong>📅 Fecha:</strong> " +
+            escaparHTML(reserva.fecha) +
+            "</p>" +
+
+            "<p>" +
+            "<strong>🕐 Hora:</strong> " +
+            escaparHTML(reserva.hora) +
+            "</p>" +
+
+            (
+                reserva.comentario
+                    ?
+                    "<p>" +
+                    "<strong>💬 Comentario:</strong> " +
+                    escaparHTML(reserva.comentario) +
+                    "</p>"
+                    :
+                    ""
+            ) +
+
+            "<p>" +
+            "<strong>Estado:</strong> " +
+            "<span class='estado estado-" +
+            (
+                reserva.estado || "Pendiente"
+            ).toLowerCase() +
+            "'>" +
+            escaparHTML(
+                reserva.estado || "Pendiente"
+            ) +
+            "</span>" +
+            "</p>";
+
+
+        lista.appendChild(div);
+
+    });
+
+}
+
 }
     
 async function cambiarEstadoCita(idCita, nuevoEstado) {
