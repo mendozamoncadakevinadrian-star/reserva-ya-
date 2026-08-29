@@ -634,6 +634,17 @@ class="oculto">
 Aquí puedes administrar los servicios que ofrece tu negocio.
 </p>
 
+<button
+class="boton"
+onclick="mostrarAgregarServicio()">
+➕ Agregar servicio
+</button>
+
+<button
+class="secundario"
+onclick="volverListaServicios()">
+⬅️ Volver a servicios
+</button>    
 
 <div id="listaServiciosPanel">
 
@@ -642,6 +653,8 @@ Cargando servicios...
 </div>
 
 </div>
+
+<div id="zonaAgregarServicio" class="oculto">  
 
 
 <div class="separador"></div>
@@ -686,6 +699,8 @@ onclick="agregarServicio()">
 <div
 id="mensajeServiciosPanel"
 class="mensaje">
+</div>
+
 </div>
 
 
@@ -2356,7 +2371,42 @@ async function guardarInformacionNegocio() {
 /* =========================================================
    CARGAR SERVICIOS DEL PANEL
 ========================================================= */
+function mostrarAgregarServicio() {
 
+    const lista =
+        document.getElementById("listaServiciosPanel");
+
+    const zonaAgregar =
+        document.getElementById("zonaAgregarServicio");
+
+    if (lista) {
+        lista.classList.add("oculto");
+    }
+
+    if (zonaAgregar) {
+        zonaAgregar.classList.remove("oculto");
+    }
+
+}
+function volverListaServicios() {
+
+    const lista =
+        document.getElementById("listaServiciosPanel");
+
+    const zonaAgregar =
+        document.getElementById("zonaAgregarServicio");
+
+    if (zonaAgregar) {
+        zonaAgregar.classList.add("oculto");
+    }
+
+    if (lista) {
+        lista.classList.remove("oculto");
+    }
+
+    cargarServiciosPanel();
+
+}    
 async function cargarServiciosPanel() {
 
     const lista =
