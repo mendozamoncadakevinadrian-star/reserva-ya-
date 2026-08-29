@@ -102,6 +102,10 @@ button {
     padding: 16px;
     border-radius: 14px;
 }
+.boton-eliminar {
+    margin-top: 12px;
+    font-size: 14px;
+}   
 .boton-agregar {
     margin-top: 0;
 }
@@ -2424,7 +2428,7 @@ async function cargarServiciosPanel() {
         "🗑️ Eliminar servicio";
 
     botonEliminar.className =
-        "secundario";
+    "secundario boton-eliminar";
 
     botonEliminar.onclick =
         function() {
