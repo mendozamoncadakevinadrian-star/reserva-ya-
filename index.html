@@ -354,6 +354,7 @@ class="mensaje">
 ========================= -->
 
 <div id="cliente" class="oculto">
+<div id="pantallaPrincipalCliente">  
 
 
 <!-- DATOS CLIENTE -->
@@ -412,7 +413,7 @@ class="mensaje">
 
 </div>
 
-
+</div>
 
 <!-- =========================
      NEGOCIO SELECCIONADO
@@ -1924,9 +1925,10 @@ function mostrarPanelNegocio() {
     /* Ocultar las zonas principales del cliente */
 
     const zonasPrincipales = [
-        "zonaNegocio",
-        "zonaReservas"
-    ];
+    "pantallaPrincipalCliente",
+    "zonaNegocio",
+    "zonaReservas"
+];
 
     zonasPrincipales.forEach(function(zona) {
 
