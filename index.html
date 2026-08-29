@@ -2822,6 +2822,53 @@ lista.appendChild(div);
 
     });
 
+}
+async function cambiarEstadoCita(idCita, nuevoEstado) {
+
+    const confirmar =
+        confirm(
+            "¿Seguro que quieres cambiar el estado de esta cita a " +
+            nuevoEstado +
+            "?"
+        );
+
+    if (!confirmar) {
+        return;
+    }
+
+
+    const resultado =
+        await supabaseClient
+            .from("Citas")
+            .update({
+                estado: nuevoEstado
+            })
+            .eq("id", idCita);
+
+
+    if (resultado.error) {
+
+        console.error(
+            "ERROR CAMBIANDO ESTADO:",
+            resultado.error
+        );
+
+        alert(
+            "Error cambiando el estado: " +
+            resultado.error.message
+        );
+
+        return;
+    }
+
+
+    alert(
+        "✅ Cita actualizada correctamente."
+    );
+
+
+    await cargarReservasNegocio();
+
 }    
 /* =========================================================
    ELIMINAR SERVICIO
