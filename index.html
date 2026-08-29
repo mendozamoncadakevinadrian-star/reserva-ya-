@@ -105,6 +105,13 @@ button {
 .boton-eliminar {
     margin-top: 12px;
     font-size: 14px;
+}
+.boton-cancelar {
+    margin-top: 12px;
+    font-size: 14px;
+}
+.boton-guardar {
+    margin-top: 12px;
 }   
 .boton-agregar {
     margin-top: 0;
@@ -135,10 +142,11 @@ button {
 
 .reserva {
     border: 1px solid #ddd;
-    padding: 16px;
-    border-radius: 12px;
-    margin-bottom: 12px;
+    padding: 18px;
+    border-radius: 14px;
+    margin-bottom: 14px;
     background: #fff;
+}
 }
 
 .reserva h3 {
@@ -178,6 +186,8 @@ button {
     background: #e5e7eb;
     font-size: 13px;
     font-weight: bold;
+    margin-left: 5px;
+
 }
 
 .separador {
@@ -1845,7 +1855,7 @@ reservas.forEach(function(reserva) {
 const botonCancelar = document.createElement("button");
 
 botonCancelar.textContent = "❌ Cancelar cita";
-botonCancelar.className = "secundario";
+botonCancelar.className = "secundario boton-cancelar";
 
 botonCancelar.onclick = function() {
     cancelarCita(reserva.id);
@@ -2113,7 +2123,7 @@ if (!negocio) {
     "</textarea>" +
 
     "<button " +
-    "class='boton' " +
+    "class='boton boton-guardar' " + 
     "onclick='guardarInformacionNegocio()'>" +
     "💾 Guardar cambios" +
     "</button>";
