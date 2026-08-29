@@ -2778,7 +2778,47 @@ async function cargarReservasNegocio() {
             "</p>";
 
 
-        lista.appendChild(div);
+        const botonAceptar =
+    document.createElement("button");
+
+botonAceptar.textContent =
+    "✅ Aceptar cita";
+
+botonAceptar.className =
+    "boton";
+
+botonAceptar.onclick =
+    function() {
+        cambiarEstadoCita(
+            reserva.id,
+            "Aceptada"
+        );
+    };
+
+
+const botonCancelar =
+    document.createElement("button");
+
+botonCancelar.textContent =
+    "❌ Cancelar cita";
+
+botonCancelar.className =
+    "secundario";
+
+botonCancelar.onclick =
+    function() {
+        cambiarEstadoCita(
+            reserva.id,
+            "Cancelada"
+        );
+    };
+
+
+div.appendChild(botonAceptar);
+
+div.appendChild(botonCancelar);
+
+lista.appendChild(div);
 
     });
 
