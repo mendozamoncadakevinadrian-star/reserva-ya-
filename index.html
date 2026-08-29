@@ -574,7 +574,8 @@ onclick="mostrarSeccionPanel('reservasNegocio')">
 </button>
 
 </div>
-
+    
+<div id="contenidoPanelNegocio">
 
 
 <!-- =========================
@@ -695,8 +696,10 @@ onclick="volverMenuPanel()">
 
 </div>
 
-
-
+</div>
+    
+</div>
+    
 <!-- =========================
      RESERVAS
 ========================= -->
@@ -1945,9 +1948,13 @@ function mostrarSeccionPanel(id) {
         "reservasNegocio"
     ];
 
+    /* Ocultar el menú */
+
     if (menu) {
         menu.classList.add("oculto");
     }
+
+    /* Ocultar todas las ventanas */
 
     secciones.forEach(function(seccion) {
 
@@ -1960,12 +1967,16 @@ function mostrarSeccionPanel(id) {
 
     });
 
+    /* Mostrar solamente la ventana elegida */
+
     const destino =
         document.getElementById(id);
 
     if (destino) {
         destino.classList.remove("oculto");
     }
+
+    /* Cargar información correspondiente */
 
     if (id === "informacionNegocio") {
         cargarPanelNegocio();
@@ -1974,6 +1985,7 @@ function mostrarSeccionPanel(id) {
     if (id === "serviciosNegocio") {
         cargarServiciosPanel();
     }
+
 }
 
 
@@ -2002,7 +2014,12 @@ function volverMenuPanel() {
         }
 
     });
+const contenido =
+    document.getElementById("contenidoPanelNegocio");
 
+if (contenido) {
+    contenido.classList.remove("oculto");
+}
     if (menu) {
         menu.classList.remove("oculto");
     }
