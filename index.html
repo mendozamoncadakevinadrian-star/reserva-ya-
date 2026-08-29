@@ -438,7 +438,12 @@ id="zonaNegocio"
 class="tarjeta oculto">
 
 <h2 id="nombreNegocio"></h2>
-
+    
+<button
+class="secundario"
+onclick="volverPantallaCliente()">
+⬅️ Volver a negocios
+</button>
 
 
 
@@ -528,6 +533,12 @@ id="zonaReservas"
 class="tarjeta oculto">
 
 <h2>📋 Mis reservas</h2>
+
+<button
+class="secundario"
+onclick="volverPantallaCliente()">
+⬅️ Volver a negocios
+</button>    
 
 <div id="listaReservas">
 
@@ -1165,11 +1176,30 @@ negocioActual =
 negocio;
 
 
+/* OCULTAR PANTALLAS DEL CLIENTE */
+
+document
+.getElementById("pantallaPrincipalCliente")
+.classList
+.add("oculto");
+
+document
+.getElementById("zonaReservas")
+.classList
+.add("oculto");
+
+document
+.getElementById("zonaPanelNegocio")
+.classList
+.add("oculto");
+
+
+/* MOSTRAR SOLAMENTE EL NEGOCIO */
+
 document
 .getElementById("zonaNegocio")
 .classList
 .remove("oculto");
-
 
 document
 .getElementById("nombreNegocio")
@@ -1598,29 +1628,104 @@ await cargarMisReservas();
 
 async function mostrarMisReservas() {
 
-const zona =
-document.getElementById("zonaReservas");
+    const pantallaPrincipal =
+        document.getElementById(
+            "pantallaPrincipalCliente"
+        );
+
+    const zonaNegocio =
+        document.getElementById(
+            "zonaNegocio"
+        );
+
+    const zonaReservas =
+        document.getElementById(
+            "zonaReservas"
+        );
+
+    const zonaPanel =
+        document.getElementById(
+            "zonaPanelNegocio"
+        );
 
 
-if (
-zona.classList.contains("oculto")
-) {
+    /* OCULTAR TODAS LAS OTRAS PANTALLAS */
 
-zona.classList.remove("oculto");
+    if (pantallaPrincipal) {
+        pantallaPrincipal.classList.add("oculto");
+    }
 
-} else {
+    if (zonaNegocio) {
+        zonaNegocio.classList.add("oculto");
+    }
 
-zona.classList.add("oculto");
+    if (zonaPanel) {
+        zonaPanel.classList.add("oculto");
+    }
 
-return;
+
+    /* MOSTRAR MIS RESERVAS */
+
+    if (zonaReservas) {
+        zonaReservas.classList.remove("oculto");
+    }
+
+
+    /* CARGAR RESERVAS */
+
+    await cargarMisReservas();
 
 }
+function volverPantallaCliente() {
+
+    const pantallaPrincipal =
+        document.getElementById(
+            "pantallaPrincipalCliente"
+        );
+
+    const zonaNegocio =
+        document.getElementById(
+            "zonaNegocio"
+        );
+
+    const zonaReservas =
+        document.getElementById(
+            "zonaReservas"
+        );
+
+    const zonaPanel =
+        document.getElementById(
+            "zonaPanelNegocio"
+        );
 
 
-await cargarMisReservas();
+    /* OCULTAR TODO */
 
-}
+    if (zonaNegocio) {
+        zonaNegocio.classList.add("oculto");
+    }
 
+    if (zonaReservas) {
+        zonaReservas.classList.add("oculto");
+    }
+
+    if (zonaPanel) {
+        zonaPanel.classList.add("oculto");
+    }
+
+
+    /* MOSTRAR INICIO DEL CLIENTE */
+
+    if (pantallaPrincipal) {
+        pantallaPrincipal.classList.remove("oculto");
+    }
+
+
+    /* ACTUALIZAR NEGOCIOS */
+
+    cargarNegocios();
+
+}    
 
 
 /* =========================================================
