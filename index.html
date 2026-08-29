@@ -1921,17 +1921,48 @@ async function cancelarCita(idCita) {
 
 function mostrarPanelNegocio() {
 
-    const zona =
+    /* Ocultar las zonas principales del cliente */
+
+    const zonasPrincipales = [
+        "zonaNegocio",
+        "zonaReservas"
+    ];
+
+    zonasPrincipales.forEach(function(zona) {
+
+        const elemento =
+            document.getElementById(zona);
+
+        if (elemento) {
+            elemento.classList.add("oculto");
+        }
+
+    });
+
+
+    /* Mostrar el panel del negocio */
+
+    const zonaPanel =
         document.getElementById("zonaPanelNegocio");
 
-    if (!zona) {
+    if (!zonaPanel) {
         return;
     }
 
-    zona.classList.remove("oculto");
+    zonaPanel.classList.remove("oculto");
+
+
+    /* Mostrar el menú principal del panel */
+
+    volverMenuPanel();
+
+
+    /* Cargar información */
 
     cargarPanelNegocio();
+
     cargarServiciosPanel();
+
 }
 /* =========================================================
    NAVEGACIÓN DEL PANEL DEL NEGOCIO
@@ -2004,6 +2035,9 @@ function volverMenuPanel() {
         "reservasNegocio"
     ];
 
+
+    /* Ocultar las secciones internas */
+
     secciones.forEach(function(seccion) {
 
         const elemento =
@@ -2014,17 +2048,15 @@ function volverMenuPanel() {
         }
 
     });
-const contenido =
-    document.getElementById("contenidoPanelNegocio");
 
-if (contenido) {
-    contenido.classList.remove("oculto");
-}
+
+    /* Mostrar nuevamente el menú */
+
     if (menu) {
         menu.classList.remove("oculto");
     }
 
-}    
+}
 
 
 async function cargarPanelNegocio() {
