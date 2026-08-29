@@ -197,6 +197,20 @@ button {
     margin-left: 5px;
 
 }
+ .estado-pendiente {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.estado-aceptada {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.estado-cancelada {
+    background: #fee2e2;
+    color: #991b1b;
+}   
 
 .separador {
     height: 1px;
@@ -2770,12 +2784,16 @@ async function cargarReservasNegocio() {
 
             "<p>" +
             "<strong>Estado:</strong> " +
-            "<span class='estado'>" +
-            escaparHTML(
-                reserva.estado || "Pendiente"
-            ) +
-            "</span>" +
-            "</p>";
+            "<span class='estado estado-" +
+(
+    reserva.estado || "Pendiente"
+).toLowerCase() +
+"'>" +
+escaparHTML(
+    reserva.estado || "Pendiente"
+) +
+"</span>" +
+ "</p>";
 
 
 if (reserva.estado === "Pendiente") {
