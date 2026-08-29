@@ -734,19 +734,22 @@ class="oculto">
 <h3>📅 Reservas</h3>
 
 <p class="pequeno">
-Aquí veremos las reservas realizadas en tu negocio.
+Aquí puedes consultar las reservas realizadas en tu negocio.
 </p>
-
 
 <div
 id="listaReservasNegocio">
 
-<p class="pequeno">
-Próximamente podremos administrar las reservas desde aquí.
-</p>
+<div class="cargando">
+Cargando reservas...
+</div>
 
 </div>
 
+<div
+id="mensajeReservasNegocio"
+class="mensaje">
+</div>
 
 <button
 class="secundario"
@@ -2040,6 +2043,9 @@ function mostrarSeccionPanel(id) {
     if (id === "serviciosNegocio") {
         cargarServiciosPanel();
     }
+    if (id === "reservasNegocio") {
+    cargarReservasNegocio();
+    }
 
 }
 
@@ -2586,6 +2592,197 @@ async function cargarServiciosPanel() {
 });
 
 }
+async function cargarReservasNegocio() {
+
+    const lista =
+        document.getElementById("listaReservasNegocio");
+
+    const mensaje =
+        document.getElementById("mensajeReservasNegocio");
+
+    if (!lista || !mensaje) {
+        return;
+    }
+
+    lista.innerHTML =
+        "<div class='cargando'>Cargando reservas...</div>";
+
+    mensaje.textContent = "";
+    mensaje.className = "mensaje";
+
+
+    /* BUSCAR USUARIO */
+
+    const resultadoUsuario =
+        await supabaseClient.auth.getUser();
+
+    const user =
+        resultadoUsuario.data?.user;
+
+
+    if (!user) {
+
+        lista.innerHTML = "";
+
+        mensaje.textContent =
+            "Debes iniciar sesión.";
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    /* BUSCAR NEGOCIO DEL USUARIO */
+
+    const resultadoNegocio =
+        await supabaseClient
+            .from("negocios")
+            .select("id")
+            .eq("usuario_id", user.id)
+            .maybeSingle();
+
+
+    if (resultadoNegocio.error) {
+
+        lista.innerHTML = "";
+
+        mensaje.textContent =
+            "Error buscando tu negocio: " +
+            resultadoNegocio.error.message;
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    const negocio =
+        resultadoNegocio.data;
+
+
+    if (!negocio) {
+
+        lista.innerHTML = "";
+
+        mensaje.textContent =
+            "No tienes un negocio asociado.";
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    /* BUSCAR RESERVAS */
+
+    const resultadoReservas =
+        await supabaseClient
+            .from("Citas")
+            .select(
+                "id, negocio_id, servicio_id, nombre_cliente, fecha, hora, comentario, estado"
+            )
+            .eq("negocio_id", negocio.id)
+            .order("fecha", {
+                ascending: true
+            })
+            .order("hora", {
+                ascending: true
+            });
+
+
+    if (resultadoReservas.error) {
+
+        lista.innerHTML = "";
+
+        mensaje.textContent =
+            "Error cargando reservas: " +
+            resultadoReservas.error.message;
+
+        mensaje.className =
+            "mensaje error";
+
+        return;
+    }
+
+
+    const reservas =
+        resultadoReservas.data || [];
+
+
+    if (reservas.length === 0) {
+
+        lista.innerHTML =
+            "<p class='pequeno'>" +
+            "Todavía no hay reservas en tu negocio." +
+            "</p>";
+
+        return;
+    }
+
+
+    lista.innerHTML = "";
+
+
+    reservas.forEach(function(reserva) {
+
+        const div =
+            document.createElement("div");
+
+        div.className =
+            "reserva";
+
+
+        div.innerHTML =
+
+            "<h3>📅 Reserva</h3>" +
+
+            "<p>" +
+            "<strong>👤 Cliente:</strong> " +
+            escaparHTML(
+                reserva.nombre_cliente || "Cliente"
+            ) +
+            "</p>" +
+
+            "<p>" +
+            "<strong>📅 Fecha:</strong> " +
+            escaparHTML(reserva.fecha) +
+            "</p>" +
+
+            "<p>" +
+            "<strong>🕐 Hora:</strong> " +
+            escaparHTML(reserva.hora) +
+            "</p>" +
+
+            (
+                reserva.comentario
+                    ?
+                    "<p>" +
+                    "<strong>💬 Comentario:</strong> " +
+                    escaparHTML(reserva.comentario) +
+                    "</p>"
+                    :
+                    ""
+            ) +
+
+            "<p>" +
+            "<strong>Estado:</strong> " +
+            "<span class='estado'>" +
+            escaparHTML(
+                reserva.estado || "Pendiente"
+            ) +
+            "</span>" +
+            "</p>";
+
+
+        lista.appendChild(div);
+
+    });
+
+}    
 /* =========================================================
    ELIMINAR SERVICIO
 ========================================================= */
