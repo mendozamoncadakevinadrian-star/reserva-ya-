@@ -2772,12 +2772,54 @@ async function cargarReservasNegocio() {
 
         return;
     }
+        const ahora =
+        new Date();
+
+    const proximasReservas =
+        reservas.filter(function(reserva) {
+
+            const fechaHora =
+                new Date(
+                    reserva.fecha +
+                    "T" +
+                    reserva.hora
+                );
+
+            return fechaHora >= ahora;
+
+        });
+
+
+    const reservasAnteriores =
+        reservas.filter(function(reserva) {
+
+            const fechaHora =
+                new Date(
+                    reserva.fecha +
+                    "T" +
+                    reserva.hora
+                );
+
+            return fechaHora < ahora;
+
+        });
 
 
     lista.innerHTML = "";
 
 
-    reservas.forEach(function(reserva) {
+    if (proximasReservas.length > 0) {
+
+    const tituloProximas =
+        document.createElement("h3");
+
+    tituloProximas.textContent =
+        "📅 Próximas citas";
+
+    lista.appendChild(tituloProximas);
+
+
+    proximasReservas.forEach(function(reserva) {
 const servicio =
     servicios.find(function(item) {
 
@@ -2896,7 +2938,10 @@ lista.appendChild(div);
 
     });
 
+  }
+
 }
+    
 async function cambiarEstadoCita(idCita, nuevoEstado) {
 
     const confirmar =
