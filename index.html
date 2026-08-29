@@ -574,6 +574,13 @@ onclick="mostrarSeccionPanel('reservasNegocio')">
 📅 Reservas
 </button>
 
+    
+<button
+class="secundario"
+onclick="salirPanelNegocio()">
+⬅️ Salir del panel
+</button>
+    
 </div>
     
 <div id="contenidoPanelNegocio">
@@ -2059,7 +2066,23 @@ function volverMenuPanel() {
     }
 
 }
+function salirPanelNegocio() {
 
+    const panel =
+        document.getElementById("zonaPanelNegocio");
+
+    const pantallaPrincipal =
+        document.getElementById("pantallaPrincipalCliente");
+
+    if (panel) {
+        panel.classList.add("oculto");
+    }
+
+    if (pantallaPrincipal) {
+        pantallaPrincipal.classList.remove("oculto");
+    }
+
+}
 
 async function cargarPanelNegocio() {
 
