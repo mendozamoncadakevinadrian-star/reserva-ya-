@@ -1,3509 +1,6096 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta charset="UTF-8">
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
-<title>ReservaYa</title>
+  <meta
+    name="theme-color"
+    content="#111827"
+  >
 
-<style>
+  <title>ReservaYa</title>
 
-* {
-    box-sizing: border-box;
-}
+  <!-- =====================================================
+       RESERVAYA V2
+       Sistema de reservas
+       Supabase + HTML + CSS + JavaScript
+       ===================================================== -->
 
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f3f4f6;
-    color: #222;
-}
+  <style>
 
-header {
-    background: #111827;
-    color: white;
-    padding: 18px;
-    text-align: center;
-}
+    /* =====================================================
+       VARIABLES
+       ===================================================== */
 
-header h1 {
-    margin: 0;
-}
+    :root {
+      --fondo: #f4f7fb;
+      --blanco: #ffffff;
+      --texto: #111827;
+      --texto-suave: #64748b;
+      --borde: #e5e7eb;
 
-.contenedor {
-    max-width: 650px;
-    margin: auto;
-    padding: 20px;
-}
+      --principal: #4f46e5;
+      --principal-oscuro: #3730a3;
 
-.tarjeta {
-    background: white;
-    border-radius: 18px;
-    padding: 22px;
-    margin-bottom: 20px;
-    box-shadow: 0 3px 12px rgba(0,0,0,.08);
-}
+      --verde: #16a34a;
+      --verde-suave: #dcfce7;
 
-.oculto {
-    display: none !important;
-}
+      --amarillo: #d97706;
+      --amarillo-suave: #fef3c7;
 
-h2 {
-    margin-top: 0;
-}
+      --rojo: #dc2626;
+      --rojo-suave: #fee2e2;
 
-input,
-select,
-textarea {
-    width: 100%;
-    padding: 13px;
-    margin-top: 6px;
-    margin-bottom: 14px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    font-size: 16px;
-}
+      --azul-suave: #e0e7ff;
 
-textarea {
-    min-height: 90px;
-}
+      --sombra:
+        0 10px 30px rgba(15, 23, 42, 0.08);
 
-button {
-    width: 100%;
-    padding: 14px;
-    border: 0;
-    border-radius: 10px;
-    margin-top: 8px;
-    font-size: 16px;
-    cursor: pointer;
-}
+      --radio: 18px;
+    }
 
-.boton {
-    background: #111827;
-    color: white;
-}
-.inicio-botones {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
 
-.inicio-botones button {
-    margin-top: 0;
-}
-.secundario {
-    background: #e5e7eb;
-    color: #111827;
-}
-.menu-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
+    /* =====================================================
+       RESET
+       ===================================================== */
 
-.menu-panel button {
-    margin-top: 0;
-}
-  .menu-panel button {
-    text-align: left;
-    padding: 16px;
-    border-radius: 14px;
-}
-.boton-eliminar {
-    margin-top: 12px;
-    font-size: 14px;
-}
-.boton-cancelar {
-    margin-top: 12px;
-    font-size: 14px;
-}
-.boton-guardar {
-    margin-top: 12px;
-}   
-.boton-agregar {
-    margin-top: 0;
-}
+    * {
+      box-sizing: border-box;
+    }
 
-.negocio {
-    border: 1px solid #ddd;
-    border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 12px;
-    cursor: pointer;
-}
+    html {
+      scroll-behavior: smooth;
+    }
 
-.negocio:hover {
-    background: #f9fafb;
-}
+    body {
+      margin: 0;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
 
-.negocio h3 {
-    margin: 0 0 6px;
-}
+      background: var(--fondo);
+      color: var(--texto);
+    }
 
-.servicio {
-    background: #f3f4f6;
-    padding: 14px;
-    border-radius: 12px;
-    margin-bottom: 10px;
-}
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
 
-.reserva {
-    border: 1px solid #ddd;
-    padding: 18px;
-    border-radius: 14px;
-    margin-bottom: 14px;
-    background: #fff;
+    button {
+      cursor: pointer;
+    }
 
-}
 
-.reserva h3 {
-    margin-top: 0;
-}
+    /* =====================================================
+       UTILIDADES
+       ===================================================== */
 
-.exito {
-    color: #087f23;
-    font-weight: bold;
-}
+    .oculto {
+      display: none !important;
+    }
 
-.error {
-    color: #b00020;
-    font-weight: bold;
-}
+    .contenedor {
+      width: min(1100px, 92%);
+      margin: 0 auto;
+    }
 
-.mensaje {
-    margin-top: 12px;
-    text-align: center;
-}
 
-.pequeno {
-    color: #666;
-    font-size: 14px;
-}
+    /* =====================================================
+       PANTALLAS DE AUTENTICACIÓN
+       ===================================================== */
 
-.cargando {
-    text-align: center;
-    color: #666;
-    padding: 15px;
-}
+    .pantalla-inicial {
+      min-height: 100vh;
 
-.estado {
-    display: inline-block;
-    padding: 6px 10px;
-    border-radius: 8px;
-    background: #e5e7eb;
-    font-size: 13px;
-    font-weight: bold;
-    margin-left: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-}
- .estado-pendiente {
-    background: #fef3c7;
-    color: #92400e;
-}
+      padding: 25px 0;
+    }
 
-.estado-aceptada {
-    background: #dcfce7;
-    color: #166534;
-}
+    .tarjeta-inicial {
+      width: min(500px, 92%);
 
-.estado-cancelada {
-    background: #fee2e2;
-    color: #991b1b;
-}   
+      background: var(--blanco);
 
-.separador {
-    height: 1px;
-    background: #ddd;
-    margin: 20px 0;
-}
+      border-radius: 28px;
 
-</style>
+      padding: 35px 25px;
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+      box-shadow: var(--sombra);
 
+      text-align: center;
+    }
+
+    .logo-grande {
+      width: 78px;
+      height: 78px;
+
+      margin: 0 auto 18px;
+
+      border-radius: 24px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background: var(--principal);
+
+      color: white;
+
+      font-size: 38px;
+
+      box-shadow:
+        0 12px 25px rgba(79, 70, 229, 0.25);
+    }
+
+    .titulo-principal {
+      margin: 0;
+
+      font-size: 32px;
+      font-weight: 800;
+    }
+
+    .subtitulo {
+      margin: 10px 0 25px;
+
+      color: var(--texto-suave);
+
+      line-height: 1.5;
+    }
+
+
+    /* =====================================================
+       BOTONES
+       ===================================================== */
+
+    .boton {
+      width: 100%;
+
+      border: 0;
+
+      border-radius: 14px;
+
+      padding: 14px 18px;
+
+      background: var(--principal);
+
+      color: white;
+
+      font-weight: 700;
+
+      transition:
+        transform 0.15s,
+        background 0.15s;
+    }
+
+    .boton:hover {
+      background: var(--principal-oscuro);
+    }
+
+    .boton:active {
+      transform: scale(0.98);
+    }
+
+    .boton.secundario {
+      background: #eef2ff;
+      color: var(--principal);
+    }
+
+    .boton.secundario:hover {
+      background: #e0e7ff;
+    }
+
+    .boton.verde {
+      background: var(--verde);
+    }
+
+    .boton.rojo {
+      background: var(--rojo);
+    }
+
+    .boton.pequeno {
+      width: auto;
+      padding: 10px 14px;
+      font-size: 14px;
+    }
+
+    .boton + .boton {
+      margin-top: 10px;
+    }
+
+
+    /* =====================================================
+       FORMULARIOS
+       ===================================================== */
+
+    .formulario {
+      text-align: left;
+    }
+
+    .campo {
+      margin-bottom: 16px;
+    }
+
+    .campo label {
+      display: block;
+
+      margin-bottom: 7px;
+
+      font-size: 14px;
+
+      font-weight: 700;
+    }
+
+    .campo input,
+    .campo textarea,
+    .campo select {
+      width: 100%;
+
+      border: 1px solid var(--borde);
+
+      border-radius: 13px;
+
+      padding: 13px 14px;
+
+      background: #fff;
+
+      color: var(--texto);
+
+      outline: none;
+    }
+
+    .campo textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .campo input:focus,
+    .campo textarea:focus,
+    .campo select:focus {
+      border-color: var(--principal);
+
+      box-shadow:
+        0 0 0 3px rgba(79, 70, 229, 0.10);
+    }
+
+    .mensaje {
+      padding: 12px 14px;
+
+      border-radius: 12px;
+
+      margin: 15px 0;
+
+      font-size: 14px;
+    }
+
+    .mensaje.exito {
+      background: var(--verde-suave);
+      color: #166534;
+    }
+
+    .mensaje.error {
+      background: var(--rojo-suave);
+      color: #991b1b;
+    }
+
+    .mensaje.info {
+      background: var(--azul-suave);
+      color: #3730a3;
+    }
+
+
+    /* =====================================================
+       APP
+       ===================================================== */
+
+    #cliente {
+      min-height: 100vh;
+    }
+
+    .barra-superior {
+      position: sticky;
+
+      top: 0;
+
+      z-index: 50;
+
+      background: rgba(244, 247, 251, 0.92);
+
+      backdrop-filter: blur(12px);
+
+      border-bottom: 1px solid rgba(229, 231, 235, 0.7);
+    }
+
+    .barra-superior-contenido {
+      width: min(1100px, 92%);
+
+      min-height: 68px;
+
+      margin: 0 auto;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      gap: 15px;
+    }
+
+    .marca {
+      display: flex;
+
+      align-items: center;
+
+      gap: 10px;
+    }
+
+    .marca-icono {
+      width: 40px;
+      height: 40px;
+
+      border-radius: 12px;
+
+      background: var(--principal);
+
+      color: white;
+
+      display: flex;
+
+      align-items: center;
+      justify-content: center;
+
+      font-size: 21px;
+    }
+
+    .marca-texto {
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .usuario-superior {
+      color: var(--texto-suave);
+
+      font-size: 13px;
+
+      max-width: 150px;
+
+      overflow: hidden;
+
+      text-overflow: ellipsis;
+
+      white-space: nowrap;
+    }
+
+
+    /* =====================================================
+       CONTENIDO CLIENTE
+       ===================================================== */
+
+    .contenido-app {
+      padding: 25px 0 100px;
+    }
+
+    .hero {
+      background:
+        linear-gradient(
+          135deg,
+          #111827,
+          #312e81
+        );
+
+      color: white;
+
+      border-radius: 25px;
+
+      padding: 28px 22px;
+
+      margin-bottom: 22px;
+
+      box-shadow: var(--sombra);
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+
+      font-size: clamp(26px, 6vw, 38px);
+    }
+
+    .hero p {
+      margin: 0;
+
+      color: #dbeafe;
+
+      line-height: 1.5;
+    }
+
+
+    /* =====================================================
+       BUSCADOR
+       ===================================================== */
+
+    .buscador {
+      margin-top: 22px;
+
+      position: relative;
+    }
+
+    .buscador input {
+      width: 100%;
+
+      border: 0;
+
+      border-radius: 15px;
+
+      padding: 15px 16px 15px 45px;
+
+      outline: none;
+
+      color: var(--texto);
+
+      box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .buscador-icono {
+      position: absolute;
+
+      left: 16px;
+
+      top: 50%;
+
+      transform: translateY(-50%);
+
+      color: var(--texto-suave);
+    }
+
+
+    /* =====================================================
+       CATEGORÍAS
+       ===================================================== */
+
+    .categorias {
+      display: flex;
+
+      gap: 8px;
+
+      overflow-x: auto;
+
+      padding: 5px 2px 15px;
+
+      scrollbar-width: none;
+    }
+
+    .categorias::-webkit-scrollbar {
+      display: none;
+    }
+
+    .categoria {
+      flex: 0 0 auto;
+
+      border: 1px solid var(--borde);
+
+      background: white;
+
+      color: var(--texto-suave);
+
+      border-radius: 999px;
+
+      padding: 9px 13px;
+
+      font-size: 13px;
+
+      font-weight: 700;
+    }
+
+    .categoria.activa {
+      background: var(--principal);
+
+      border-color: var(--principal);
+
+      color: white;
+    }
+
+
+    /* =====================================================
+       SECCIONES
+       ===================================================== */
+
+    .encabezado-seccion {
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      gap: 15px;
+
+      margin: 22px 0 14px;
+    }
+
+    .encabezado-seccion h2,
+    .encabezado-seccion h3 {
+      margin: 0;
+    }
+
+    .texto-suave {
+      color: var(--texto-suave);
+    }
+
+
+    /* =====================================================
+       NEGOCIOS
+       ===================================================== */
+
+    .grid-negocios {
+      display: grid;
+
+      grid-template-columns:
+        repeat(auto-fit, minmax(260px, 1fr));
+
+      gap: 15px;
+    }
+
+    .negocio-card {
+      background: white;
+
+      border: 1px solid var(--borde);
+
+      border-radius: var(--radio);
+
+      padding: 18px;
+
+      box-shadow:
+        0 4px 14px rgba(15, 23, 42, 0.04);
+
+      transition:
+        transform 0.15s,
+        box-shadow 0.15s;
+    }
+
+    .negocio-card:hover {
+      transform: translateY(-2px);
+
+      box-shadow: var(--sombra);
+    }
+
+    .negocio-superior {
+      display: flex;
+
+      align-items: flex-start;
+
+      gap: 13px;
+    }
+
+    .negocio-icono {
+      width: 52px;
+      height: 52px;
+
+      flex: 0 0 52px;
+
+      border-radius: 15px;
+
+      background: #eef2ff;
+
+      display: flex;
+
+      align-items: center;
+      justify-content: center;
+
+      font-size: 26px;
+    }
+
+    .negocio-card h3 {
+      margin: 0 0 4px;
+
+      font-size: 18px;
+    }
+
+    .negocio-categoria {
+      display: inline-block;
+
+      color: var(--principal);
+
+      font-size: 12px;
+
+      font-weight: 700;
+    }
+
+    .negocio-direccion {
+      margin: 14px 0 5px;
+
+      color: var(--texto-suave);
+
+      font-size: 14px;
+    }
+
+    .negocio-descripcion {
+      color: var(--texto-suave);
+
+      font-size: 14px;
+
+      line-height: 1.45;
+
+      min-height: 42px;
+
+      margin-bottom: 15px;
+    }
+
+
+    /* =====================================================
+       NEGOCIO SELECCIONADO
+       ===================================================== */
+
+    .panel-superior {
+      background: white;
+
+      border-radius: 20px;
+
+      padding: 18px;
+
+      margin-bottom: 18px;
+
+      border: 1px solid var(--borde);
+
+      box-shadow: var(--sombra);
+    }
+
+    .fila-volver {
+      margin-bottom: 16px;
+    }
+
+    .boton-volver {
+      border: 0;
+
+      background: transparent;
+
+      color: var(--principal);
+
+      font-weight: 700;
+
+      padding: 5px 0;
+    }
+
+    .negocio-detalle {
+      display: flex;
+
+      align-items: center;
+
+      gap: 15px;
+    }
+
+    .negocio-detalle .negocio-icono {
+      width: 62px;
+      height: 62px;
+    }
+
+    .negocio-detalle h1 {
+      margin: 0 0 5px;
+
+      font-size: 25px;
+    }
+
+
+    /* =====================================================
+       SERVICIOS
+       ===================================================== */
+
+    .lista-servicios {
+      display: grid;
+
+      gap: 12px;
+    }
+
+    .servicio-card {
+      background: white;
+
+      border: 1px solid var(--borde);
+
+      border-radius: 16px;
+
+      padding: 15px;
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+      gap: 15px;
+    }
+
+    .servicio-card h3 {
+      margin: 0 0 5px;
+
+      font-size: 16px;
+    }
+
+    .servicio-info {
+      color: var(--texto-suave);
+
+      font-size: 13px;
+    }
+
+    .servicio-precio {
+      font-weight: 800;
+
+      color: var(--texto);
+
+      white-space: nowrap;
+    }
+
+
+    /* =====================================================
+       RESERVAS
+       ===================================================== */
+
+    .reserva-card {
+      background: white;
+
+      border: 1px solid var(--borde);
+
+      border-radius: 17px;
+
+      padding: 16px;
+
+      margin-bottom: 12px;
+    }
+
+    .reserva-superior {
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: flex-start;
+
+      gap: 12px;
+    }
+
+    .reserva-card h3 {
+      margin: 0 0 5px;
+
+      font-size: 16px;
+    }
+
+    .reserva-negocio {
+      color: var(--texto-suave);
+
+      font-size: 13px;
+    }
+
+    .estado {
+      display: inline-block;
+
+      padding: 6px 9px;
+
+      border-radius: 999px;
+
+      font-size: 12px;
+
+      font-weight: 800;
+
+      white-space: nowrap;
+    }
+
+    .estado-pendiente {
+      background: var(--amarillo-suave);
+      color: #92400e;
+    }
+
+    .estado-aceptada {
+      background: var(--verde-suave);
+      color: #166534;
+    }
+
+    .estado-cancelada {
+      background: var(--rojo-suave);
+      color: #991b1b;
+    }
+
+    .reserva-datos {
+      display: grid;
+
+      gap: 6px;
+
+      margin-top: 13px;
+
+      color: var(--texto-suave);
+
+      font-size: 14px;
+    }
+
+    .reserva-acciones {
+      margin-top: 14px;
+
+      display: flex;
+
+      gap: 8px;
+
+      flex-wrap: wrap;
+    }
+
+
+    /* =====================================================
+       PANEL DEL NEGOCIO
+       ===================================================== */
+
+    .panel-negocio-hero {
+      background:
+        linear-gradient(
+          135deg,
+          #111827,
+          #1e1b4b
+        );
+
+      color: white;
+
+      border-radius: 22px;
+
+      padding: 22px;
+
+      margin-bottom: 18px;
+    }
+
+    .panel-negocio-hero h1 {
+      margin: 0 0 6px;
+    }
+
+    .panel-negocio-hero p {
+      margin: 0;
+
+      color: #cbd5e1;
+    }
+
+    .estadisticas {
+      display: grid;
+
+      grid-template-columns:
+        repeat(2, 1fr);
+
+      gap: 10px;
+
+      margin-bottom: 18px;
+    }
+
+    .estadistica {
+      background: white;
+
+      border: 1px solid var(--borde);
+
+      border-radius: 16px;
+
+      padding: 16px;
+    }
+
+    .estadistica-numero {
+      display: block;
+
+      font-size: 25px;
+
+      font-weight: 900;
+    }
+
+    .estadistica-label {
+      color: var(--texto-suave);
+
+      font-size: 12px;
+
+      margin-top: 3px;
+    }
+
+    .menu-panel {
+      display: grid;
+
+      grid-template-columns:
+        repeat(2, 1fr);
+
+      gap: 10px;
+
+      margin-bottom: 18px;
+    }
+
+    .menu-panel button {
+      border: 1px solid var(--borde);
+
+      background: white;
+
+      border-radius: 17px;
+
+      padding: 17px 12px;
+
+      font-weight: 800;
+
+      color: var(--texto);
+
+      text-align: left;
+    }
+
+    .menu-panel button span {
+      display: block;
+
+      font-size: 25px;
+
+      margin-bottom: 8px;
+    }
+
+    .seccion-panel {
+      background: white;
+
+      border: 1px solid var(--borde);
+
+      border-radius: 20px;
+
+      padding: 18px;
+
+      margin-bottom: 15px;
+    }
+
+    .seccion-panel h2 {
+      margin-top: 0;
+    }
+
+
+    /* =====================================================
+       LISTAS DEL PANEL
+       ===================================================== */
+
+    .item-servicio-admin {
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      gap: 12px;
+
+      border-bottom: 1px solid var(--borde);
+
+      padding: 13px 0;
+    }
+
+    .item-servicio-admin:last-child {
+      border-bottom: 0;
+    }
+
+    .item-servicio-admin h3 {
+      margin: 0 0 4px;
+
+      font-size: 15px;
+    }
+
+    .item-servicio-admin p {
+      margin: 0;
+
+      color: var(--texto-suave);
+
+      font-size: 13px;
+    }
+
+
+    /* =====================================================
+       GRUPOS DE CITAS
+       ===================================================== */
+
+    .grupo-reservas {
+      margin-top: 20px;
+    }
+
+    .grupo-reservas:first-child {
+      margin-top: 0;
+    }
+
+    .titulo-grupo {
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      margin-bottom: 10px;
+    }
+
+    .titulo-grupo h3 {
+      margin: 0;
+
+      font-size: 17px;
+    }
+
+    .contador {
+      background: #eef2ff;
+
+      color: var(--principal);
+
+      border-radius: 999px;
+
+      padding: 5px 9px;
+
+      font-size: 12px;
+
+      font-weight: 800;
+    }
+
+
+    /* =====================================================
+       VACÍOS
+       ===================================================== */
+
+    .estado-vacio {
+      background: white;
+
+      border: 1px dashed #cbd5e1;
+
+      border-radius: 18px;
+
+      padding: 28px 18px;
+
+      text-align: center;
+
+      color: var(--texto-suave);
+    }
+
+    .estado-vacio .emoji {
+      font-size: 38px;
+
+      margin-bottom: 10px;
+    }
+
+    .estado-vacio h3 {
+      color: var(--texto);
+
+      margin: 0 0 7px;
+    }
+
+
+    /* =====================================================
+       BARRA INFERIOR
+       ===================================================== */
+
+    .barra-inferior {
+      position: fixed;
+
+      bottom: 0;
+
+      left: 0;
+
+      right: 0;
+
+      z-index: 60;
+
+      background: rgba(255,255,255,0.96);
+
+      backdrop-filter: blur(12px);
+
+      border-top: 1px solid var(--borde);
+    }
+
+    .barra-inferior-contenido {
+      width: min(600px, 100%);
+
+      margin: 0 auto;
+
+      display: grid;
+
+      grid-template-columns:
+        repeat(3, 1fr);
+    }
+
+    .barra-inferior button {
+      border: 0;
+
+      background: transparent;
+
+      padding: 10px 5px 9px;
+
+      color: var(--texto-suave);
+
+      font-size: 12px;
+
+      font-weight: 700;
+    }
+
+    .barra-inferior button span {
+      display: block;
+
+      font-size: 20px;
+
+      margin-bottom: 2px;
+    }
+
+
+    /* =====================================================
+       CARGANDO
+       ===================================================== */
+
+    .cargando {
+      text-align: center;
+
+      color: var(--texto-suave);
+
+      padding: 30px 15px;
+    }
+
+
+    /* =====================================================
+       RESPONSIVE
+       ===================================================== */
+
+    @media (min-width: 700px) {
+
+      .estadisticas {
+        grid-template-columns:
+          repeat(4, 1fr);
+      }
+
+      .menu-panel {
+        grid-template-columns:
+          repeat(4, 1fr);
+      }
+
+      .contenido-app {
+        padding-bottom: 40px;
+      }
+
+      .barra-inferior {
+        display: none;
+      }
+
+    }
+
+  </style>
 </head>
+
 
 <body>
 
-<header>
 
-<h1>📅 ReservaYa</h1>
+  <!-- =====================================================
+       PANTALLA INICIAL
+       ===================================================== -->
 
-<p>
-Reserva servicios de tus negocios favoritos
-</p>
+  <section
+    id="inicio"
+    class="pantalla-inicial"
+  >
 
-</header>
+    <div class="tarjeta-inicial">
 
+      <div class="logo-grande">
+        📅
+      </div>
 
-<div class="contenedor">
+      <h1 class="titulo-principal">
+        ReservaYa
+      </h1>
 
+      <p class="subtitulo">
+        Reserva servicios de tus negocios favoritos
+        desde un solo lugar.
+      </p>
 
-<!-- =========================
-     INICIO
-========================= -->
+      <button
+        class="boton"
+        onclick="mostrarPublica('login')"
+      >
+        🔐 Iniciar sesión
+      </button>
 
-<div id="inicio" class="tarjeta">
+      <button
+        class="boton secundario"
+        onclick="mostrarPublica('registro')"
+      >
+        ✨ Crear una cuenta
+      </button>
 
-<h2>Bienvenido</h2>
+    </div>
 
-<p>
-Reserva citas y servicios de diferentes negocios
-desde un solo lugar.
-</p>
-<div class="inicio-botones">
+  </section>
 
-<button
-class="boton"
-onclick="mostrar('login')">
-Iniciar sesión
-</button>
 
-<button
-class="secundario"
-onclick="mostrar('registro')">
-Crear una cuenta
-</button>
+  <!-- =====================================================
+       REGISTRO
+       ===================================================== -->
 
-</div>
+  <section
+    id="registro"
+    class="pantalla-inicial oculto"
+  >
 
-</div>
+    <div class="tarjeta-inicial">
 
-<!-- =========================
-     REGISTRO
-========================= -->
+      <div class="logo-grande">
+        ✨
+      </div>
 
-<div id="registro" class="tarjeta oculto">
+      <h1 class="titulo-principal">
+        Crear cuenta
+      </h1>
 
-<h2>Crear cuenta</h2>
+      <p class="subtitulo">
+        Crea tu cuenta para empezar a reservar.
+      </p>
 
-<label>Nombre</label>
+      <form
+        class="formulario"
+        onsubmit="registrarse(event)"
+      >
 
-<input
-id="registroNombre"
-type="text"
-placeholder="Tu nombre">
+        <div class="campo">
 
-<label>Correo</label>
+          <label for="nombreRegistro">
+            Nombre
+          </label>
 
-<input
-id="registroEmail"
-type="email"
-placeholder="tu@email.com">
+          <input
+            id="nombreRegistro"
+            type="text"
+            required
+            autocomplete="name"
+          >
 
-<label>Contraseña</label>
+        </div>
 
-<input
-id="registroPassword"
-type="password"
-placeholder="Contraseña">
 
-<button
-class="boton"
-onclick="crearCuenta()">
-Registrarme
-</button>
+        <div class="campo">
 
-<button
-class="secundario"
-onclick="mostrar('inicio')">
-Volver
-</button>
+          <label for="correoRegistro">
+            Correo
+          </label>
 
-<div
-id="mensajeRegistro"
-class="mensaje">
-</div>
+          <input
+            id="correoRegistro"
+            type="email"
+            required
+            autocomplete="email"
+          >
 
-</div>
+        </div>
 
 
+        <div class="campo">
 
-<!-- =========================
-     LOGIN
-========================= -->
+          <label for="passwordRegistro">
+            Contraseña
+          </label>
 
-<div id="login" class="tarjeta oculto">
+          <input
+            id="passwordRegistro"
+            type="password"
+            minlength="6"
+            required
+            autocomplete="new-password"
+          >
 
-<h2>Iniciar sesión</h2>
+        </div>
 
-<label>Correo</label>
 
-<input
-id="loginEmail"
-type="email"
-placeholder="tu@email.com">
+        <div
+          id="mensajeRegistro"
+          class="mensaje oculto"
+        ></div>
 
-<label>Contraseña</label>
 
-<input
-id="loginPassword"
-type="password"
-placeholder="Contraseña">
+        <button
+          id="botonRegistro"
+          class="boton"
+          type="submit"
+        >
+          Registrarme
+        </button>
 
-<button
-class="boton"
-onclick="iniciarSesion()">
-Iniciar sesión
-</button>
+      </form>
 
-<button
-class="secundario"
-onclick="mostrar('inicio')">
-Volver
-</button>
 
-<div
-id="mensajeLogin"
-class="mensaje">
-</div>
+      <button
+        class="boton secundario"
+        onclick="mostrarPublica('inicio')"
+      >
+        ⬅️ Volver
+      </button>
 
-</div>
+    </div>
 
+  </section>
 
 
-<!-- =========================
-     CLIENTE
-========================= -->
+  <!-- =====================================================
+       LOGIN
+       ===================================================== -->
 
-<div id="cliente" class="oculto">
-<div id="pantallaPrincipalCliente">  
+  <section
+    id="login"
+    class="pantalla-inicial oculto"
+  >
 
+    <div class="tarjeta-inicial">
 
-<!-- DATOS CLIENTE -->
+      <div class="logo-grande">
+        🔐
+      </div>
 
-<div class="tarjeta">
+      <h1 class="titulo-principal">
+        Iniciar sesión
+      </h1>
 
-<h2>
-👋 Hola,
-<span id="nombreCliente"></span>
-</h2>
+      <p class="subtitulo">
+        Entra a tu cuenta de ReservaYa.
+      </p>
 
-<p>
-Elige un negocio para reservar.
-</p>
+      <form
+        class="formulario"
+        onsubmit="iniciarSesion(event)"
+      >
 
-<button
-class="boton"
-onclick="mostrarMisReservas()">
-📋 Mis reservas
-</button>
-<button
-class="boton"
-onclick="mostrarPanelNegocio()">
-🏢 Panel de mi negocio
-</button>
-<button
-class="secundario"
-onclick="cerrarSesion()">
-Cerrar sesión
-</button>
+        <div class="campo">
 
-</div>
+          <label for="correoLogin">
+            Correo
+          </label>
 
+          <input
+            id="correoLogin"
+            type="email"
+            required
+            autocomplete="email"
+          >
 
+        </div>
 
-<!-- =========================
-     NEGOCIOS
-========================= -->
 
-<div class="tarjeta">
+        <div class="campo">
 
-<h2>🏢 Negocios</h2>
+          <label for="passwordLogin">
+            Contraseña
+          </label>
 
-<div id="listaNegocios">
+          <input
+            id="passwordLogin"
+            type="password"
+            required
+            autocomplete="current-password"
+          >
 
-<div class="cargando">
-Cargando negocios...
-</div>
+        </div>
 
-</div>
 
-<div
-id="mensajeNegocios"
-class="mensaje">
-</div>
+        <div
+          id="mensajeLogin"
+          class="mensaje oculto"
+        ></div>
 
-</div>
 
-</div>
+        <button
+          id="botonLogin"
+          class="boton"
+          type="submit"
+        >
+          Iniciar sesión
+        </button>
 
-<!-- =========================
-     NEGOCIO SELECCIONADO
-========================= -->
+      </form>
 
-<div
-id="zonaNegocio"
-class="tarjeta oculto">
 
-<h2 id="nombreNegocio"></h2>
-    
-<button
-class="secundario"
-onclick="volverPantallaCliente()">
-⬅️ Volver a negocios
-</button>
+      <button
+        class="boton secundario"
+        onclick="mostrarPublica('inicio')"
+      >
+        ⬅️ Volver
+      </button>
 
+    </div>
 
+  </section>
 
-<h3>Servicios</h3>
 
-<div id="listaServicios"></div>
+  <!-- =====================================================
+       APLICACIÓN CLIENTE
+       ===================================================== -->
 
+  <section
+    id="cliente"
+    class="oculto"
+  >
 
-<div class="separador"></div>
 
+    <!-- BARRA SUPERIOR -->
 
-<h3>Reservar</h3>
+    <header class="barra-superior">
 
+      <div class="barra-superior-contenido">
 
-<label>Servicio</label>
+        <div class="marca">
 
-<select id="servicioReserva">
+          <div class="marca-icono">
+            📅
+          </div>
 
-<option value="">
-Selecciona un servicio
-</option>
+          <div class="marca-texto">
+            ReservaYa
+          </div>
 
-</select>
+        </div>
 
 
+        <div
+          id="usuarioSuperior"
+          class="usuario-superior"
+        ></div>
 
-<label>Fecha</label>
+      </div>
 
-<input
-id="fechaReserva"
-type="date">
+    </header>
 
 
-<label>Hora</label>
+    <main class="contenido-app">
 
-<input
-id="horaReserva"
-type="time">
 
+      <div class="contenedor">
 
 
+        <!-- =================================================
+             VISTA INICIO CLIENTE
+             ================================================= -->
 
-<label>Comentario</label>
+        <div
+          id="vistaInicioCliente"
+          class="vista-cliente"
+        >
 
-<textarea
-id="comentarioReserva"
-placeholder="Algo que quieras decirle al negocio"></textarea>
+          <div class="hero">
 
+            <h1>
+              👋 Hola,
+              <span id="nombreCliente"></span>
+            </h1>
 
-<button
-class="boton"
-onclick="reservar()">
-Confirmar reserva
-</button>
+            <p>
+              Encuentra un negocio y reserva tu servicio
+              de forma rápida.
+            </p>
 
 
-<div
-id="mensajeReserva"
-class="mensaje">
-</div>
+            <div class="buscador">
 
-</div>
+              <span class="buscador-icono">
+                🔎
+              </span>
 
+              <input
+                id="buscadorNegocios"
+                type="search"
+                placeholder="Buscar negocio..."
+                oninput="filtrarNegocios()"
+              >
 
+            </div>
 
-<!-- =========================
-     MIS RESERVAS
-========================= -->
+          </div>
 
-<div
-id="zonaReservas"
-class="tarjeta oculto">
 
-<h2>📋 Mis reservas</h2>
+          <div class="encabezado-seccion">
 
-<button
-class="secundario"
-onclick="volverPantallaCliente()">
-⬅️ Volver a negocios
-</button>    
+            <h2>
+              🏢 Negocios
+            </h2>
 
-<div id="listaReservas">
+          </div>
 
-<div class="cargando">
-Cargando reservas...
-</div>
 
-</div>
+          <div
+            id="categoriasNegocios"
+            class="categorias"
+          ></div>
 
-<div
-id="mensajeReservas"
-class="mensaje">
-</div>
 
-</div>
+          <div
+            id="listaNegocios"
+            class="grid-negocios"
+          >
 
+            <div class="cargando">
+              Cargando negocios...
+            </div>
 
+          </div>
 
-<!-- =========================
-     PANEL DEL NEGOCIO
-========================= -->
+        </div>
 
-<div
-id="zonaPanelNegocio"
-class="tarjeta oculto">
 
-<h2>🏢 Panel de mi negocio</h2>
+        <!-- =================================================
+             VISTA NEGOCIO SELECCIONADO
+             ================================================= -->
 
-<p class="pequeno">
-Administra tu negocio desde aquí.
-</p>
+        <div
+          id="vistaNegocio"
+          class="vista-cliente oculto"
+        >
 
+          <div class="panel-superior">
 
-<!-- OPCIONES DEL PANEL -->
+            <div class="fila-volver">
 
-<div id="menuPanelNegocio" class="menu-panel">
+              <button
+                class="boton-volver"
+                onclick="volverPantallaCliente()"
+              >
+                ⬅️ Volver a negocios
+              </button>
 
-<button
-class="boton"
-onclick="mostrarSeccionPanel('informacionNegocio')">
-✏️ Información del negocio
-</button>
+            </div>
 
 
-<button
-class="boton"
-onclick="mostrarSeccionPanel('serviciosNegocio')">
-⚙️ Mis servicios
-</button>
+            <div class="negocio-detalle">
 
+              <div
+                id="iconoNegocioSeleccionado"
+                class="negocio-icono"
+              >
+                🏢
+              </div>
 
-<button
-class="boton"
-onclick="mostrarSeccionPanel('reservasNegocio')">
-📅 Reservas
-</button>
+              <div>
 
-    
-<button
-class="secundario"
-onclick="salirPanelNegocio()">
-⬅️ Salir del panel
-</button>
-    
-</div>
-    
-<div id="contenidoPanelNegocio">
+                <h1 id="nombreNegocioSeleccionado">
+                  Negocio
+                </h1>
 
+                <div
+                  id="categoriaNegocioSeleccionado"
+                  class="negocio-categoria"
+                ></div>
 
-<!-- =========================
-     INFORMACIÓN DEL NEGOCIO
-========================= -->
+                <div
+                  id="direccionNegocioSeleccionado"
+                  class="texto-suave"
+                ></div>
 
-<div
-id="informacionNegocio"
-class="oculto">
+              </div>
 
-<h3>✏️ Información del negocio</h3>
+            </div>
 
-<div id="infoMiNegocio">
 
-<div class="cargando">
-Cargando información del negocio...
-</div>
+            <p
+              id="descripcionNegocioSeleccionado"
+              class="texto-suave"
+            ></p>
 
-</div>
+          </div>
 
-<div
-id="mensajePanelNegocio"
-class="mensaje">
-</div>
 
+          <div class="encabezado-seccion">
 
-<button
-class="secundario"
-onclick="volverMenuPanel()">
-⬅️ Volver
-</button>
+            <h2>
+              🛠️ Servicios
+            </h2>
 
-</div>
+          </div>
 
 
+          <div
+            id="listaServiciosCliente"
+            class="lista-servicios"
+          >
 
-<!-- =========================
-     SERVICIOS
-========================= -->
+            <div class="cargando">
+              Cargando servicios...
+            </div>
 
-<div
-id="serviciosNegocio"
-class="oculto">
+          </div>
 
-<h3>⚙️ Administración de servicios</h3>
 
-<p class="pequeno">
-Aquí puedes administrar los servicios que ofrece tu negocio.
-</p>
+          <div
+            id="zonaReserva"
+            class="panel-superior oculto"
+            style="margin-top:20px;"
+          >
 
-<button
-class="boton"
-onclick="mostrarAgregarServicio()">
-➕ Agregar servicio
-</button>
+            <div class="encabezado-seccion">
 
-<button
-class="secundario"
-onclick="volverListaServicios()">
-⬅️ Volver a servicios
-</button>    
+              <h2>
+                📅 Reservar
+              </h2>
 
-<div id="listaServiciosPanel">
+            </div>
 
-<div class="cargando">
-Cargando servicios...
-</div>
 
-</div>
+            <form
+              class="formulario"
+              onsubmit="reservar(event)"
+            >
 
-<div id="zonaAgregarServicio" class="oculto">  
 
+              <div class="campo">
 
-<div class="separador"></div>
+                <label for="servicioReserva">
+                  Servicio
+                </label>
 
+                <select
+                  id="servicioReserva"
+                  required
+                >
 
-<h3>➕ Agregar servicio</h3>
+                  <option value="">
+                    Selecciona un servicio
+                  </option>
 
+                </select>
 
-<label>Nombre del servicio</label>
+              </div>
 
-<input
-id="nuevoServicioNombre"
-type="text"
-placeholder="Ejemplo: Corte de cabello">
 
+              <div class="campo">
 
-<label>Precio</label>
+                <label for="fechaReserva">
+                  Fecha
+                </label>
 
-<input
-id="nuevoServicioPrecio"
-type="number"
-min="0"
-placeholder="Ejemplo: 25000">
+                <input
+                  id="fechaReserva"
+                  type="date"
+                  required
+                >
 
+              </div>
 
-<label>Duración en minutos</label>
 
-<input
-id="nuevoServicioDuracion"
-type="number"
-min="1"
-placeholder="Ejemplo: 30">
+              <div class="campo">
 
+                <label for="horaReserva">
+                  Hora
+                </label>
 
-<button
-class="boton boton-agregar"
-onclick="agregarServicio()">
-➕ Agregar servicio
-</button>
+                <!--
+                  IMPORTANTE:
+                  Este selector permite elegir cualquier
+                  minuto: 09:01, 09:02, 09:20, etc.
+                -->
 
+                <input
+                  id="horaReserva"
+                  type="time"
+                  step="60"
+                  required
+                >
 
-<div
-id="mensajeServiciosPanel"
-class="mensaje">
-</div>
+              </div>
 
-</div>
 
+              <div class="campo">
 
-<button
-class="secundario boton-actualizar"
-onclick="cargarServiciosPanel()">
-🔄 Actualizar servicios
-</button>
+                <label for="comentarioReserva">
+                  Comentario
+                </label>
 
+                <textarea
+                  id="comentarioReserva"
+                  placeholder="Escribe alguna indicación..."
+                ></textarea>
 
-<button
-class="secundario boton-volver"
-onclick="volverMenuPanel()">
-⬅️ Volver
-</button>
+              </div>
 
-</div>
 
-</div>
-    
-</div>
-    
-<!-- =========================
-     RESERVAS
-========================= -->
+              <div
+                id="mensajeReserva"
+                class="mensaje oculto"
+              ></div>
 
-<div
-id="reservasNegocio"
-class="oculto">
 
-<h3>📅 Reservas</h3>
+              <button
+                id="botonReservar"
+                class="boton"
+                type="submit"
+              >
+                📅 Confirmar reserva
+              </button>
 
-<p class="pequeno">
-Aquí puedes consultar las reservas realizadas en tu negocio.
-</p>
+            </form>
 
-<div
-id="listaReservasNegocio">
+          </div>
 
-<div class="cargando">
-Cargando reservas...
-</div>
+        </div>
 
-</div>
 
-<div
-id="mensajeReservasNegocio"
-class="mensaje">
-</div>
+        <!-- =================================================
+             MIS RESERVAS
+             ================================================= -->
 
-<button
-class="secundario"
-onclick="volverMenuPanel()">
-⬅️ Volver
-</button>
+        <div
+          id="vistaMisReservas"
+          class="vista-cliente oculto"
+        >
 
-</div>
+          <div class="panel-superior">
 
-</div>
+            <button
+              class="boton-volver"
+              onclick="volverPantallaCliente()"
+            >
+              ⬅️ Volver a negocios
+            </button>
 
-<script>
+            <h1>
+              📋 Mis reservas
+            </h1>
 
+            <p class="texto-suave">
+              Aquí puedes consultar y cancelar tus reservas.
+            </p>
 
+          </div>
 
-/* =========================================================
-   SUPABASE
-========================================================= */
 
-const SUPABASE_URL =
-"https://mjxiyzapdybzckurootw.supabase.co";
+          <div
+            id="listaMisReservas"
+          >
 
-const SUPABASE_ANON_KEY =
-"sb_publishable_Ox1Wz7UT2Gw6uHOP6SncjQ_sGapEEB-";
+            <div class="cargando">
+              Cargando reservas...
+            </div>
 
+          </div>
 
-const supabaseClient =
-window.supabase.createClient(
-SUPABASE_URL,
-SUPABASE_ANON_KEY
-);
+        </div>
 
 
-let usuarioActual = null;
+        <!-- =================================================
+             PANEL DEL NEGOCIO
+             ================================================= -->
 
-let negocioActual = null;
+        <div
+          id="vistaPanelNegocio"
+          class="vista-cliente oculto"
+        >
 
 
+          <div
+            id="panelSinNegocio"
+            class="estado-vacio oculto"
+          >
 
-/* =========================================================
-   MOSTRAR PANTALLA
-========================================================= */
+            <div class="emoji">
+              🏢
+            </div>
 
-function mostrar(id) {
+            <h3>
+              Todavía no tienes un negocio
+            </h3>
 
-const secciones = [
-"inicio",
-"registro",
-"login",
-"cliente"
-];
+            <p>
+              Crea tu negocio para comenzar a administrar
+              servicios y reservas.
+            </p>
 
+            <button
+              class="boton"
+              onclick="mostrarVistaCliente('vistaCrearNegocio')"
+            >
+              ➕ Crear mi negocio
+            </button>
 
-secciones.forEach(function(seccion) {
+          </div>
 
-const elemento =
-document.getElementById(seccion);
 
-if (elemento) {
+          <div
+            id="panelConNegocio"
+            class="oculto"
+          >
 
-elemento.classList.add("oculto");
+            <div class="panel-negocio-hero">
 
-}
+              <h1>
+                🏢
+                <span id="nombrePanelNegocio">
+                  Mi negocio
+                </span>
+              </h1>
 
-});
+              <p>
+                Administra tu negocio, servicios y reservas.
+              </p>
 
+            </div>
 
-const destino =
-document.getElementById(id);
 
-if (destino) {
+            <div
+              id="estadisticasPanel"
+              class="estadisticas"
+            ></div>
 
-destino.classList.remove("oculto");
 
-}
+            <div
+              id="menuPanelNegocio"
+              class="menu-panel"
+            >
 
-}
+              <button
+                onclick="mostrarSeccionPanel('informacionNegocio')"
+              >
 
+                <span>✏️</span>
 
+                Información
 
-/* =========================================================
-   REGISTRO
-========================================================= */
+              </button>
 
-async function crearCuenta() {
 
-const nombre =
-document
-.getElementById("registroNombre")
-.value
-.trim();
+              <button
+                onclick="mostrarSeccionPanel('serviciosNegocio')"
+              >
 
+                <span>⚙️</span>
 
-const email =
-document
-.getElementById("registroEmail")
-.value
-.trim();
+                Servicios
 
+              </button>
 
-const password =
-document
-.getElementById("registroPassword")
-.value;
 
+              <button
+                onclick="mostrarSeccionPanel('reservasNegocio')"
+              >
 
-const mensaje =
-document.getElementById("mensajeRegistro");
+                <span>📅</span>
 
+                Reservas
 
-if (!nombre || !email || !password) {
+              </button>
 
-mensaje.textContent =
-"Completa todos los campos.";
 
-mensaje.className =
-"mensaje error";
+              <button
+                onclick="volverPantallaCliente()"
+              >
 
-return;
+                <span>⬅️</span>
 
-}
+                Salir del panel
 
+              </button>
 
-if (password.length < 6) {
+            </div>
 
-mensaje.textContent =
-"La contraseña debe tener mínimo 6 caracteres.";
 
-mensaje.className =
-"mensaje error";
+            <!-- INFORMACIÓN -->
 
-return;
+            <div
+              id="informacionNegocio"
+              class="seccion-panel oculto"
+            >
 
-}
+              <button
+                class="boton-volver"
+                onclick="volverMenuPanel()"
+              >
+                ⬅️ Volver
+              </button>
 
+              <h2>
+                ✏️ Información del negocio
+              </h2>
 
-mensaje.textContent =
-"Creando cuenta...";
 
+              <form
+                class="formulario"
+                onsubmit="guardarInformacionNegocio(event)"
+              >
 
-const resultado =
-await supabaseClient.auth.signUp({
+                <div class="campo">
 
-email: email,
+                  <label for="nombreNegocioPanel">
+                    Nombre del negocio
+                  </label>
 
-password: password,
+                  <input
+                    id="nombreNegocioPanel"
+                    type="text"
+                    required
+                  >
 
-options: {
+                </div>
 
-data: {
 
-nombre: nombre
+                <div class="campo">
 
-}
+                  <label for="direccionNegocioPanel">
+                    Dirección
+                  </label>
 
-}
+                  <input
+                    id="direccionNegocioPanel"
+                    type="text"
+                  >
 
-});
+                </div>
 
 
-if (resultado.error) {
+                <div class="campo">
 
-mensaje.textContent =
-"Error: " +
-resultado.error.message;
+                  <label for="descripcionNegocioPanel">
+                    Descripción
+                  </label>
 
-mensaje.className =
-"mensaje error";
+                  <textarea
+                    id="descripcionNegocioPanel"
+                  ></textarea>
 
-return;
+                </div>
 
-}
 
+                <div
+                  id="mensajeInfoNegocio"
+                  class="mensaje oculto"
+                ></div>
 
-mensaje.textContent =
-"✅ Cuenta creada correctamente.";
 
-mensaje.className =
-"mensaje exito";
+                <button
+                  id="botonGuardarInfo"
+                  class="boton"
+                  type="submit"
+                >
+                  💾 Guardar cambios
+                </button>
 
+              </form>
 
-document
-.getElementById("loginEmail")
-.value = email;
+            </div>
 
 
-setTimeout(function() {
+            <!-- SERVICIOS -->
 
-mostrar("login");
+            <div
+              id="serviciosNegocio"
+              class="seccion-panel oculto"
+            >
 
-}, 1000);
+              <button
+                class="boton-volver"
+                onclick="volverMenuPanel()"
+              >
+                ⬅️ Volver
+              </button>
 
-}
+              <h2>
+                ⚙️ Administración de servicios
+              </h2>
 
+              <p class="texto-suave">
+                Aquí puedes administrar los servicios que
+                ofrece tu negocio.
+              </p>
 
 
-/* =========================================================
-   LOGIN
-========================================================= */
+              <button
+                class="boton"
+                onclick="mostrarAgregarServicio()"
+              >
+                ➕ Agregar servicio
+              </button>
 
-async function iniciarSesion() {
 
-const email =
-document
-.getElementById("loginEmail")
-.value
-.trim();
+              <div
+                id="listaServiciosAdmin"
+                style="margin-top:18px;"
+              >
 
+                <div class="cargando">
+                  Cargando servicios...
+                </div>
 
-const password =
-document
-.getElementById("loginPassword")
-.value;
+              </div>
 
+            </div>
 
-const mensaje =
-document.getElementById("mensajeLogin");
 
+            <!-- AGREGAR SERVICIO -->
 
-if (!email || !password) {
+            <div
+              id="agregarServicioNegocio"
+              class="seccion-panel oculto"
+            >
 
-mensaje.textContent =
-"Completa correo y contraseña.";
+              <button
+                class="boton-volver"
+                onclick="volverListaServicios()"
+              >
+                ⬅️ Volver a servicios
+              </button>
 
-mensaje.className =
-"mensaje error";
+              <h2>
+                ➕ Agregar servicio
+              </h2>
 
-return;
 
-}
+              <form
+                class="formulario"
+                onsubmit="agregarServicio(event)"
+              >
 
+                <div class="campo">
 
-mensaje.textContent =
-"Iniciando sesión...";
+                  <label for="nombreServicio">
+                    Nombre del servicio
+                  </label>
 
+                  <input
+                    id="nombreServicio"
+                    type="text"
+                    required
+                  >
 
-const resultado =
-await supabaseClient.auth.signInWithPassword({
+                </div>
 
-email: email,
 
-password: password
+                <div class="campo">
 
-});
+                  <label for="precioServicio">
+                    Precio
+                  </label>
 
+                  <input
+                    id="precioServicio"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    required
+                  >
 
-if (resultado.error) {
+                </div>
 
-mensaje.textContent =
-"Error: " +
-resultado.error.message;
 
-mensaje.className =
-"mensaje error";
+                <div class="campo">
 
-return;
+                  <label for="duracionServicio">
+                    Duración en minutos
+                  </label>
 
-}
+                  <input
+                    id="duracionServicio"
+                    type="number"
+                    min="1"
+                    required
+                  >
 
+                </div>
 
-usuarioActual =
-resultado.data.user;
 
+                <div
+                  id="mensajeServicio"
+                  class="mensaje oculto"
+                ></div>
 
-document
-.getElementById("nombreCliente")
-.textContent =
-usuarioActual.user_metadata?.nombre ||
-usuarioActual.email;
 
+                <button
+                  id="botonAgregarServicio"
+                  class="boton"
+                  type="submit"
+                >
+                  ➕ Agregar servicio
+                </button>
 
-mostrar("cliente");
+              </form>
 
+            </div>
 
-await cargarNegocios();
 
-}
+            <!-- RESERVAS NEGOCIO -->
 
+            <div
+              id="reservasNegocio"
+              class="seccion-panel oculto"
+            >
 
+              <button
+                class="boton-volver"
+                onclick="volverMenuPanel()"
+              >
+                ⬅️ Volver
+              </button>
 
-/* =========================================================
-   CARGAR NEGOCIOS
-========================================================= */
+              <h2>
+                📅 Reservas
+              </h2>
 
-async function cargarNegocios() {
+              <p class="texto-suave">
+                Aquí puedes consultar y administrar las
+                reservas realizadas en tu negocio.
+              </p>
 
-const lista =
-document.getElementById("listaNegocios");
 
-const mensaje =
-document.getElementById("mensajeNegocios");
+              <div
+                id="listaReservasNegocio"
+              >
 
+                <div class="cargando">
+                  Cargando reservas...
+                </div>
 
-lista.innerHTML =
-"<div class='cargando'>Cargando negocios...</div>";
+              </div>
 
-mensaje.textContent = "";
+            </div>
 
+          </div>
 
-const resultado =
-await supabaseClient
-.from("negocios")
-.select("id, nombre, direccion, descripcion")
-.order("nombre");
+        </div>
 
 
-if (resultado.error) {
+        <!-- =================================================
+             CREAR NEGOCIO
+             ================================================= -->
 
-lista.innerHTML = "";
+        <div
+          id="vistaCrearNegocio"
+          class="vista-cliente oculto"
+        >
 
-mensaje.textContent =
-"Error cargando negocios: " +
-resultado.error.message;
+          <div class="panel-superior">
 
-mensaje.className =
-"mensaje error";
+            <button
+              class="boton-volver"
+              onclick="mostrarPanelNegocio()"
+            >
+              ⬅️ Volver al panel
+            </button>
 
-return;
+            <h1>
+              🏢 Crear mi negocio
+            </h1>
 
-}
+            <p class="texto-suave">
+              Registra tu negocio para comenzar a recibir
+              reservas.
+            </p>
 
 
-const negocios =
-resultado.data;
+            <form
+              class="formulario"
+              onsubmit="crearNegocio(event)"
+            >
 
+              <div class="campo">
 
-if (!negocios || negocios.length === 0) {
+                <label for="nuevoNegocioNombre">
+                  Nombre del negocio
+                </label>
 
-lista.innerHTML =
-"<p class='error'>No hay negocios registrados.</p>";
+                <input
+                  id="nuevoNegocioNombre"
+                  type="text"
+                  required
+                  placeholder="Ej. Clínica Dental Sonrisa"
+                >
 
-return;
+              </div>
 
-}
 
+              <div class="campo">
 
-lista.innerHTML = "";
+                <label for="nuevoNegocioDireccion">
+                  Dirección
+                </label>
 
+                <input
+                  id="nuevoNegocioDireccion"
+                  type="text"
+                  placeholder="Ej. Calle 10 #20-30"
+                >
 
-negocios.forEach(function(negocio) {
+              </div>
 
-const tarjeta =
-document.createElement("div");
 
+              <div class="campo">
 
-tarjeta.className =
-"negocio";
+                <label for="nuevoNegocioDescripcion">
+                  Descripción
+                </label>
 
+                <textarea
+                  id="nuevoNegocioDescripcion"
+                  placeholder="Cuéntales a tus clientes qué servicios ofrece tu negocio."
+                ></textarea>
 
-tarjeta.innerHTML =
+              </div>
 
-"<h3>🏢 " +
-escaparHTML(negocio.nombre) +
-"</h3>" +
 
-(
-    negocio.direccion
-        ?
-        "<p>📍 " +
-        escaparHTML(negocio.direccion) +
-        "</p>"
-        :
-        ""
-) +
+              <div
+                id="mensajeCrearNegocio"
+                class="mensaje oculto"
+              ></div>
 
-(
-    negocio.descripcion
-        ?
-        "<p>📝 " +
-        escaparHTML(negocio.descripcion) +
-        "</p>"
-        :
-        ""
-) +
 
-"<p>Toca para ver sus servicios.</p>";
+              <button
+                id="botonCrearNegocio"
+                class="boton"
+                type="submit"
+              >
+                🏢 Crear negocio
+              </button>
 
+            </form>
 
-tarjeta.onclick =
-function() {
+          </div>
 
-seleccionarNegocio(negocio);
+        </div>
 
-};
 
+      </div>
 
-lista.appendChild(tarjeta);
+    </main>
 
-});
 
-}
+    <!-- =====================================================
+         BARRA INFERIOR
+         ===================================================== -->
 
+    <nav class="barra-inferior">
 
+      <div class="barra-inferior-contenido">
 
-/* =========================================================
-   SELECCIONAR NEGOCIO
-========================================================= */
+        <button
+          onclick="mostrarVistaCliente('vistaInicioCliente')"
+        >
+          <span>🏠</span>
+          Inicio
+        </button>
 
-async function seleccionarNegocio(negocio) {
 
-negocioActual =
-negocio;
+        <button
+          onclick="mostrarMisReservas()"
+        >
+          <span>📋</span>
+          Reservas
+        </button>
 
 
-/* OCULTAR PANTALLAS DEL CLIENTE */
+        <button
+          onclick="mostrarPanelNegocio()"
+        >
+          <span>🏢</span>
+          Mi negocio
+        </button>
 
-document
-.getElementById("pantallaPrincipalCliente")
-.classList
-.add("oculto");
+      </div>
 
-document
-.getElementById("zonaReservas")
-.classList
-.add("oculto");
+    </nav>
 
-document
-.getElementById("zonaPanelNegocio")
-.classList
-.add("oculto");
 
+  </section>
 
-/* MOSTRAR SOLAMENTE EL NEGOCIO */
 
-document
-.getElementById("zonaNegocio")
-.classList
-.remove("oculto");
+  <!-- =====================================================
+       SUPABASE
+       ===================================================== -->
 
-document
-.getElementById("nombreNegocio")
-.textContent =
-negocio.nombre;
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 
+  <script>
 
+    /* =====================================================
+       CONFIGURACIÓN SUPABASE
+       ===================================================== */
 
+    const SUPABASE_URL =
+      "https://mjxiyzapdybzckurootw.supabase.co";
 
-const lista =
-document.getElementById("listaServicios");
+    const SUPABASE_ANON_KEY =
+      "sb_publishable_Ox1Wz7UT2Gw6uHOP6SncjQ_sGapEEB-";
 
 
-const selector =
-document.getElementById("servicioReserva");
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
 
 
-lista.innerHTML =
-"<div class='cargando'>Cargando servicios...</div>";
+    /* =====================================================
+       VARIABLES GLOBALES
+       ===================================================== */
 
+    let usuarioActual = null;
 
-selector.innerHTML =
-"<option value=''>Cargando servicios...</option>";
+    let negocioActual = null;
 
+    let negocioPropio = null;
 
-const resultado =
-await supabaseClient
-.from("servicios")
-.select(
-"id, nombre, precio, duracion, negocio_id"
-)
-.eq("negocio_id", negocio.id)
-.order("nombre");
+    let negociosCache = [];
 
+    let categoriaActual = "Todos";
 
-if (resultado.error) {
 
-lista.innerHTML =
-"<p class='error'>" +
-"Error al cargar servicios: " +
-escaparHTML(resultado.error.message) +
-"</p>";
+    /* =====================================================
+       LISTA DE CATEGORÍAS
+       ===================================================== */
 
-return;
-
-}
-
-
-const servicios =
-resultado.data;
-
-
-if (!servicios || servicios.length === 0) {
-
-lista.innerHTML =
-"<p class='error'>" +
-"Este negocio no tiene servicios registrados." +
-"</p>";
-
-return;
-
-}
-
-
-lista.innerHTML = "";
-
-selector.innerHTML =
-"<option value=''>Selecciona un servicio</option>";
-
-
-servicios.forEach(function(servicio) {
-
-const div =
-document.createElement("div");
-
-
-div.className =
-"servicio";
-
-
-let precioTexto =
-"Reserva";
-
-
-if (
-servicio.precio !== null &&
-servicio.precio !== undefined &&
-Number(servicio.precio) > 0
-) {
-
-precioTexto =
-"$" +
-Number(servicio.precio)
-.toLocaleString("es-CO");
-
-}
-
-
-div.innerHTML =
-
-"<strong>" +
-escaparHTML(servicio.nombre) +
-"</strong><br>" +
-
-precioTexto +
-"<br>" +
-
-"<span class='pequeno'>" +
-
-(
-servicio.duracion
-?
-escaparHTML(
-String(servicio.duracion)
-) +
-" minutos"
-:
-"Duración no especificada"
-) +
-
-"</span>";
-
-
-lista.appendChild(div);
-
-
-const opcion =
-document.createElement("option");
-
-
-opcion.value =
-servicio.id;
-
-
-opcion.textContent =
-servicio.nombre;
-
-
-if (
-Number(servicio.precio) > 0
-) {
-
-opcion.textContent +=
-" - $" +
-Number(servicio.precio)
-.toLocaleString("es-CO");
-
-}
-
-
-selector.appendChild(opcion);
-
-});
-
-}
-
-
-
-/* =========================================================
-   RESERVAR
-========================================================= */
-
-async function reservar() {
-
-const mensaje =
-document.getElementById("mensajeReserva");
-
-
-const servicioId =
-document
-.getElementById("servicioReserva")
-.value;
-
-
-const fecha =
-document
-.getElementById("fechaReserva")
-.value;
-
-
-const hora =
-document
-.getElementById("horaReserva")
-.value;
-
-
-const comentario =
-document
-.getElementById("comentarioReserva")
-.value
-.trim();
-
-
-
-/* COMPROBAR USUARIO */
-
-const resultadoUsuario =
-await supabaseClient.auth.getUser();
-
-
-const user =
-resultadoUsuario.data?.user;
-
-
-if (
-resultadoUsuario.error ||
-!user
-) {
-
-mensaje.textContent =
-"Debes iniciar sesión.";
-
-mensaje.className =
-"mensaje error";
-
-return;
-
-}
-
-
-usuarioActual =
-user;
-
-
-
-/* VALIDACIONES */
-
-if (!negocioActual) {
-
-mensaje.textContent =
-"Selecciona un negocio.";
-
-mensaje.className =
-"mensaje error";
-
-return;
-
-}
-
-
-if (!servicioId) {
-
-mensaje.textContent =
-"Selecciona un servicio.";
-
-mensaje.className =
-"mensaje error";
-
-return;
-
-}
-
-
-if (!fecha) {
-
-mensaje.textContent =
-"Selecciona una fecha.";
-
-mensaje.className =
-"mensaje error";
-
-return;
-
-}
-
-
-if (!hora) {
-
-mensaje.textContent =
-"Selecciona una hora.";
-
-mensaje.className =
-"mensaje error";
-
-return;
-
-}
-
-
-mensaje.textContent =
-"Guardando reserva...";
-
-mensaje.className =
-"mensaje";
-
-
-
-/*
-IMPORTANTE:
-
-Tu tabla funciona con:
-
-Citas
-
-Y la columna del usuario es:
-
-usuario
-
-NO usamos:
-
-cliente_id
-
-NO usamos:
-
-teléfono_cliente
-*/
-
-
-const nombreCliente =
-user.user_metadata?.nombre ||
-user.email ||
-"Cliente";
-
-
-const datosReserva = {
-
-negocio_id:
-negocioActual.id,
-
-servicio_id:
-servicioId,
-
-nombre_cliente:
-nombreCliente,
-
-fecha:
-fecha,
-
-hora:
-hora,
-
-comentario:
-comentario,
-
-estado:
-"Pendiente",
-
-usuario:
-user.id
-
-};
-
-
-console.log(
-"DATOS DE RESERVA:",
-datosReserva
-);
-
-
-
-/* INSERTAR */
-
-const resultado =
-await supabaseClient
-.from("Citas")
-.insert(datosReserva);
-
-
-if (resultado.error) {
-
-console.error(
-"ERROR GUARDANDO CITA:",
-resultado.error
-);
-
-
-/* HORARIO YA OCUPADO */
-
-if (resultado.error.code === "23505") {
-
-    mensaje.textContent =
-        "⚠️ Ese horario ya está reservado. Por favor, elige otra hora.";
-
-    mensaje.className =
-        "mensaje error";
-
-    return;
-}
-
-
-/* OTRO ERROR */
-
-mensaje.textContent =
-    "Error al guardar la reserva: " +
-    resultado.error.message;
-
-mensaje.className =
-    "mensaje error";
-
-return;
-
-}
-
-
-
-/* ÉXITO */
-
-mensaje.textContent =
-"✅ ¡Reserva realizada correctamente!";
-
-mensaje.className =
-"mensaje exito";
-
-
-document
-.getElementById("servicioReserva")
-.value = "";
-
-
-document
-.getElementById("fechaReserva")
-.value = "";
-
-
-document
-.getElementById("horaReserva")
-.value = "";
-
-
-document
-.getElementById("comentarioReserva")
-.value = "";
-
-
-console.log(
-"✅ CITA GUARDADA"
-);
-
-
-/* Actualizar mis reservas */
-
-await cargarMisReservas();
-
-}
-
-
-
-/* =========================================================
-   MIS RESERVAS
-========================================================= */
-
-async function mostrarMisReservas() {
-
-    const pantallaPrincipal =
-        document.getElementById(
-            "pantallaPrincipalCliente"
-        );
-
-    const zonaNegocio =
-        document.getElementById(
-            "zonaNegocio"
-        );
-
-    const zonaReservas =
-        document.getElementById(
-            "zonaReservas"
-        );
-
-    const zonaPanel =
-        document.getElementById(
-            "zonaPanelNegocio"
-        );
-
-
-    /* OCULTAR TODAS LAS OTRAS PANTALLAS */
-
-    if (pantallaPrincipal) {
-        pantallaPrincipal.classList.add("oculto");
-    }
-
-    if (zonaNegocio) {
-        zonaNegocio.classList.add("oculto");
-    }
-
-    if (zonaPanel) {
-        zonaPanel.classList.add("oculto");
-    }
-
-
-    /* MOSTRAR MIS RESERVAS */
-
-    if (zonaReservas) {
-        zonaReservas.classList.remove("oculto");
-    }
-
-
-    /* CARGAR RESERVAS */
-
-    await cargarMisReservas();
-
-}
-function volverPantallaCliente() {
-
-    const pantallaPrincipal =
-        document.getElementById(
-            "pantallaPrincipalCliente"
-        );
-
-    const zonaNegocio =
-        document.getElementById(
-            "zonaNegocio"
-        );
-
-    const zonaReservas =
-        document.getElementById(
-            "zonaReservas"
-        );
-
-    const zonaPanel =
-        document.getElementById(
-            "zonaPanelNegocio"
-        );
-
-
-    /* OCULTAR TODO */
-
-    if (zonaNegocio) {
-        zonaNegocio.classList.add("oculto");
-    }
-
-    if (zonaReservas) {
-        zonaReservas.classList.add("oculto");
-    }
-
-    if (zonaPanel) {
-        zonaPanel.classList.add("oculto");
-    }
-
-
-    /* MOSTRAR INICIO DEL CLIENTE */
-
-    if (pantallaPrincipal) {
-        pantallaPrincipal.classList.remove("oculto");
-    }
-
-
-    /* ACTUALIZAR NEGOCIOS */
-
-    cargarNegocios();
-
-}    
-
-
-/* =========================================================
-   CARGAR MIS RESERVAS
-========================================================= */
-
-async function cargarMisReservas() {
-
-const lista =
-document.getElementById("listaReservas");
-
-
-const mensaje =
-document.getElementById("mensajeReservas");
-
-
-lista.innerHTML =
-"<div class='cargando'>Cargando reservas...</div>";
-
-mensaje.textContent = "";
-
-
-/* Usuario actual */
-
-const resultadoUsuario =
-await supabaseClient.auth.getUser();
-
-
-const user =
-resultadoUsuario.data?.user;
-
-
-if (!user) {
-
-lista.innerHTML = "";
-
-mensaje.textContent =
-"Debes iniciar sesión.";
-
-mensaje.className =
-"mensaje error";
-
-return;
-
-}
-
-
-/*
-La consulta utiliza la columna:
-
-usuario
-
-que es la que tenemos en Citas.
-*/
-
-
-const resultado =
-await supabaseClient
-.from("Citas")
-.select(
-"id, negocio_id, servicio_id, nombre_cliente, fecha, hora, comentario, estado"
-)
-.eq("usuario", user.id)
-.order("fecha", {
-ascending: false
-})
-.order("hora", {
-ascending: false
-});
-
-
-console.log(
-"MIS RESERVAS:",
-resultado
-);
-
-
-if (resultado.error) {
-
-lista.innerHTML = "";
-
-mensaje.textContent =
-"Error cargando reservas: " +
-resultado.error.message;
-
-mensaje.className =
-"mensaje error";
-
-return;
-
-}
-
-
-const reservas =
-resultado.data;
-
-
-if (
-!reservas ||
-reservas.length === 0
-) {
-
-lista.innerHTML =
-"<p class='pequeno'>" +
-"Todavía no tienes reservas." +
-"</p>";
-
-return;
-
-}
-
-
-lista.innerHTML = "";
-/* =========================================================
-   CARGAR NOMBRES DE NEGOCIOS Y SERVICIOS
-========================================================= */
-
-const negociosIds =
-    [...new Set(
-        reservas
-            .map(function(reserva) {
-                return reserva.negocio_id;
-            })
-            .filter(Boolean)
-    )];
-
-const serviciosIds =
-    [...new Set(
-        reservas
-            .map(function(reserva) {
-                return reserva.servicio_id;
-            })
-            .filter(Boolean)
-    )];
-
-
-let negocios = [];
-
-if (negociosIds.length > 0) {
-
-    const resultadoNegocios =
-        await supabaseClient
-            .from("negocios")
-            .select("id, nombre")
-            .in("id", negociosIds);
-
-    if (resultadoNegocios.error) {
-
-        console.error(
-            "Error cargando negocios:",
-            resultadoNegocios.error
-        );
-
-    } else {
-
-        negocios =
-            resultadoNegocios.data || [];
-
-    }
-}
-
-
-let servicios = [];
-
-if (serviciosIds.length > 0) {
-
-    const resultadoServicios =
-        await supabaseClient
-            .from("servicios")
-            .select("id, nombre")
-            .in("id", serviciosIds);
-
-    if (resultadoServicios.error) {
-
-        console.error(
-            "Error cargando servicios:",
-            resultadoServicios.error
-        );
-
-    } else {
-
-        servicios =
-            resultadoServicios.data || [];
-
-    }
-}
-
-
-/* =========================================================
-   MOSTRAR RESERVAS
-========================================================= */
-
-lista.innerHTML = "";
-
-
-reservas.forEach(function(reserva) {
-
-    const negocio =
-        negocios.find(function(item) {
-
-            return item.id === reserva.negocio_id;
-
-        });
-
-
-    const servicio =
-        servicios.find(function(item) {
-
-            return item.id === reserva.servicio_id;
-
-        });
-
-
-    const nombreNegocio =
-        negocio
-            ? negocio.nombre
-            : "Negocio no encontrado";
-
-
-    const nombreServicio =
-        servicio
-            ? servicio.nombre
-            : "Servicio no encontrado";
-
-
-    const div =
-        document.createElement("div");
-
-
-    div.className =
-        "reserva";
-
-
-    div.innerHTML =
-
-        "<h3>📅 Reserva</h3>" +
-
-        "<p>" +
-        "<strong>🏢 Negocio:</strong> " +
-        escaparHTML(nombreNegocio) +
-        "</p>" +
-
-        "<p>" +
-        "<strong>✂️ Servicio:</strong> " +
-        escaparHTML(nombreServicio) +
-        "</p>" +
-
-        "<p>" +
-        "<strong>📅 Fecha:</strong> " +
-        escaparHTML(reserva.fecha) +
-        "</p>" +
-
-        "<p>" +
-        "<strong>🕐 Hora:</strong> " +
-        escaparHTML(reserva.hora) +
-        "</p>" +
-
-        (
-            reserva.comentario
-                ?
-                "<p>" +
-                "<strong>💬 Comentario:</strong> " +
-                escaparHTML(reserva.comentario) +
-                "</p>"
-                :
-                ""
-        ) +
-
-        "<p>" +
-        "<strong>Estado:</strong> " +
-        "<span class='estado'>" +
-        escaparHTML(
-            reserva.estado || "Pendiente"
-        ) +
-        "</span>" +
-        "</p>";
-
-const botonCancelar = document.createElement("button");
-
-botonCancelar.textContent = "❌ Cancelar cita";
-botonCancelar.className = "secundario boton-cancelar";
-
-botonCancelar.onclick = function() {
-    cancelarCita(reserva.id);
-};
-
-div.appendChild(botonCancelar);
-    lista.appendChild(div);
-
-});
-
-}    
-/* =========================================================
-   CANCELAR CITA
-========================================================= */
-
-async function cancelarCita(idCita) {
-
-    const confirmar =
-        confirm("¿Seguro que quieres cancelar esta cita?");
-
-    if (!confirmar) {
-        return;
-    }
-
-    const resultado =
-        await supabaseClient
-            .from("Citas")
-            .update({
-                estado: "Cancelada"
-            })
-            .eq("id", idCita)
-            .eq("usuario", usuarioActual.id);
-
-    if (resultado.error) {
-
-        alert(
-            "Error al cancelar la cita: " +
-            resultado.error.message
-        );
-
-        return;
-    }
-
-    alert("✅ Cita cancelada correctamente.");
-
-    await cargarMisReservas();
-}
-/* =========================================================
-   PANEL DEL NEGOCIO
-========================================================= */
-
-function mostrarPanelNegocio() {
-
-    /* Ocultar las zonas principales del cliente */
-
-    const zonasPrincipales = [
-    "pantallaPrincipalCliente",
-    "zonaNegocio",
-    "zonaReservas"
-];
-
-    zonasPrincipales.forEach(function(zona) {
-
-        const elemento =
-            document.getElementById(zona);
-
-        if (elemento) {
-            elemento.classList.add("oculto");
-        }
-
-    });
-
-
-    /* Mostrar el panel del negocio */
-
-    const zonaPanel =
-        document.getElementById("zonaPanelNegocio");
-
-    if (!zonaPanel) {
-        return;
-    }
-
-    zonaPanel.classList.remove("oculto");
-
-
-    /* Mostrar el menú principal del panel */
-
-    volverMenuPanel();
-
-
-    /* Cargar información */
-
-    cargarPanelNegocio();
-
-    cargarServiciosPanel();
-
-}
-/* =========================================================
-   NAVEGACIÓN DEL PANEL DEL NEGOCIO
-========================================================= */
-
-function mostrarSeccionPanel(id) {
-
-    const menu =
-        document.getElementById("menuPanelNegocio");
-
-    const secciones = [
-        "informacionNegocio",
-        "serviciosNegocio",
-        "reservasNegocio"
+    const categoriasDisponibles = [
+      {
+        nombre: "Todos",
+        icono: "✨"
+      },
+      {
+        nombre: "Barbería",
+        icono: "💈"
+      },
+      {
+        nombre: "Belleza",
+        icono: "💅"
+      },
+      {
+        nombre: "Restaurante",
+        icono: "🍽️"
+      },
+      {
+        nombre: "Salud",
+        icono: "🩺"
+      },
+      {
+        nombre: "Fitness",
+        icono: "🏋️"
+      },
+      {
+        nombre: "Spa",
+        icono: "💆"
+      },
+      {
+        nombre: "Mascotas",
+        icono: "🐕"
+      },
+      {
+        nombre: "Automotriz",
+        icono: "🚗"
+      },
+      {
+        nombre: "Educación",
+        icono: "📚"
+      },
+      {
+        nombre: "Profesional",
+        icono: "💼"
+      },
+      {
+        nombre: "Otros",
+        icono: "🏢"
+      }
     ];
 
-    /* Ocultar el menú */
 
-    if (menu) {
-        menu.classList.add("oculto");
+    /* =====================================================
+       UTILIDADES
+       ===================================================== */
+
+    function escaparHTML(valor) {
+
+      if (valor === null || valor === undefined) {
+        return "";
+      }
+
+      return String(valor)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
 
-    /* Ocultar todas las ventanas */
 
-    secciones.forEach(function(seccion) {
+    function mostrarPublica(id) {
+
+      const pantallas = [
+        "inicio",
+        "registro",
+        "login",
+        "cliente"
+      ];
+
+      pantallas.forEach(function(pantalla) {
 
         const elemento =
-            document.getElementById(seccion);
+          document.getElementById(pantalla);
 
         if (elemento) {
-            elemento.classList.add("oculto");
+          elemento.classList.add("oculto");
         }
 
-    });
+      });
 
-    /* Mostrar solamente la ventana elegida */
 
-    const destino =
+      const destino =
         document.getElementById(id);
 
-    if (destino) {
+      if (destino) {
         destino.classList.remove("oculto");
+      }
+
     }
 
-    /* Cargar información correspondiente */
 
-    if (id === "informacionNegocio") {
-        cargarPanelNegocio();
+    function mostrarVistaCliente(id) {
+
+      const vistas = document.querySelectorAll(
+        ".vista-cliente"
+      );
+
+      vistas.forEach(function(vista) {
+        vista.classList.add("oculto");
+      });
+
+
+      const destino =
+        document.getElementById(id);
+
+      if (destino) {
+        destino.classList.remove("oculto");
+      }
+
     }
 
-    if (id === "serviciosNegocio") {
-        cargarServiciosPanel();
-    }
-    if (id === "reservasNegocio") {
-    cargarReservasNegocio();
-    }
 
-}
+    function hoyISO() {
 
+      const ahora = new Date();
 
-/* =========================================================
-   VOLVER AL MENÚ DEL PANEL
-========================================================= */
+      const año =
+        ahora.getFullYear();
 
-function volverMenuPanel() {
+      const mes =
+        String(
+          ahora.getMonth() + 1
+        ).padStart(2, "0");
 
-    const menu =
-        document.getElementById("menuPanelNegocio");
+      const dia =
+        String(
+          ahora.getDate()
+        ).padStart(2, "0");
 
-    const secciones = [
-        "informacionNegocio",
-        "serviciosNegocio",
-        "reservasNegocio"
-    ];
+      return `${año}-${mes}-${dia}`;
 
-
-    /* Ocultar las secciones internas */
-
-    secciones.forEach(function(seccion) {
-
-        const elemento =
-            document.getElementById(seccion);
-
-        if (elemento) {
-            elemento.classList.add("oculto");
-        }
-
-    });
-
-
-    /* Mostrar nuevamente el menú */
-
-    if (menu) {
-        menu.classList.remove("oculto");
-    }
-
-}
-function salirPanelNegocio() {
-
-    const panel =
-        document.getElementById("zonaPanelNegocio");
-
-    const pantallaPrincipal =
-        document.getElementById("pantallaPrincipalCliente");
-
-    if (panel) {
-        panel.classList.add("oculto");
-    }
-
-    if (pantallaPrincipal) {
-        pantallaPrincipal.classList.remove("oculto");
-    }
-
-}
-
-async function cargarPanelNegocio() {
-
-    const info =
-        document.getElementById("infoMiNegocio");
-
-    const mensaje =
-        document.getElementById("mensajePanelNegocio");
-
-    if (!info || !mensaje) {
-        return;
-    }
-
-    info.innerHTML =
-        "<div class='cargando'>" +
-        "Buscando tu negocio..." +
-        "</div>";
-
-    mensaje.textContent = "";
-    mensaje.className = "mensaje";
-
-
-    const resultadoUsuario =
-        await supabaseClient.auth.getUser();
-
-    const user =
-        resultadoUsuario.data?.user;
-
-
-    if (!user) {
-
-        info.innerHTML = "";
-
-        mensaje.textContent =
-            "Debes iniciar sesión.";
-
-        mensaje.className =
-            "mensaje error";
-
-        return;
     }
 
 
     /*
-       POR AHORA BUSCAMOS EL NEGOCIO
-       QUE TENGA TU usuario_id.
+      IMPORTANTE:
+
+      No usamos directamente:
+
+      new Date("2026-09-01T18:00")
+
+      para clasificar citas.
+
+      Construimos la fecha local manualmente para evitar
+      problemas de zona horaria entre navegador y Supabase.
     */
 
-    const resultado =
-        await supabaseClient
-            .from("negocios")
-            .select("id, nombre, direccion, descripcion, usuario_id")
-            .eq("usuario_id", user.id)
-            .maybeSingle();
+    function construirFechaHoraLocal(
+      fecha,
+      hora
+    ) {
+
+      if (!fecha) {
+        return null;
+      }
+
+      const partesFecha =
+        fecha.split("-").map(Number);
+
+      const partesHora =
+        String(hora || "00:00")
+          .split(":")
+          .map(Number);
+
+      const año = partesFecha[0];
+
+      const mes = partesFecha[1];
+
+      const dia = partesFecha[2];
+
+      const horas = partesHora[0] || 0;
+
+      const minutos = partesHora[1] || 0;
+
+      return new Date(
+        año,
+        mes - 1,
+        dia,
+        horas,
+        minutos,
+        0,
+        0
+      );
+
+    }
 
 
-    if (resultado.error) {
+    function formatearFecha(fecha) {
 
-        console.error(
-            "ERROR CARGANDO NEGOCIO:",
-            resultado.error
+      if (!fecha) {
+        return "";
+      }
+
+      const partes =
+        fecha.split("-");
+
+      if (partes.length !== 3) {
+        return fecha;
+      }
+
+      return `${partes[2]}/${partes[1]}/${partes[0]}`;
+
+    }
+
+
+    function formatearPrecio(precio) {
+
+      const numero =
+        Number(precio || 0);
+
+      return numero.toLocaleString(
+        "es-CO",
+        {
+          style: "currency",
+          currency: "COP",
+          maximumFractionDigits: 0
+        }
+      );
+
+    }
+
+
+    function obtenerCategoriaNegocio(
+      negocio
+    ) {
+
+      const texto = (
+        (negocio.nombre || "") +
+        " " +
+        (negocio.descripcion || "")
+      ).toLowerCase();
+
+
+      if (
+        /barber|barbería|barberia|peluquer/.test(texto)
+      ) {
+        return "Barbería";
+      }
+
+
+      if (
+        /belleza|manicure|pedicure|uñas|unas|estética|estetica|salón|salon/.test(texto)
+      ) {
+        return "Belleza";
+      }
+
+
+      if (
+        /restaurante|comida|pizza|hamburguesa|café|cafe|bar |comedor/.test(texto)
+      ) {
+        return "Restaurante";
+      }
+
+
+      if (
+        /dentist|dental|odontolog|médic|medic|doctor|clínica|clinica|salud|fisioter|psicolog/.test(texto)
+      ) {
+        return "Salud";
+      }
+
+
+      if (
+        /gimnasio|gym|fitness|entrenamiento|deporte/.test(texto)
+      ) {
+        return "Fitness";
+      }
+
+
+      if (
+        /spa|masaje|relajación|relajacion|wellness/.test(texto)
+      ) {
+        return "Spa";
+      }
+
+
+      if (
+        /veterin|mascota|perro|gato|pet/.test(texto)
+      ) {
+        return "Mascotas";
+      }
+
+
+      if (
+        /mecánic|mecanic|automotr|taller|carro|vehículo|vehiculo/.test(texto)
+      ) {
+        return "Automotriz";
+      }
+
+
+      if (
+        /colegio|escuela|universidad|clase|profesor|tutor|educación|educacion|curso/.test(texto)
+      ) {
+        return "Educación";
+      }
+
+
+      if (
+        /abogado|contador|consultor|asesor|fotógraf|fotograf|diseño|diseñ|diseñador|profesional/.test(texto)
+      ) {
+        return "Profesional";
+      }
+
+
+      return "Otros";
+
+    }
+
+
+    function obtenerIconoCategoria(
+      categoria
+    ) {
+
+      const encontrada =
+        categoriasDisponibles.find(
+          function(categoriaItem) {
+            return categoriaItem.nombre === categoria;
+          }
         );
 
-        info.innerHTML = "";
 
-        mensaje.textContent =
-            "Error cargando tu negocio: " +
-            resultado.error.message;
+      return encontrada
+        ? encontrada.icono
+        : "🏢";
 
-        mensaje.className =
-            "mensaje error";
-
-        return;
     }
 
 
-    const negocio =
-    resultado.data;
+    function obtenerClaseEstado(
+      estado
+    ) {
 
-negocioActual =
-    negocio;
+      if (estado === "Pendiente") {
+        return "estado-pendiente";
+      }
 
-if (!negocio) {
+      if (estado === "Aceptada") {
+        return "estado-aceptada";
+      }
 
-        info.innerHTML =
-            "<p class='pequeno'>" +
-            "Todavía no tienes un negocio asociado a tu cuenta." +
-            "</p>";
+      if (estado === "Cancelada") {
+        return "estado-cancelada";
+      }
 
-        return;
+      return "";
+
     }
 
 
-    info.innerHTML =
+    function mostrarMensaje(
+      id,
+      texto,
+      tipo
+    ) {
 
-    "<h3>✏️ Editar información del negocio</h3>" +
+      const elemento =
+        document.getElementById(id);
 
-    "<label>Nombre del negocio</label>" +
-
-    "<input " +
-    "id='editarNombreNegocio' " +
-    "type='text' " +
-    "value='" +
-    escaparHTML(negocio.nombre || "") +
-    "'>" +
-
-    "<label>📍 Dirección</label>" +
-
-    "<input " +
-    "id='editarDireccionNegocio' " +
-    "type='text' " +
-    "value='" +
-    escaparHTML(negocio.direccion || "") +
-    "'>" +
-
-    "<label>📝 Descripción</label>" +
-
-    "<textarea " +
-    "id='editarDescripcionNegocio'>" +
-    escaparHTML(negocio.descripcion || "") +
-    "</textarea>" +
-
-    "<button " +
-    "class='boton boton-guardar' " + 
-    "onclick='guardarInformacionNegocio()'>" +
-    "💾 Guardar cambios" +
-    "</button>";
-
-
-    mensaje.textContent =
-        "✅ Negocio encontrado correctamente.";
-
-    mensaje.className =
-        "mensaje exito";
-}
-/* =========================================================
-   GUARDAR INFORMACIÓN DEL NEGOCIO
-========================================================= */
-
-async function guardarInformacionNegocio() {
-
-    const nombre =
-        document
-            .getElementById("editarNombreNegocio")
-            .value
-            .trim();
-
-    const direccion =
-        document
-            .getElementById("editarDireccionNegocio")
-            .value
-            .trim();
-
-    const descripcion =
-        document
-            .getElementById("editarDescripcionNegocio")
-            .value
-            .trim();
-
-    const mensaje =
-        document.getElementById("mensajePanelNegocio");
-
-
-    /* VALIDAR NOMBRE */
-
-    if (!nombre) {
-
-        mensaje.textContent =
-            "Escribe el nombre del negocio.";
-
-        mensaje.className =
-            "mensaje error";
-
+      if (!elemento) {
         return;
+      }
+
+      elemento.textContent = texto;
+
+      elemento.className =
+        "mensaje " +
+        (tipo || "info");
+
     }
 
 
-    mensaje.textContent =
-        "Guardando cambios...";
+    function ocultarMensaje(id) {
 
-    mensaje.className =
-        "mensaje";
+      const elemento =
+        document.getElementById(id);
 
-
-    /* COMPROBAR USUARIO */
-
-    const resultadoUsuario =
-        await supabaseClient.auth.getUser();
-
-    const user =
-        resultadoUsuario.data?.user;
-
-
-    if (!user) {
-
-        mensaje.textContent =
-            "Debes iniciar sesión.";
-
-        mensaje.className =
-            "mensaje error";
-
+      if (!elemento) {
         return;
+      }
+
+      elemento.className =
+        "mensaje oculto";
+
+      elemento.textContent = "";
+
     }
 
 
-    /* ACTUALIZAR NEGOCIO */
+    /* =====================================================
+       REGISTRO
+       ===================================================== */
 
-    const resultado =
-        await supabaseClient
-            .from("negocios")
-            .update({
+    async function registrarse(event) {
 
-                nombre:
-                    nombre,
-
-                direccion:
-                    direccion,
-
-                descripcion:
-                    descripcion
-
-            })
-            .eq("id", negocioActual.id)
-            .eq("usuario_id", user.id);
+      event.preventDefault();
 
 
-    /* COMPROBAR ERROR */
-
-    if (resultado.error) {
-
-        console.error(
-            "ERROR ACTUALIZANDO NEGOCIO:",
-            resultado.error
+      const boton =
+        document.getElementById(
+          "botonRegistro"
         );
 
-        mensaje.textContent =
-            "Error guardando los cambios: " +
-            resultado.error.message;
 
-        mensaje.className =
-            "mensaje error";
+      const nombre =
+        document.getElementById(
+          "nombreRegistro"
+        ).value.trim();
+
+
+      const email =
+        document.getElementById(
+          "correoRegistro"
+        ).value.trim();
+
+
+      const password =
+        document.getElementById(
+          "passwordRegistro"
+        ).value;
+
+
+      ocultarMensaje(
+        "mensajeRegistro"
+      );
+
+
+      boton.disabled = true;
+
+      boton.textContent =
+        "Creando cuenta...";
+
+
+      const resultado =
+        await supabaseClient.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: {
+              nombre: nombre
+            }
+          }
+        });
+
+
+      if (resultado.error) {
+
+        console.error(
+          "ERROR REGISTRO:",
+          resultado.error
+        );
+
+
+        mostrarMensaje(
+          "mensajeRegistro",
+          resultado.error.message,
+          "error"
+        );
+
+
+        boton.disabled = false;
+
+        boton.textContent =
+          "Registrarme";
 
         return;
+
+      }
+
+
+      mostrarMensaje(
+        "mensajeRegistro",
+        "✅ Cuenta creada correctamente. Ahora puedes iniciar sesión.",
+        "exito"
+      );
+
+
+      boton.disabled = false;
+
+      boton.textContent =
+        "Registrarme";
+
+
+      setTimeout(
+        function() {
+          mostrarPublica("login");
+        },
+        1200
+      );
+
     }
 
 
-    /* ACTUALIZAR NEGOCIO ACTUAL */
+    /* =====================================================
+       LOGIN
+       ===================================================== */
 
-    negocioActual.nombre =
+    async function iniciarSesion(event) {
+
+      event.preventDefault();
+
+
+      const boton =
+        document.getElementById(
+          "botonLogin"
+        );
+
+
+      const email =
+        document.getElementById(
+          "correoLogin"
+        ).value.trim();
+
+
+      const password =
+        document.getElementById(
+          "passwordLogin"
+        ).value;
+
+
+      ocultarMensaje(
+        "mensajeLogin"
+      );
+
+
+      boton.disabled = true;
+
+      boton.textContent =
+        "Entrando...";
+
+
+      const resultado =
+        await supabaseClient.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+
+
+      if (resultado.error) {
+
+        console.error(
+          "ERROR LOGIN:",
+          resultado.error
+        );
+
+
+        mostrarMensaje(
+          "mensajeLogin",
+          resultado.error.message,
+          "error"
+        );
+
+
+        boton.disabled = false;
+
+        boton.textContent =
+          "Iniciar sesión";
+
+        return;
+
+      }
+
+
+      usuarioActual =
+        resultado.data.user;
+
+
+      await entrarAplicacion();
+
+    }
+
+
+    /* =====================================================
+       ENTRAR A LA APP
+       ===================================================== */
+
+    async function entrarAplicacion() {
+
+      mostrarPublica("cliente");
+
+
+      const nombre =
+        usuarioActual?.user_metadata?.nombre ||
+        usuarioActual?.email ||
+        "Cliente";
+
+
+      document.getElementById(
+        "nombreCliente"
+      ).textContent =
         nombre;
 
-    negocioActual.direccion =
-        direccion;
 
-    negocioActual.descripcion =
-        descripcion;
-
-
-    mensaje.textContent =
-        "✅ Información del negocio actualizada correctamente.";
-
-    mensaje.className =
-        "mensaje exito";
+      document.getElementById(
+        "usuarioSuperior"
+      ).textContent =
+        usuarioActual?.email || "";
 
 
-    /* ACTUALIZAR LISTA DE NEGOCIOS */
-
-    await cargarNegocios();
-
-}    
-/* =========================================================
-   CARGAR SERVICIOS DEL PANEL
-========================================================= */
-function mostrarAgregarServicio() {
-
-    const lista =
-        document.getElementById("listaServiciosPanel");
-
-    const zonaAgregar =
-        document.getElementById("zonaAgregarServicio");
-
-    if (lista) {
-        lista.classList.add("oculto");
-    }
-
-    if (zonaAgregar) {
-        zonaAgregar.classList.remove("oculto");
-    }
-
-}
-function volverListaServicios() {
-
-    const lista =
-        document.getElementById("listaServiciosPanel");
-
-    const zonaAgregar =
-        document.getElementById("zonaAgregarServicio");
-
-    if (zonaAgregar) {
-        zonaAgregar.classList.add("oculto");
-    }
-
-    if (lista) {
-        lista.classList.remove("oculto");
-    }
-
-    cargarServiciosPanel();
-
-}    
-async function cargarServiciosPanel() {
-
-    const lista =
-        document.getElementById("listaServiciosPanel");
-
-    if (!lista) {
-        return;
-    }
-
-    lista.innerHTML =
-        "<div class='cargando'>Cargando servicios...</div>";
+      document.getElementById(
+        "fechaReserva"
+      ).min =
+        hoyISO();
 
 
-    /* BUSCAR USUARIO */
-
-    const resultadoUsuario =
-        await supabaseClient.auth.getUser();
-
-    const user =
-        resultadoUsuario.data?.user;
+      mostrarVistaCliente(
+        "vistaInicioCliente"
+      );
 
 
-    if (!user) {
+      await cargarNegocios();
 
-        lista.innerHTML =
-            "<p class='error'>Debes iniciar sesión.</p>";
-
-        return;
     }
 
 
-    /* BUSCAR NEGOCIO DEL USUARIO */
+    /* =====================================================
+       CARGAR NEGOCIOS
+       ===================================================== */
 
-    const resultadoNegocio =
-        await supabaseClient
-            .from("negocios")
-            .select("id")
-            .eq("usuario_id", user.id)
-            .maybeSingle();
+    async function cargarNegocios() {
 
-
-    if (resultadoNegocio.error) {
-
-        console.error(
-            "ERROR BUSCANDO NEGOCIO:",
-            resultadoNegocio.error
+      const contenedor =
+        document.getElementById(
+          "listaNegocios"
         );
 
-        lista.innerHTML =
-            "<p class='error'>" +
-            "Error buscando tu negocio." +
-            "</p>";
 
-        return;
-    }
+      contenedor.innerHTML =
+        `<div class="cargando">
+          Cargando negocios...
+        </div>`;
 
 
-    const negocio =
-        resultadoNegocio.data;
-
-
-    if (!negocio) {
-
-        lista.innerHTML =
-            "<p class='error'>" +
-            "No tienes un negocio asociado." +
-            "</p>";
-
-        return;
-    }
-
-
-    /* BUSCAR SERVICIOS */
-
-    const resultadoServicios =
+      const resultado =
         await supabaseClient
-            .from("servicios")
-            .select("id, nombre, precio, duracion, negocio_id")
-            .eq("negocio_id", negocio.id)
-            .order("nombre");
+          .from("negocios")
+          .select(
+            "id,nombre,direccion,descripcion"
+          )
+          .order(
+            "nombre",
+            {
+              ascending: true
+            }
+          );
 
 
-    if (resultadoServicios.error) {
+      if (resultado.error) {
 
         console.error(
-            "ERROR CARGANDO SERVICIOS:",
-            resultadoServicios.error
+          "ERROR CARGANDO NEGOCIOS:",
+          resultado.error
         );
 
-        lista.innerHTML =
-            "<p class='error'>" +
-            "Error cargando servicios: " +
-            escaparHTML(
-                resultadoServicios.error.message
-            ) +
-            "</p>";
+
+        contenedor.innerHTML =
+          `<div class="estado-vacio">
+            <div class="emoji">⚠️</div>
+            <h3>No se pudieron cargar los negocios</h3>
+            <p>${escaparHTML(
+              resultado.error.message
+            )}</p>
+          </div>`;
 
         return;
+
+      }
+
+
+      negociosCache =
+        resultado.data || [];
+
+
+      renderizarCategorias();
+
+      renderizarNegocios();
+
     }
 
 
-    const servicios =
-        resultadoServicios.data || [];
+    /* =====================================================
+       CATEGORÍAS
+       ===================================================== */
+
+    function renderizarCategorias() {
+
+      const contenedor =
+        document.getElementById(
+          "categoriasNegocios"
+        );
 
 
-    if (servicios.length === 0) {
+      contenedor.innerHTML =
+        categoriasDisponibles
+          .map(function(categoria) {
 
-        lista.innerHTML =
-            "<p class='pequeno'>" +
-            "Todavía no tienes servicios registrados." +
-            "</p>";
+            const activa =
+              categoria.nombre === categoriaActual
+                ? "activa"
+                : "";
 
-        return;
+
+            return `
+              <button
+                class="categoria ${activa}"
+                onclick="seleccionarCategoria('${escaparHTML(categoria.nombre)}')"
+              >
+                ${categoria.icono}
+                ${escaparHTML(categoria.nombre)}
+              </button>
+            `;
+
+          })
+          .join("");
+
     }
 
 
-    /* MOSTRAR SERVICIOS */
+    function seleccionarCategoria(
+      categoria
+    ) {
 
-    lista.innerHTML = "";
+      categoriaActual =
+        categoria;
 
+      renderizarCategorias();
 
-    servicios.forEach(function(servicio) {
+      renderizarNegocios();
 
-    const div =
-        document.createElement("div");
-
-    div.className =
-        "servicio";
-
-    const precio =
-        Number(servicio.precio)
-            .toLocaleString("es-CO");
-
-    div.innerHTML =
-
-        "<strong>✂️ " +
-        escaparHTML(servicio.nombre) +
-        "</strong>" +
-
-        "<br>" +
-
-        "💰 $" +
-        precio +
-
-        "<br>" +
-
-        "<span class='pequeno'>" +
-        "⏱️ " +
-        escaparHTML(
-            String(servicio.duracion)
-        ) +
-        " minutos" +
-        "</span>";
+    }
 
 
-    /* BOTÓN ELIMINAR */
+    /* =====================================================
+       FILTRAR NEGOCIOS
+       ===================================================== */
 
-    const botonEliminar =
-        document.createElement("button");
+    function filtrarNegocios() {
 
-    botonEliminar.textContent =
-        "🗑️ Eliminar servicio";
+      renderizarNegocios();
 
-    botonEliminar.className =
-    "secundario boton-eliminar";
+    }
 
-    botonEliminar.onclick =
+
+    function renderizarNegocios() {
+
+      const contenedor =
+        document.getElementById(
+          "listaNegocios"
+        );
+
+
+      const texto =
+        document.getElementById(
+          "buscadorNegocios"
+        )?.value
+          ?.trim()
+          .toLowerCase() || "";
+
+
+      const filtrados =
+        negociosCache.filter(
+          function(negocio) {
+
+            const categoria =
+              obtenerCategoriaNegocio(
+                negocio
+              );
+
+
+            const coincideCategoria =
+              categoriaActual === "Todos" ||
+              categoria === categoriaActual;
+
+
+            const contenido =
+              (
+                (negocio.nombre || "") +
+                " " +
+                (negocio.direccion || "") +
+                " " +
+                (negocio.descripcion || "") +
+                " " +
+                categoria
+              ).toLowerCase();
+
+
+            const coincideTexto =
+              !texto ||
+              contenido.includes(texto);
+
+
+            return (
+              coincideCategoria &&
+              coincideTexto
+            );
+
+          }
+        );
+
+
+      if (filtrados.length === 0) {
+
+        contenedor.innerHTML =
+          `<div class="estado-vacio">
+            <div class="emoji">🔎</div>
+            <h3>No encontramos negocios</h3>
+            <p>
+              Prueba con otra búsqueda o categoría.
+            </p>
+          </div>`;
+
+        return;
+
+      }
+
+
+      contenedor.innerHTML =
+        filtrados
+          .map(function(negocio) {
+
+            const categoria =
+              obtenerCategoriaNegocio(
+                negocio
+              );
+
+
+            const icono =
+              obtenerIconoCategoria(
+                categoria
+              );
+
+
+            return `
+              <article class="negocio-card">
+
+                <div class="negocio-superior">
+
+                  <div class="negocio-icono">
+                    ${icono}
+                  </div>
+
+                  <div>
+
+                    <h3>
+                      ${escaparHTML(
+                        negocio.nombre
+                      )}
+                    </h3>
+
+                    <span class="negocio-categoria">
+                      ${icono}
+                      ${escaparHTML(categoria)}
+                    </span>
+
+                  </div>
+
+                </div>
+
+
+                <div class="negocio-direccion">
+                  📍
+                  ${escaparHTML(
+                    negocio.direccion ||
+                    "Dirección no registrada"
+                  )}
+                </div>
+
+
+                <div class="negocio-descripcion">
+                  ${escaparHTML(
+                    negocio.descripcion ||
+                    "Consulta los servicios disponibles."
+                  )}
+                </div>
+
+
+                <button
+                  class="boton"
+                  onclick="seleccionarNegocio('${negocio.id}')"
+                >
+                  Ver negocio
+                </button>
+
+              </article>
+            `;
+
+          })
+          .join("");
+
+    }
+
+
+    /* =====================================================
+       SELECCIONAR NEGOCIO
+       ===================================================== */
+
+    async function seleccionarNegocio(
+      id
+    ) {
+
+      negocioActual =
+        negociosCache.find(
+          function(negocio) {
+            return negocio.id === id;
+          }
+        );
+
+
+      if (!negocioActual) {
+        return;
+      }
+
+
+      const categoria =
+        obtenerCategoriaNegocio(
+          negocioActual
+        );
+
+
+      document.getElementById(
+        "iconoNegocioSeleccionado"
+      ).textContent =
+        obtenerIconoCategoria(
+          categoria
+        );
+
+
+      document.getElementById(
+        "nombreNegocioSeleccionado"
+      ).textContent =
+        negocioActual.nombre;
+
+
+      document.getElementById(
+        "categoriaNegocioSeleccionado"
+      ).textContent =
+        `${obtenerIconoCategoria(categoria)} ${categoria}`;
+
+
+      document.getElementById(
+        "direccionNegocioSeleccionado"
+      ).textContent =
+        negocioActual.direccion
+          ? `📍 ${negocioActual.direccion}`
+          : "";
+
+
+      document.getElementById(
+        "descripcionNegocioSeleccionado"
+      ).textContent =
+        negocioActual.descripcion || "";
+
+
+      mostrarVistaCliente(
+        "vistaNegocio"
+      );
+
+
+      await cargarServiciosCliente();
+
+    }
+
+
+    /* =====================================================
+       SERVICIOS CLIENTE
+       ===================================================== */
+
+    async function cargarServiciosCliente() {
+
+      const lista =
+        document.getElementById(
+          "listaServiciosCliente"
+        );
+
+
+      const selector =
+        document.getElementById(
+          "servicioReserva"
+        );
+
+
+      const zonaReserva =
+        document.getElementById(
+          "zonaReserva"
+        );
+
+
+      lista.innerHTML =
+        `<div class="cargando">
+          Cargando servicios...
+        </div>`;
+
+
+      selector.innerHTML =
+        `<option value="">
+          Selecciona un servicio
+        </option>`;
+
+
+      zonaReserva.classList.add(
+        "oculto"
+      );
+
+
+      const resultado =
+        await supabaseClient
+          .from("servicios")
+          .select(
+            "id,nombre,precio,duracion"
+          )
+          .eq(
+            "negocio_id",
+            negocioActual.id
+          )
+          .order(
+            "nombre",
+            {
+              ascending: true
+            }
+          );
+
+
+      if (resultado.error) {
+
+        console.error(
+          "ERROR SERVICIOS:",
+          resultado.error
+        );
+
+
+        lista.innerHTML =
+          `<div class="estado-vacio">
+            <div class="emoji">⚠️</div>
+            <h3>Error cargando servicios</h3>
+            <p>${escaparHTML(
+              resultado.error.message
+            )}</p>
+          </div>`;
+
+        return;
+
+      }
+
+
+      const servicios =
+        resultado.data || [];
+
+
+      if (servicios.length === 0) {
+
+        lista.innerHTML =
+          `<div class="estado-vacio">
+            <div class="emoji">🛠️</div>
+            <h3>Este negocio todavía no tiene servicios</h3>
+            <p>
+              El propietario todavía no ha agregado servicios.
+            </p>
+          </div>`;
+
+        return;
+
+      }
+
+
+      lista.innerHTML =
+        servicios
+          .map(function(servicio) {
+
+            return `
+              <article class="servicio-card">
+
+                <div>
+
+                  <h3>
+                    ${escaparHTML(
+                      servicio.nombre
+                    )}
+                  </h3>
+
+                  <div class="servicio-info">
+                    ⏱️
+                    ${servicio.duracion || 0}
+                    minutos
+                  </div>
+
+                </div>
+
+
+                <div>
+
+                  <div class="servicio-precio">
+                    ${formatearPrecio(
+                      servicio.precio
+                    )}
+                  </div>
+
+                  <button
+                    class="boton pequeno"
+                    style="margin-top:8px;"
+                    onclick="seleccionarServicioParaReserva('${servicio.id}')"
+                  >
+                    Reservar
+                  </button>
+
+                </div>
+
+              </article>
+            `;
+
+          })
+          .join("");
+
+
+      servicios.forEach(
+        function(servicio) {
+
+          const opcion =
+            document.createElement(
+              "option"
+            );
+
+          opcion.value =
+            servicio.id;
+
+          opcion.textContent =
+            `${servicio.nombre} — ${formatearPrecio(servicio.precio)}`;
+
+          selector.appendChild(
+            opcion
+          );
+
+        }
+      );
+
+
+      selector.onchange =
         function() {
-            eliminarServicio(servicio.id);
+
+          if (this.value) {
+
+            zonaReserva.classList.remove(
+              "oculto"
+            );
+
+          }
+
         };
 
-
-    div.appendChild(botonEliminar);
-
-    lista.appendChild(div);
-
-});
-
-}
-async function cargarReservasNegocio() {
-
-    const lista =
-        document.getElementById("listaReservasNegocio");
-
-    const mensaje =
-        document.getElementById("mensajeReservasNegocio");
-
-    if (!lista || !mensaje) {
-        return;
-    }
-
-    lista.innerHTML =
-        "<div class='cargando'>Cargando reservas...</div>";
-
-    mensaje.textContent = "";
-    mensaje.className = "mensaje";
-
-
-    /* BUSCAR USUARIO */
-
-    const resultadoUsuario =
-        await supabaseClient.auth.getUser();
-
-    const user =
-        resultadoUsuario.data?.user;
-
-
-    if (!user) {
-
-        lista.innerHTML = "";
-
-        mensaje.textContent =
-            "Debes iniciar sesión.";
-
-        mensaje.className =
-            "mensaje error";
-
-        return;
     }
 
 
-    /* BUSCAR NEGOCIO DEL USUARIO */
+    function seleccionarServicioParaReserva(
+      idServicio
+    ) {
 
-    const resultadoNegocio =
+      document.getElementById(
+        "servicioReserva"
+      ).value =
+        idServicio;
+
+
+      document.getElementById(
+        "zonaReserva"
+      ).classList.remove(
+        "oculto"
+      );
+
+
+      document.getElementById(
+        "zonaReserva"
+      ).scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+    }
+
+
+    /* =====================================================
+       RESERVAR
+       ===================================================== */
+
+    async function reservar(event) {
+
+      event.preventDefault();
+
+
+      if (!usuarioActual) {
+
+        mostrarPublica("login");
+
+        return;
+
+      }
+
+
+      if (!negocioActual) {
+
+        mostrarMensaje(
+          "mensajeReserva",
+          "⚠️ Selecciona un negocio.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      const boton =
+        document.getElementById(
+          "botonReservar"
+        );
+
+
+      const servicioId =
+        document.getElementById(
+          "servicioReserva"
+        ).value;
+
+
+      const fecha =
+        document.getElementById(
+          "fechaReserva"
+        ).value;
+
+
+      const hora =
+        document.getElementById(
+          "horaReserva"
+        ).value;
+
+
+      const comentario =
+        document.getElementById(
+          "comentarioReserva"
+        ).value.trim();
+
+
+      const nombreCliente =
+        usuarioActual
+          ?.user_metadata
+          ?.nombre ||
+        usuarioActual?.email ||
+        "Cliente";
+
+
+      if (!servicioId) {
+
+        mostrarMensaje(
+          "mensajeReserva",
+          "Selecciona un servicio.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      if (!fecha || !hora) {
+
+        mostrarMensaje(
+          "mensajeReserva",
+          "Selecciona fecha y hora.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      const fechaHoraReserva =
+        construirFechaHoraLocal(
+          fecha,
+          hora
+        );
+
+
+      if (
+        !fechaHoraReserva ||
+        fechaHoraReserva <= new Date()
+      ) {
+
+        mostrarMensaje(
+          "mensajeReserva",
+          "⚠️ La reserva debe ser para una fecha y hora futura.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      boton.disabled = true;
+
+      boton.textContent =
+        "Guardando reserva...";
+
+
+      ocultarMensaje(
+        "mensajeReserva"
+      );
+
+
+      const datosReserva = {
+
+        negocio_id:
+          negocioActual.id,
+
+        servicio_id:
+          servicioId,
+
+        nombre_cliente:
+          nombreCliente,
+
+        telefono_cliente:
+          "",
+
+        fecha:
+          fecha,
+
+        hora:
+          hora,
+
+        comentario:
+          comentario,
+
+        estado:
+          "Pendiente",
+
+        usuario:
+          usuarioActual.id
+
+      };
+
+
+      const resultado =
         await supabaseClient
-            .from("negocios")
-            .select("id")
-            .eq("usuario_id", user.id)
-            .maybeSingle();
+          .from("Citas")
+          .insert(
+            datosReserva
+          );
 
 
-    if (resultadoNegocio.error) {
+      if (resultado.error) {
 
-        lista.innerHTML = "";
-
-        mensaje.textContent =
-            "Error buscando tu negocio: " +
-            resultadoNegocio.error.message;
-
-        mensaje.className =
-            "mensaje error";
-
-        return;
-    }
+        console.error(
+          "ERROR GUARDANDO CITA:",
+          resultado.error
+        );
 
 
-    const negocio =
-        resultadoNegocio.data;
+        if (
+          resultado.error.code ===
+          "23505"
+        ) {
 
-
-    if (!negocio) {
-
-        lista.innerHTML = "";
-
-        mensaje.textContent =
-            "No tienes un negocio asociado.";
-
-        mensaje.className =
-            "mensaje error";
-
-        return;
-    }
-
-
-    /* BUSCAR RESERVAS */
-
-    const resultadoReservas =
-        await supabaseClient
-            .from("Citas")
-            .select(
-                "id, negocio_id, servicio_id, nombre_cliente, fecha, hora, comentario, estado"
-            )
-            .eq("negocio_id", negocio.id)
-            .order("fecha", {
-                ascending: true
-            })
-            .order("hora", {
-                ascending: true
-            });
-
-
-    if (resultadoReservas.error) {
-
-        lista.innerHTML = "";
-
-        mensaje.textContent =
-            "Error cargando reservas: " +
-            resultadoReservas.error.message;
-
-        mensaje.className =
-            "mensaje error";
-
-        return;
-    }
-
-
-    const reservas =
-        resultadoReservas.data || [];
-    const serviciosIds =
-        [...new Set(
-            reservas
-                .map(function(reserva) {
-                    return reserva.servicio_id;
-                })
-                .filter(Boolean)
-        )];
-
-
-    let servicios = [];
-
-
-    if (serviciosIds.length > 0) {
-
-        const resultadoServicios =
-            await supabaseClient
-                .from("servicios")
-                .select("id, nombre")
-                .in("id", serviciosIds);
-
-
-        if (resultadoServicios.error) {
-
-            console.error(
-                "Error cargando servicios:",
-                resultadoServicios.error
-            );
+          mostrarMensaje(
+            "mensajeReserva",
+            "⚠️ Ese horario ya está reservado. Por favor, elige otra hora.",
+            "error"
+          );
 
         } else {
 
-            servicios =
-                resultadoServicios.data || [];
+          mostrarMensaje(
+            "mensajeReserva",
+            "Error al guardar la reserva: " +
+            resultado.error.message,
+            "error"
+          );
 
         }
 
-    }
 
-    if (reservas.length === 0) {
+        boton.disabled = false;
 
-        lista.innerHTML =
-            "<p class='pequeno'>" +
-            "Todavía no hay reservas en tu negocio." +
-            "</p>";
+        boton.textContent =
+          "📅 Confirmar reserva";
 
         return;
+
+      }
+
+
+      mostrarMensaje(
+        "mensajeReserva",
+        "✅ Reserva creada correctamente. Quedó en estado Pendiente.",
+        "exito"
+      );
+
+
+      boton.disabled = false;
+
+      boton.textContent =
+        "📅 Confirmar reserva";
+
+
+      document.getElementById(
+        "comentarioReserva"
+      ).value = "";
+
+
+      setTimeout(
+        function() {
+
+          mostrarMisReservas();
+
+        },
+        1000
+      );
+
     }
-        const ahora =
-        new Date();
-        console.log("AHORA:", ahora);
 
-    const proximasReservas =
-    reservas.filter(function(reserva) {
 
-        const fechaHora =
-            new Date(
-                reserva.fecha +
-                "T" +
-                reserva.hora
-            );
+    /* =====================================================
+       VOLVER CLIENTE
+       ===================================================== */
 
-        return (
-            fechaHora >= ahora &&
-            reserva.estado !== "Cancelada"
+    function volverPantallaCliente() {
+
+      mostrarVistaCliente(
+        "vistaInicioCliente"
+      );
+
+      cargarNegocios();
+
+    }
+
+
+    /* =====================================================
+       MIS RESERVAS
+       ===================================================== */
+
+    async function mostrarMisReservas() {
+
+      mostrarVistaCliente(
+        "vistaMisReservas"
+      );
+
+
+      await cargarMisReservas();
+
+    }
+
+
+    async function cargarMisReservas() {
+
+      const contenedor =
+        document.getElementById(
+          "listaMisReservas"
         );
 
-    });
 
-    const reservasAnteriores =
-    reservas.filter(function(reserva) {
+      contenedor.innerHTML =
+        `<div class="cargando">
+          Cargando reservas...
+        </div>`;
 
-        const fechaHora =
-            new Date(
-                reserva.fecha +
-                "T" +
-                reserva.hora
-            );
 
-        return (
-            fechaHora < ahora ||
-            reserva.estado === "Cancelada"
-        );
-
-    });
-
-    lista.innerHTML = "";
-
-
-    if (proximasReservas.length > 0) {
-
-    const tituloProximas =
-        document.createElement("h3");
-
-    tituloProximas.textContent =
-        "📅 Próximas citas";
-
-    lista.appendChild(tituloProximas);
-
-
-    proximasReservas.forEach(function(reserva) {
-const servicio =
-    servicios.find(function(item) {
-
-        return item.id === reserva.servicio_id;
-
-    });
-
-
-const nombreServicio =
-    servicio
-        ? servicio.nombre
-        : "Servicio no encontrado";
-        const div =
-            document.createElement("div");
-
-        div.className =
-            "reserva";
-
-
-        div.innerHTML =
-
-            "<h3>📅 Reserva</h3>" +
-
-            "<p>" +
-            "<strong>👤 Cliente:</strong> " +
-            escaparHTML(
-                reserva.nombre_cliente || "Cliente"
-            ) +
-            "</p>" +
-            
-            "<p>" +
-            "<strong>🛠️ Servicio:</strong> " +
-            escaparHTML(nombreServicio) +
-            "</p>" +
-
-            "<p>" +
-            "<strong>📅 Fecha:</strong> " +
-            escaparHTML(reserva.fecha) +
-            "</p>" +
-
-            "<p>" +
-            "<strong>🕐 Hora:</strong> " +
-            escaparHTML(reserva.hora) +
-            "</p>" +
-
-            (
-                reserva.comentario
-                    ?
-                    "<p>" +
-                    "<strong>💬 Comentario:</strong> " +
-                    escaparHTML(reserva.comentario) +
-                    "</p>"
-                    :
-                    ""
-            ) +
-
-            "<p>" +
-            "<strong>Estado:</strong> " +
-            "<span class='estado estado-" +
-(
-    reserva.estado || "Pendiente"
-).toLowerCase() +
-"'>" +
-escaparHTML(
-    reserva.estado || "Pendiente"
-) +
-"</span>" +
- "</p>";
-
-
-if (reserva.estado === "Pendiente") {
-
-    const botonAceptar =
-        document.createElement("button");
-
-    botonAceptar.textContent =
-        "✅ Aceptar cita";
-
-    botonAceptar.className =
-        "boton";
-
-    botonAceptar.onclick =
-        function() {
-            cambiarEstadoCita(
-                reserva.id,
-                "Aceptada"
-            );
-        };
-
-
-    const botonCancelar =
-        document.createElement("button");
-
-    botonCancelar.textContent =
-        "❌ Cancelar cita";
-
-    botonCancelar.className =
-        "secundario";
-
-    botonCancelar.onclick =
-        function() {
-            cambiarEstadoCita(
-                reserva.id,
-                "Cancelada"
-            );
-        };
-
-
-    div.appendChild(botonAceptar);
-
-    div.appendChild(botonCancelar);
-
-}
-
-lista.appendChild(div);
-
-    });
-
-  }
-
-if (reservasAnteriores.length > 0) {
-
-    const tituloAnteriores =
-        document.createElement("h3");
-
-    tituloAnteriores.textContent =
-        "🗂️ Citas anteriores";
-
-    lista.appendChild(tituloAnteriores);
-        reservasAnteriores.forEach(function(reserva) {
-
-        const servicio =
-            servicios.find(function(item) {
-
-                return item.id === reserva.servicio_id;
-
-            });
-
-
-        const nombreServicio =
-            servicio
-                ? servicio.nombre
-                : "Servicio no encontrado";
-
-
-        const div =
-            document.createElement("div");
-
-        div.className =
-            "reserva";
-
-
-        div.innerHTML =
-
-            "<h3>📅 Reserva anterior</h3>" +
-
-            "<p>" +
-            "<strong>👤 Cliente:</strong> " +
-            escaparHTML(
-                reserva.nombre_cliente || "Cliente"
-            ) +
-            "</p>" +
-
-            "<p>" +
-            "<strong>🛠️ Servicio:</strong> " +
-            escaparHTML(nombreServicio) +
-            "</p>" +
-
-            "<p>" +
-            "<strong>📅 Fecha:</strong> " +
-            escaparHTML(reserva.fecha) +
-            "</p>" +
-
-            "<p>" +
-            "<strong>🕐 Hora:</strong> " +
-            escaparHTML(reserva.hora) +
-            "</p>" +
-
-            (
-                reserva.comentario
-                    ?
-                    "<p>" +
-                    "<strong>💬 Comentario:</strong> " +
-                    escaparHTML(reserva.comentario) +
-                    "</p>"
-                    :
-                    ""
-            ) +
-
-            "<p>" +
-            "<strong>Estado:</strong> " +
-            "<span class='estado estado-" +
-            (
-                reserva.estado || "Pendiente"
-            ).toLowerCase() +
-            "'>" +
-            escaparHTML(
-                reserva.estado || "Pendiente"
-            ) +
-            "</span>" +
-            "</p>";
-
-
-        lista.appendChild(div);
-
-    });
-
-}
-
-}
-    
-async function cambiarEstadoCita(idCita, nuevoEstado) {
-
-    const confirmar =
-        confirm(
-            "¿Seguro que quieres cambiar el estado de esta cita a " +
-            nuevoEstado +
-            "?"
-        );
-
-    if (!confirmar) {
+      if (!usuarioActual) {
         return;
-    }
+      }
 
 
-    const resultado =
+      const resultado =
         await supabaseClient
-            .from("Citas")
-            .update({
-                estado: nuevoEstado
-            })
-            .eq("id", idCita);
+          .from("Citas")
+          .select(
+            "id,negocio_id,servicio_id,nombre_cliente,fecha,hora,comentario,estado"
+          )
+          .eq(
+            "usuario",
+            usuarioActual.id
+          )
+          .order(
+            "fecha",
+            {
+              ascending: true
+            }
+          )
+          .order(
+            "hora",
+            {
+              ascending: true
+            }
+          );
 
 
-    if (resultado.error) {
+      if (resultado.error) {
 
         console.error(
-            "ERROR CAMBIANDO ESTADO:",
-            resultado.error
+          "ERROR MIS RESERVAS:",
+          resultado.error
         );
 
-        alert(
-            "Error cambiando el estado: " +
-            resultado.error.message
-        );
+
+        contenedor.innerHTML =
+          `<div class="estado-vacio">
+            <div class="emoji">⚠️</div>
+            <h3>Error cargando reservas</h3>
+            <p>${escaparHTML(
+              resultado.error.message
+            )}</p>
+          </div>`;
 
         return;
+
+      }
+
+
+      const reservas =
+        resultado.data || [];
+
+
+      if (reservas.length === 0) {
+
+        contenedor.innerHTML =
+          `<div class="estado-vacio">
+            <div class="emoji">📅</div>
+            <h3>No tienes reservas todavía</h3>
+            <p>
+              Cuando hagas una reserva aparecerá aquí.
+            </p>
+          </div>`;
+
+        return;
+
+      }
+
+
+      const negocioIds =
+        [
+          ...new Set(
+            reservas.map(
+              function(reserva) {
+                return reserva.negocio_id;
+              }
+            )
+          )
+        ];
+
+
+      const servicioIds =
+        [
+          ...new Set(
+            reservas.map(
+              function(reserva) {
+                return reserva.servicio_id;
+              }
+            )
+          )
+        ];
+
+
+      const negociosResultado =
+        await supabaseClient
+          .from("negocios")
+          .select(
+            "id,nombre"
+          )
+          .in(
+            "id",
+            negocioIds
+          );
+
+
+      const serviciosResultado =
+        await supabaseClient
+          .from("servicios")
+          .select(
+            "id,nombre"
+          )
+          .in(
+            "id",
+            servicioIds
+          );
+
+
+      const mapaNegocios = {};
+
+      (
+        negociosResultado.data || []
+      ).forEach(
+        function(negocio) {
+
+          mapaNegocios[
+            negocio.id
+          ] =
+            negocio.nombre;
+
+        }
+      );
+
+
+      const mapaServicios = {};
+
+      (
+        serviciosResultado.data || []
+      ).forEach(
+        function(servicio) {
+
+          mapaServicios[
+            servicio.id
+          ] =
+            servicio.nombre;
+
+        }
+      );
+
+
+      const ahora =
+        new Date();
+
+
+      const proximas =
+        reservas.filter(
+          function(reserva) {
+
+            const fechaHora =
+              construirFechaHoraLocal(
+                reserva.fecha,
+                reserva.hora
+              );
+
+
+            return (
+              fechaHora &&
+              fechaHora >= ahora &&
+              reserva.estado !== "Cancelada"
+            );
+
+          }
+        );
+
+
+      const historial =
+        reservas.filter(
+          function(reserva) {
+
+            const fechaHora =
+              construirFechaHoraLocal(
+                reserva.fecha,
+                reserva.hora
+              );
+
+
+            return (
+              reserva.estado === "Cancelada" ||
+              !fechaHora ||
+              fechaHora < ahora
+            );
+
+          }
+        );
+
+
+      let html = "";
+
+
+      html += `
+        <div class="grupo-reservas">
+
+          <div class="titulo-grupo">
+
+            <h3>
+              📅 Próximas reservas
+            </h3>
+
+            <span class="contador">
+              ${proximas.length}
+            </span>
+
+          </div>
+      `;
+
+
+      if (proximas.length === 0) {
+
+        html += `
+          <div class="estado-vacio">
+
+            <div class="emoji">
+              📅
+            </div>
+
+            <h3>
+              No tienes reservas próximas
+            </h3>
+
+            <p>
+              Las nuevas reservas aparecerán aquí.
+            </p>
+
+          </div>
+        `;
+
+      } else {
+
+        proximas.forEach(
+          function(reserva) {
+
+            html += crearTarjetaReservaCliente(
+              reserva,
+              mapaNegocios,
+              mapaServicios,
+              true
+            );
+
+          }
+        );
+
+      }
+
+
+      html += `
+        </div>
+
+        <div class="grupo-reservas">
+
+          <div class="titulo-grupo">
+
+            <h3>
+              🗂️ Historial
+            </h3>
+
+            <span class="contador">
+              ${historial.length}
+            </span>
+
+          </div>
+      `;
+
+
+      if (historial.length === 0) {
+
+        html += `
+          <div class="estado-vacio">
+
+            <div class="emoji">
+              🗂️
+            </div>
+
+            <h3>
+              Todavía no tienes historial
+            </h3>
+
+            <p>
+              Tus reservas anteriores aparecerán aquí.
+            </p>
+
+          </div>
+        `;
+
+      } else {
+
+        historial.forEach(
+          function(reserva) {
+
+            html += crearTarjetaReservaCliente(
+              reserva,
+              mapaNegocios,
+              mapaServicios,
+              false
+            );
+
+          }
+        );
+
+      }
+
+
+      html += `
+        </div>
+      `;
+
+
+      contenedor.innerHTML =
+        html;
+
     }
 
 
-    alert(
-        "✅ Cita actualizada correctamente."
+    function crearTarjetaReservaCliente(
+      reserva,
+      mapaNegocios,
+      mapaServicios,
+      puedeCancelar
+    ) {
+
+      const claseEstado =
+        obtenerClaseEstado(
+          reserva.estado
+        );
+
+
+      let botonCancelar = "";
+
+
+      if (
+        puedeCancelar &&
+        reserva.estado !== "Cancelada"
+      ) {
+
+        botonCancelar = `
+          <button
+            class="boton pequeno rojo"
+            onclick="cancelarCita('${reserva.id}')"
+          >
+            ❌ Cancelar cita
+          </button>
+        `;
+
+      }
+
+
+      return `
+        <article class="reserva-card">
+
+          <div class="reserva-superior">
+
+            <div>
+
+              <h3>
+                ${escaparHTML(
+                  mapaServicios[
+                    reserva.servicio_id
+                  ] ||
+                  "Servicio"
+                )}
+              </h3>
+
+              <div class="reserva-negocio">
+                🏢
+                ${escaparHTML(
+                  mapaNegocios[
+                    reserva.negocio_id
+                  ] ||
+                  "Negocio"
+                )}
+              </div>
+
+            </div>
+
+
+            <span class="estado ${claseEstado}">
+              ${escaparHTML(
+                reserva.estado
+              )}
+            </span>
+
+          </div>
+
+
+          <div class="reserva-datos">
+
+            <div>
+              📅
+              ${formatearFecha(
+                reserva.fecha
+              )}
+            </div>
+
+            <div>
+              🕐
+              ${escaparHTML(
+                reserva.hora
+              )}
+            </div>
+
+            ${
+              reserva.comentario
+                ? `
+                  <div>
+                    💬
+                    ${escaparHTML(
+                      reserva.comentario
+                    )}
+                  </div>
+                `
+                : ""
+            }
+
+          </div>
+
+
+          ${
+            botonCancelar
+              ? `
+                <div class="reserva-acciones">
+                  ${botonCancelar}
+                </div>
+              `
+              : ""
+          }
+
+        </article>
+      `;
+
+    }
+
+
+    /* =====================================================
+       CANCELAR CITA
+       ===================================================== */
+
+    async function cancelarCita(
+      idCita
+    ) {
+
+      if (!usuarioActual) {
+        return;
+      }
+
+
+      const confirmar =
+        window.confirm(
+          "¿Seguro que quieres cancelar esta cita?"
+        );
+
+
+      if (!confirmar) {
+        return;
+      }
+
+
+      const resultado =
+        await supabaseClient
+          .from("Citas")
+          .update({
+            estado: "Cancelada"
+          })
+          .eq(
+            "id",
+            idCita
+          )
+          .eq(
+            "usuario",
+            usuarioActual.id
+          );
+
+
+      if (resultado.error) {
+
+        console.error(
+          "ERROR CANCELANDO:",
+          resultado.error
+        );
+
+
+        alert(
+          "No se pudo cancelar la cita: " +
+          resultado.error.message
+        );
+
+        return;
+
+      }
+
+
+      await cargarMisReservas();
+
+    }
+
+
+    /* =====================================================
+       PANEL DEL NEGOCIO
+       ===================================================== */
+
+    async function mostrarPanelNegocio() {
+
+      mostrarVistaCliente(
+        "vistaPanelNegocio"
+      );
+
+
+      await cargarPanelNegocio();
+
+    }
+
+
+    async function cargarNegocioPropio() {
+
+      if (!usuarioActual) {
+        return null;
+      }
+
+
+      const resultado =
+        await supabaseClient
+          .from("negocios")
+          .select(
+            "id,nombre,direccion,descripcion"
+          )
+          .eq(
+            "usuario_id",
+            usuarioActual.id
+          )
+          .order(
+            "nombre",
+            {
+              ascending: true
+            }
+          )
+          .limit(1)
+          .maybeSingle();
+
+
+      if (resultado.error) {
+
+        console.error(
+          "ERROR NEGOCIO PROPIO:",
+          resultado.error
+        );
+
+        return null;
+
+      }
+
+
+      negocioPropio =
+        resultado.data || null;
+
+
+      return negocioPropio;
+
+    }
+
+
+    async function cargarPanelNegocio() {
+
+      const panelSin =
+        document.getElementById(
+          "panelSinNegocio"
+        );
+
+
+      const panelCon =
+        document.getElementById(
+          "panelConNegocio"
+        );
+
+
+      panelSin.classList.add(
+        "oculto"
+      );
+
+      panelCon.classList.add(
+        "oculto"
+      );
+
+
+      const negocio =
+        await cargarNegocioPropio();
+
+
+      if (!negocio) {
+
+        panelSin.classList.remove(
+          "oculto"
+        );
+
+        return;
+
+      }
+
+
+      panelCon.classList.remove(
+        "oculto"
+      );
+
+
+      document.getElementById(
+        "nombrePanelNegocio"
+      ).textContent =
+        negocio.nombre;
+
+
+      document.getElementById(
+        "nombreNegocioPanel"
+      ).value =
+        negocio.nombre || "";
+
+
+      document.getElementById(
+        "direccionNegocioPanel"
+      ).value =
+        negocio.direccion || "";
+
+
+      document.getElementById(
+        "descripcionNegocioPanel"
+      ).value =
+        negocio.descripcion || "";
+
+
+      await cargarEstadisticasPanel();
+
+      volverMenuPanel();
+
+    }
+
+
+    /* =====================================================
+       ESTADÍSTICAS PANEL
+       ===================================================== */
+
+    async function cargarEstadisticasPanel() {
+
+      const contenedor =
+        document.getElementById(
+          "estadisticasPanel"
+        );
+
+
+      contenedor.innerHTML =
+        `<div class="cargando">
+          Cargando resumen...
+        </div>`;
+
+
+      if (!negocioPropio) {
+        return;
+      }
+
+
+      const resultado =
+        await supabaseClient
+          .from("Citas")
+          .select(
+            "id,fecha,hora,estado"
+          )
+          .eq(
+            "negocio_id",
+            negocioPropio.id
+          );
+
+
+      if (resultado.error) {
+
+        console.error(
+          "ERROR ESTADÍSTICAS:",
+          resultado.error
+        );
+
+
+        contenedor.innerHTML =
+          `<div class="estadistica">
+            <span class="estadistica-numero">—</span>
+            <span class="estadistica-label">
+              No disponible
+            </span>
+          </div>`;
+
+        return;
+
+      }
+
+
+      const reservas =
+        resultado.data || [];
+
+
+      const ahora =
+        new Date();
+
+
+      let pendientes = 0;
+
+      let aceptadas = 0;
+
+      let anteriores = 0;
+
+
+      reservas.forEach(
+        function(reserva) {
+
+          const fechaHora =
+            construirFechaHoraLocal(
+              reserva.fecha,
+              reserva.hora
+            );
+
+
+          if (
+            reserva.estado === "Pendiente" &&
+            fechaHora &&
+            fechaHora >= ahora
+          ) {
+
+            pendientes++;
+
+            return;
+
+          }
+
+
+          if (
+            reserva.estado === "Aceptada" &&
+            fechaHora &&
+            fechaHora >= ahora
+          ) {
+
+            aceptadas++;
+
+            return;
+
+          }
+
+
+          anteriores++;
+
+        }
+      );
+
+
+      contenedor.innerHTML = `
+
+        <div class="estadistica">
+
+          <span class="estadistica-numero">
+            ${pendientes}
+          </span>
+
+          <span class="estadistica-label">
+            Pendientes
+          </span>
+
+        </div>
+
+
+        <div class="estadistica">
+
+          <span class="estadistica-numero">
+            ${aceptadas}
+          </span>
+
+          <span class="estadistica-label">
+            Aceptadas
+          </span>
+
+        </div>
+
+
+        <div class="estadistica">
+
+          <span class="estadistica-numero">
+            ${anteriores}
+          </span>
+
+          <span class="estadistica-label">
+            Historial
+          </span>
+
+        </div>
+
+
+        <div class="estadistica">
+
+          <span class="estadistica-numero">
+            ${reservas.length}
+          </span>
+
+          <span class="estadistica-label">
+            Total
+          </span>
+
+        </div>
+
+      `;
+
+    }
+
+
+    /* =====================================================
+       SECCIONES PANEL
+       ===================================================== */
+
+    function mostrarSeccionPanel(
+      id
+    ) {
+
+      const secciones = [
+        "informacionNegocio",
+        "serviciosNegocio",
+        "agregarServicioNegocio",
+        "reservasNegocio"
+      ];
+
+
+      secciones.forEach(
+        function(seccion) {
+
+          const elemento =
+            document.getElementById(
+              seccion
+            );
+
+          if (elemento) {
+            elemento.classList.add(
+              "oculto"
+            );
+          }
+
+        }
+      );
+
+
+      document.getElementById(
+        "menuPanelNegocio"
+      ).classList.add(
+        "oculto"
+      );
+
+
+      document.getElementById(
+        "estadisticasPanel"
+      ).classList.add(
+        "oculto"
+      );
+
+
+      const destino =
+        document.getElementById(
+          id
+        );
+
+
+      if (destino) {
+
+        destino.classList.remove(
+          "oculto"
+        );
+
+      }
+
+
+      if (
+        id ===
+        "serviciosNegocio"
+      ) {
+
+        cargarServiciosPanel();
+
+      }
+
+
+      if (
+        id ===
+        "reservasNegocio"
+      ) {
+
+        cargarReservasNegocio();
+
+      }
+
+    }
+
+
+    function volverMenuPanel() {
+
+      const secciones = [
+        "informacionNegocio",
+        "serviciosNegocio",
+        "agregarServicioNegocio",
+        "reservasNegocio"
+      ];
+
+
+      secciones.forEach(
+        function(seccion) {
+
+          const elemento =
+            document.getElementById(
+              seccion
+            );
+
+          if (elemento) {
+            elemento.classList.add(
+              "oculto"
+            );
+          }
+
+        }
+      );
+
+
+      document.getElementById(
+        "estadisticasPanel"
+      ).classList.remove(
+        "oculto"
+      );
+
+
+      document.getElementById(
+        "menuPanelNegocio"
+      ).classList.remove(
+        "oculto"
+      );
+
+    }
+
+
+    /* =====================================================
+       INFORMACIÓN NEGOCIO
+       ===================================================== */
+
+    async function guardarInformacionNegocio(
+      event
+    ) {
+
+      event.preventDefault();
+
+
+      if (!usuarioActual) {
+        return;
+      }
+
+
+      if (!negocioPropio) {
+
+        await cargarNegocioPropio();
+
+      }
+
+
+      if (!negocioPropio) {
+
+        mostrarMensaje(
+          "mensajeInfoNegocio",
+          "No tienes un negocio registrado.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      const boton =
+        document.getElementById(
+          "botonGuardarInfo"
+        );
+
+
+      const nombre =
+        document.getElementById(
+          "nombreNegocioPanel"
+        ).value.trim();
+
+
+      const direccion =
+        document.getElementById(
+          "direccionNegocioPanel"
+        ).value.trim();
+
+
+      const descripcion =
+        document.getElementById(
+          "descripcionNegocioPanel"
+        ).value.trim();
+
+
+      boton.disabled = true;
+
+      boton.textContent =
+        "Guardando...";
+
+
+      const resultado =
+        await supabaseClient
+          .from("negocios")
+          .update({
+
+            nombre:
+              nombre,
+
+            direccion:
+              direccion,
+
+            descripcion:
+              descripcion
+
+          })
+          .eq(
+            "id",
+            negocioPropio.id
+          )
+          .eq(
+            "usuario_id",
+            usuarioActual.id
+          );
+
+
+      if (resultado.error) {
+
+        console.error(
+          "ERROR GUARDANDO NEGOCIO:",
+          resultado.error
+        );
+
+
+        mostrarMensaje(
+          "mensajeInfoNegocio",
+          resultado.error.message,
+          "error"
+        );
+
+
+        boton.disabled = false;
+
+        boton.textContent =
+          "💾 Guardar cambios";
+
+        return;
+
+      }
+
+
+      negocioPropio.nombre =
+        nombre;
+
+      negocioPropio.direccion =
+        direccion;
+
+      negocioPropio.descripcion =
+        descripcion;
+
+
+      document.getElementById(
+        "nombrePanelNegocio"
+      ).textContent =
+        nombre;
+
+
+      mostrarMensaje(
+        "mensajeInfoNegocio",
+        "✅ Información guardada correctamente.",
+        "exito"
+      );
+
+
+      boton.disabled = false;
+
+      boton.textContent =
+        "💾 Guardar cambios";
+
+
+      await cargarNegocios();
+
+    }
+
+
+    /* =====================================================
+       SERVICIOS ADMIN
+       ===================================================== */
+
+    async function cargarServiciosPanel() {
+
+      if (!negocioPropio) {
+
+        await cargarNegocioPropio();
+
+      }
+
+
+      const lista =
+        document.getElementById(
+          "listaServiciosAdmin"
+        );
+
+
+      lista.innerHTML =
+        `<div class="cargando">
+          Cargando servicios...
+        </div>`;
+
+
+      if (!negocioPropio) {
+
+        lista.innerHTML =
+          `<div class="estado-vacio">
+            <div class="emoji">🏢</div>
+            <h3>No tienes negocio</h3>
+          </div>`;
+
+        return;
+
+      }
+
+
+      const resultado =
+        await supabaseClient
+          .from("servicios")
+          .select(
+            "id,nombre,precio,duracion"
+          )
+          .eq(
+            "negocio_id",
+            negocioPropio.id
+          )
+          .order(
+            "nombre",
+            {
+              ascending: true
+            }
+          );
+
+
+      if (resultado.error) {
+
+        lista.innerHTML =
+          `<div class="estado-vacio">
+            <div class="emoji">⚠️</div>
+            <h3>Error cargando servicios</h3>
+            <p>${escaparHTML(
+              resultado.error.message
+            )}</p>
+          </div>`;
+
+        return;
+
+      }
+
+
+      const servicios =
+        resultado.data || [];
+
+
+      if (servicios.length === 0) {
+
+        lista.innerHTML =
+          `<div class="estado-vacio">
+            <div class="emoji">🛠️</div>
+            <h3>No tienes servicios</h3>
+            <p>
+              Agrega el primer servicio de tu negocio.
+            </p>
+          </div>`;
+
+        return;
+
+      }
+
+
+      lista.innerHTML =
+        servicios
+          .map(function(servicio) {
+
+            return `
+              <div class="item-servicio-admin">
+
+                <div>
+
+                  <h3>
+                    ${escaparHTML(
+                      servicio.nombre
+                    )}
+                  </h3>
+
+                  <p>
+                    ${formatearPrecio(
+                      servicio.precio
+                    )}
+                    ·
+                    ${servicio.duracion || 0}
+                    minutos
+                  </p>
+
+                </div>
+
+
+                <button
+                  class="boton pequeno rojo"
+                  onclick="eliminarServicio('${servicio.id}')"
+                >
+                  🗑️
+                </button>
+
+              </div>
+            `;
+
+          })
+          .join("");
+
+    }
+
+
+    function mostrarAgregarServicio() {
+
+      mostrarSeccionPanel(
+        "agregarServicioNegocio"
+      );
+
+
+      ocultarMensaje(
+        "mensajeServicio"
+      );
+
+    }
+
+
+    function volverListaServicios() {
+
+      mostrarSeccionPanel(
+        "serviciosNegocio"
+      );
+
+    }
+
+
+    /* =====================================================
+       AGREGAR SERVICIO
+       ===================================================== */
+
+    async function agregarServicio(
+      event
+    ) {
+
+      event.preventDefault();
+
+
+      if (!usuarioActual) {
+        return;
+      }
+
+
+      if (!negocioPropio) {
+
+        await cargarNegocioPropio();
+
+      }
+
+
+      if (!negocioPropio) {
+
+        mostrarMensaje(
+          "mensajeServicio",
+          "No tienes un negocio registrado.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      const boton =
+        document.getElementById(
+          "botonAgregarServicio"
+        );
+
+
+      const nombre =
+        document.getElementById(
+          "nombreServicio"
+        ).value.trim();
+
+
+      const precio =
+        Number(
+          document.getElementById(
+            "precioServicio"
+          ).value
+        );
+
+
+      const duracion =
+        Number(
+          document.getElementById(
+            "duracionServicio"
+          ).value
+        );
+
+
+      if (
+        !nombre ||
+        !Number.isFinite(precio) ||
+        precio < 0 ||
+        !Number.isInteger(duracion) ||
+        duracion <= 0
+      ) {
+
+        mostrarMensaje(
+          "mensajeServicio",
+          "Revisa los datos del servicio.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      boton.disabled = true;
+
+      boton.textContent =
+        "Guardando...";
+
+
+      const resultado =
+        await supabaseClient
+          .from("servicios")
+          .insert({
+
+            negocio_id:
+              negocioPropio.id,
+
+            nombre:
+              nombre,
+
+            precio:
+              precio,
+
+            duracion:
+              duracion
+
+          });
+
+
+      if (resultado.error) {
+
+        console.error(
+          "ERROR AGREGANDO SERVICIO:",
+          resultado.error
+        );
+
+
+        mostrarMensaje(
+          "mensajeServicio",
+          resultado.error.message,
+          "error"
+        );
+
+
+        boton.disabled = false;
+
+        boton.textContent =
+          "➕ Agregar servicio";
+
+        return;
+
+      }
+
+
+      mostrarMensaje(
+        "mensajeServicio",
+        "✅ Servicio agregado correctamente.",
+        "exito"
+      );
+
+
+      document.getElementById(
+        "nombreServicio"
+      ).value = "";
+
+
+      document.getElementById(
+        "precioServicio"
+      ).value = "";
+
+
+      document.getElementById(
+        "duracionServicio"
+      ).value = "";
+
+
+      boton.disabled = false;
+
+      boton.textContent =
+        "➕ Agregar servicio";
+
+
+      await cargarServiciosPanel();
+
+    }
+
+
+    /* =====================================================
+       ELIMINAR SERVICIO
+       ===================================================== */
+
+    async function eliminarServicio(
+      idServicio
+    ) {
+
+      const confirmar =
+        window.confirm(
+          "¿Seguro que quieres eliminar este servicio?"
+        );
+
+
+      if (!confirmar) {
+        return;
+      }
+
+
+      const resultado =
+        await supabaseClient
+          .from("servicios")
+          .delete()
+          .eq(
+            "id",
+            idServicio
+          );
+
+
+      if (resultado.error) {
+
+        console.error(
+          "ERROR ELIMINANDO SERVICIO:",
+          resultado.error
+        );
+
+
+        alert(
+          "No se pudo eliminar el servicio: " +
+          resultado.error.message
+        );
+
+        return;
+
+      }
+
+
+      await cargarServiciosPanel();
+
+    }
+
+
+    /* =====================================================
+       RESERVAS DEL NEGOCIO
+       ===================================================== */
+
+    async function cargarReservasNegocio() {
+
+      const contenedor =
+        document.getElementById(
+          "listaReservasNegocio"
+        );
+
+
+      contenedor.innerHTML =
+        `<div class="cargando">
+          Cargando reservas...
+        </div>`;
+
+
+      if (!negocioPropio) {
+
+        await cargarNegocioPropio();
+
+      }
+
+
+      if (!negocioPropio) {
+
+        contenedor.innerHTML =
+          `<div class="estado-vacio">
+            <div class="emoji">🏢</div>
+            <h3>No tienes negocio</h3>
+          </div>`;
+
+        return;
+
+      }
+
+
+      const resultado =
+        await supabaseClient
+          .from("Citas")
+          .select(
+            "id,negocio_id,servicio_id,nombre_cliente,telefono_cliente,fecha,hora,comentario,estado,usuario"
+          )
+          .eq(
+            "negocio_id",
+            negocioPropio.id
+          )
+          .order(
+            "fecha",
+            {
+              ascending: true
+            }
+          )
+          .order(
+            "hora",
+            {
+              ascending: true
+            }
+          );
+
+
+      if (resultado.error) {
+
+        console.error(
+          "ERROR RESERVAS NEGOCIO:",
+          resultado.error
+        );
+
+
+        contenedor.innerHTML =
+          `<div class="estado-vacio">
+            <div class="emoji">⚠️</div>
+            <h3>Error cargando reservas</h3>
+            <p>${escaparHTML(
+              resultado.error.message
+            )}</p>
+          </div>`;
+
+        return;
+
+      }
+
+
+      const reservas =
+        resultado.data || [];
+
+
+      if (reservas.length === 0) {
+
+        contenedor.innerHTML =
+          `<div class="estado-vacio">
+            <div class="emoji">📅</div>
+            <h3>No hay reservas todavía</h3>
+            <p>
+              Las reservas de tus clientes aparecerán aquí.
+            </p>
+          </div>`;
+
+        return;
+
+      }
+
+
+      const servicioIds =
+        [
+          ...new Set(
+            reservas.map(
+              function(reserva) {
+                return reserva.servicio_id;
+              }
+            )
+          )
+        ];
+
+
+      const serviciosResultado =
+        await supabaseClient
+          .from("servicios")
+          .select(
+            "id,nombre"
+          )
+          .in(
+            "id",
+            servicioIds
+          );
+
+
+      const mapaServicios = {};
+
+
+      (
+        serviciosResultado.data || []
+      ).forEach(
+        function(servicio) {
+
+          mapaServicios[
+            servicio.id
+          ] =
+            servicio.nombre;
+
+        }
+      );
+
+
+      const ahora =
+        new Date();
+
+
+      /*
+        =====================================================
+        AQUÍ ESTÁ LA CORRECCIÓN IMPORTANTE
+
+        Ya NO mezclamos todas las citas futuras en una sola
+        sección llamada "Próximas citas".
+
+        Ahora tenemos:
+
+        1. Pendientes
+        2. Aceptadas
+        3. Anteriores
+
+        Además, las fechas se comparan usando la hora local.
+        =====================================================
+      */
+
+
+      const pendientes =
+        reservas.filter(
+          function(reserva) {
+
+            const fechaHora =
+              construirFechaHoraLocal(
+                reserva.fecha,
+                reserva.hora
+              );
+
+
+            return (
+              reserva.estado === "Pendiente" &&
+              fechaHora &&
+              fechaHora >= ahora
+            );
+
+          }
+        );
+
+
+      const aceptadas =
+        reservas.filter(
+          function(reserva) {
+
+            const fechaHora =
+              construirFechaHoraLocal(
+                reserva.fecha,
+                reserva.hora
+              );
+
+
+            return (
+              reserva.estado === "Aceptada" &&
+              fechaHora &&
+              fechaHora >= ahora
+            );
+
+          }
+        );
+
+
+      const anteriores =
+        reservas.filter(
+          function(reserva) {
+
+            const fechaHora =
+              construirFechaHoraLocal(
+                reserva.fecha,
+                reserva.hora
+              );
+
+
+            return (
+              reserva.estado === "Cancelada" ||
+              !fechaHora ||
+              fechaHora < ahora
+            );
+
+          }
+        );
+
+
+      let html = "";
+
+
+      html += crearGrupoReservasNegocio(
+        "📌 Citas pendientes",
+        pendientes,
+        mapaServicios,
+        true
+      );
+
+
+      html += crearGrupoReservasNegocio(
+        "✅ Citas aceptadas",
+        aceptadas,
+        mapaServicios,
+        false
+      );
+
+
+      html += crearGrupoReservasNegocio(
+        "🗂️ Citas anteriores",
+        anteriores,
+        mapaServicios,
+        false
+      );
+
+
+      contenedor.innerHTML =
+        html;
+
+    }
+
+
+    function crearGrupoReservasNegocio(
+      titulo,
+      reservas,
+      mapaServicios,
+      mostrarBotones
+    ) {
+
+      let html = `
+
+        <div class="grupo-reservas">
+
+          <div class="titulo-grupo">
+
+            <h3>
+              ${titulo}
+            </h3>
+
+            <span class="contador">
+              ${reservas.length}
+            </span>
+
+          </div>
+
+      `;
+
+
+      if (reservas.length === 0) {
+
+        html += `
+          <div class="estado-vacio">
+
+            <div class="emoji">
+              📭
+            </div>
+
+            <h3>
+              No hay citas en esta sección
+            </h3>
+
+            <p>
+              Cuando aparezcan citas aquí,
+              las verás organizadas automáticamente.
+            </p>
+
+          </div>
+        `;
+
+      } else {
+
+        reservas.forEach(
+          function(reserva) {
+
+            html +=
+              crearTarjetaReservaNegocio(
+                reserva,
+                mapaServicios,
+                mostrarBotones
+              );
+
+          }
+        );
+
+      }
+
+
+      html += `
+        </div>
+      `;
+
+
+      return html;
+
+    }
+
+
+    function crearTarjetaReservaNegocio(
+      reserva,
+      mapaServicios,
+      mostrarBotones
+    ) {
+
+      const claseEstado =
+        obtenerClaseEstado(
+          reserva.estado
+        );
+
+
+      let acciones = "";
+
+
+      if (
+        mostrarBotones &&
+        reserva.estado === "Pendiente"
+      ) {
+
+        acciones = `
+
+          <div class="reserva-acciones">
+
+            <button
+              class="boton pequeno verde"
+              onclick="cambiarEstadoCita('${reserva.id}', 'Aceptada')"
+            >
+              ✅ Aceptar
+            </button>
+
+
+            <button
+              class="boton pequeno rojo"
+              onclick="cambiarEstadoCita('${reserva.id}', 'Cancelada')"
+            >
+              ❌ Cancelar
+            </button>
+
+          </div>
+
+        `;
+
+      }
+
+
+      return `
+
+        <article class="reserva-card">
+
+          <div class="reserva-superior">
+
+            <div>
+
+              <h3>
+                ${escaparHTML(
+                  mapaServicios[
+                    reserva.servicio_id
+                  ] ||
+                  "Servicio"
+                )}
+              </h3>
+
+              <div class="reserva-negocio">
+                👤
+                ${escaparHTML(
+                  reserva.nombre_cliente ||
+                  "Cliente"
+                )}
+              </div>
+
+            </div>
+
+
+            <span class="estado ${claseEstado}">
+              ${escaparHTML(
+                reserva.estado
+              )}
+            </span>
+
+          </div>
+
+
+          <div class="reserva-datos">
+
+            <div>
+              📅
+              ${formatearFecha(
+                reserva.fecha
+              )}
+            </div>
+
+            <div>
+              🕐
+              ${escaparHTML(
+                reserva.hora
+              )}
+            </div>
+
+
+            ${
+              reserva.telefono_cliente
+                ? `
+                  <div>
+                    📱
+                    ${escaparHTML(
+                      reserva.telefono_cliente
+                    )}
+                  </div>
+                `
+                : ""
+            }
+
+
+            ${
+              reserva.comentario
+                ? `
+                  <div>
+                    💬
+                    ${escaparHTML(
+                      reserva.comentario
+                    )}
+                  </div>
+                `
+                : ""
+            }
+
+          </div>
+
+
+          ${acciones}
+
+        </article>
+
+      `;
+
+    }
+
+
+    /* =====================================================
+       CAMBIAR ESTADO CITA
+       ===================================================== */
+
+    async function cambiarEstadoCita(
+      idCita,
+      nuevoEstado
+    ) {
+
+      if (!negocioPropio) {
+
+        await cargarNegocioPropio();
+
+      }
+
+
+      if (!negocioPropio) {
+
+        alert(
+          "No se encontró tu negocio."
+        );
+
+        return;
+
+      }
+
+
+      const resultado =
+        await supabaseClient
+          .from("Citas")
+          .update({
+            estado:
+              nuevoEstado
+          })
+          .eq(
+            "id",
+            idCita
+          )
+          .eq(
+            "negocio_id",
+            negocioPropio.id
+          );
+
+
+      if (resultado.error) {
+
+        console.error(
+          "ERROR CAMBIANDO ESTADO:",
+          resultado.error
+        );
+
+
+        alert(
+          "No se pudo cambiar el estado.\n\n" +
+          resultado.error.message +
+          "\n\nRevisa también la política RLS del negocio."
+        );
+
+        return;
+
+      }
+
+
+      await cargarReservasNegocio();
+
+      await cargarEstadisticasPanel();
+
+    }
+
+
+    /* =====================================================
+       CREAR NEGOCIO
+       ===================================================== */
+
+    async function crearNegocio(
+      event
+    ) {
+
+      event.preventDefault();
+
+
+      if (!usuarioActual) {
+
+        mostrarPublica("login");
+
+        return;
+
+      }
+
+
+      const boton =
+        document.getElementById(
+          "botonCrearNegocio"
+        );
+
+
+      const nombre =
+        document.getElementById(
+          "nuevoNegocioNombre"
+        ).value.trim();
+
+
+      const direccion =
+        document.getElementById(
+          "nuevoNegocioDireccion"
+        ).value.trim();
+
+
+      const descripcion =
+        document.getElementById(
+          "nuevoNegocioDescripcion"
+        ).value.trim();
+
+
+      if (!nombre) {
+
+        mostrarMensaje(
+          "mensajeCrearNegocio",
+          "Escribe el nombre del negocio.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      boton.disabled = true;
+
+      boton.textContent =
+        "Creando negocio...";
+
+
+      const resultado =
+        await supabaseClient
+          .from("negocios")
+          .insert({
+
+            nombre:
+              nombre,
+
+            direccion:
+              direccion,
+
+            descripcion:
+              descripcion,
+
+            usuario_id:
+              usuarioActual.id
+
+          })
+          .select(
+            "id,nombre,direccion,descripcion"
+          )
+          .single();
+
+
+      if (resultado.error) {
+
+        console.error(
+          "ERROR CREANDO NEGOCIO:",
+          resultado.error
+        );
+
+
+        mostrarMensaje(
+          "mensajeCrearNegocio",
+          resultado.error.message,
+          "error"
+        );
+
+
+        boton.disabled = false;
+
+        boton.textContent =
+          "🏢 Crear negocio";
+
+        return;
+
+      }
+
+
+      negocioPropio =
+        resultado.data;
+
+
+      mostrarMensaje(
+        "mensajeCrearNegocio",
+        "✅ Negocio creado correctamente.",
+        "exito"
+      );
+
+
+      boton.disabled = false;
+
+      boton.textContent =
+        "🏢 Crear negocio";
+
+
+      await cargarNegocios();
+
+
+      setTimeout(
+        function() {
+
+          mostrarPanelNegocio();
+
+        },
+        800
+      );
+
+    }
+
+
+    /* =====================================================
+       CERRAR SESIÓN
+       ===================================================== */
+
+    async function cerrarSesion() {
+
+      const resultado =
+        await supabaseClient.auth.signOut();
+
+
+      if (resultado.error) {
+
+        console.error(
+          "ERROR CERRANDO SESIÓN:",
+          resultado.error
+        );
+
+      }
+
+
+      usuarioActual = null;
+
+      negocioActual = null;
+
+      negocioPropio = null;
+
+      negociosCache = [];
+
+
+      mostrarPublica(
+        "inicio"
+      );
+
+    }
+
+
+    /* =====================================================
+       COMPROBAR SESIÓN
+       ===================================================== */
+
+    async function comprobarSesion() {
+
+      const resultado =
+        await supabaseClient.auth.getSession();
+
+
+      if (
+        resultado.error ||
+        !resultado.data.session
+      ) {
+
+        mostrarPublica(
+          "inicio"
+        );
+
+        return;
+
+      }
+
+
+      usuarioActual =
+        resultado.data.session.user;
+
+
+      await entrarAplicacion();
+
+    }
+
+
+    /* =====================================================
+       CAMBIOS DE AUTENTICACIÓN
+       ===================================================== */
+
+    supabaseClient.auth.onAuthStateChange(
+      function(evento, session) {
+
+        if (
+          evento === "SIGNED_OUT"
+        ) {
+
+          usuarioActual = null;
+
+          negocioActual = null;
+
+          negocioPropio = null;
+
+          mostrarPublica(
+            "inicio"
+          );
+
+        }
+
+      }
     );
 
 
-    await cargarReservasNegocio();
+    /* =====================================================
+       INICIALIZACIÓN
+       ===================================================== */
 
-}    
-/* =========================================================
-   ELIMINAR SERVICIO
-========================================================= */
+    document.addEventListener(
+      "DOMContentLoaded",
+      function() {
 
-async function eliminarServicio(idServicio) {
+        const fecha =
+          document.getElementById(
+            "fechaReserva"
+          );
 
-    const confirmar =
-        confirm("¿Seguro que quieres eliminar este servicio?");
 
-    if (!confirmar) {
-        return;
-    }
+        if (fecha) {
 
+          fecha.min =
+            hoyISO();
 
-    const resultado =
-        await supabaseClient
-            .from("servicios")
-            .delete()
-            .eq("id", idServicio);
+        }
 
 
-    if (resultado.error) {
+        comprobarSesion();
 
-        console.error(
-            "ERROR ELIMINANDO SERVICIO:",
-            resultado.error
-        );
+      }
+    );
 
-        alert(
-            "Error al eliminar el servicio: " +
-            resultado.error.message
-        );
-
-        return;
-    }
-
-
-    alert("✅ Servicio eliminado correctamente.");
-
-    await cargarServiciosPanel();
-}    
-/* =========================================================
-   AGREGAR SERVICIO
-========================================================= */
-
-async function agregarServicio() {
-
-    const nombre =
-        document
-            .getElementById("nuevoServicioNombre")
-            .value
-            .trim();
-
-    const precio =
-        document
-            .getElementById("nuevoServicioPrecio")
-            .value;
-
-    const duracion =
-        document
-            .getElementById("nuevoServicioDuracion")
-            .value;
-
-    const mensaje =
-        document.getElementById("mensajeServiciosPanel");
-
-
-    /* COMPROBAR NEGOCIO */
-
-    if (!negocioActual) {
-
-        mensaje.textContent =
-            "No se encontró el negocio.";
-
-        mensaje.className =
-            "mensaje error";
-
-        return;
-    }
-
-
-    /* VALIDAR NOMBRE */
-
-    if (!nombre) {
-
-        mensaje.textContent =
-            "Escribe el nombre del servicio.";
-
-        mensaje.className =
-            "mensaje error";
-
-        return;
-    }
-
-
-    /* VALIDAR PRECIO */
-
-    if (precio === "" || Number(precio) < 0) {
-
-        mensaje.textContent =
-            "Escribe un precio válido.";
-
-        mensaje.className =
-            "mensaje error";
-
-        return;
-    }
-
-
-    /* VALIDAR DURACIÓN */
-
-    if (duracion === "" || Number(duracion) <= 0) {
-
-        mensaje.textContent =
-            "Escribe una duración válida.";
-
-        mensaje.className =
-            "mensaje error";
-
-        return;
-    }
-
-
-    mensaje.textContent =
-        "Guardando servicio...";
-
-    mensaje.className =
-        "mensaje";
-
-
-    /* INSERTAR EN SUPABASE */
-
-    const resultado =
-        await supabaseClient
-            .from("servicios")
-            .insert({
-
-                negocio_id:
-                    negocioActual.id,
-
-                nombre:
-                    nombre,
-
-                precio:
-                    Number(precio),
-
-                duracion:
-                    Number(duracion)
-
-            });
-
-
-    /* COMPROBAR ERROR */
-
-    if (resultado.error) {
-
-        console.error(
-            "ERROR GUARDANDO SERVICIO:",
-            resultado.error
-        );
-
-        mensaje.textContent =
-            "Error al guardar el servicio: " +
-            resultado.error.message;
-
-        mensaje.className =
-            "mensaje error";
-
-        return;
-    }
-
-
-    /* ÉXITO */
-
-    mensaje.textContent =
-        "✅ Servicio agregado correctamente.";
-
-    mensaje.className =
-        "mensaje exito";
-
-
-    /* LIMPIAR FORMULARIO */
-
-    document
-        .getElementById("nuevoServicioNombre")
-        .value = "";
-
-    document
-        .getElementById("nuevoServicioPrecio")
-        .value = "";
-
-    document
-        .getElementById("nuevoServicioDuracion")
-        .value = "";
-
-
-    /* ACTUALIZAR PANEL */
-
-    await cargarPanelNegocio();
-await cargarServiciosPanel();
-
-}    
-/* =========================================================
-   CERRAR SESIÓN
-========================================================= */
-
-async function cerrarSesion() {
-
-await supabaseClient.auth.signOut();
-
-
-usuarioActual = null;
-
-negocioActual = null;
-
-
-mostrar("inicio");
-
-}
-
-
-
-/* =========================================================
-   ESCAPAR HTML
-========================================================= */
-
-function escaparHTML(texto) {
-
-if (
-texto === null ||
-texto === undefined
-) {
-
-return "";
-
-}
-
-
-return String(texto)
-
-.replace(
-/&/g,
-"&amp;"
-)
-
-.replace(
-/</g,
-"&lt;"
-)
-
-.replace(
-/>/g,
-"&gt;"
-)
-
-.replace(
-/"/g,
-"&quot;"
-)
-
-.replace(
-/'/g,
-"&#039;"
-);
-
-}
-
-
-
-/* =========================================================
-   COMPROBAR SESIÓN
-========================================================= */
-
-async function comprobarSesion() {
-
-const resultado =
-await supabaseClient.auth.getSession();
-
-
-const sesion =
-resultado.data?.session;
-
-
-if (
-sesion &&
-sesion.user
-) {
-
-usuarioActual =
-sesion.user;
-
-
-document
-.getElementById("nombreCliente")
-.textContent =
-usuarioActual.user_metadata?.nombre ||
-usuarioActual.email;
-
-
-mostrar("cliente");
-
-
-await cargarNegocios();
-
-} else {
-
-mostrar("inicio");
-
-}
-
-}
-
-
-
-/* =========================================================
-   INICIAR
-========================================================= */
-
-comprobarSesion();
-
-</script>
+  </script>
 
 </body>
 </html>
