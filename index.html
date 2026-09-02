@@ -1567,12 +1567,28 @@ resultado.error
 );
 
 
+/* HORARIO YA OCUPADO */
+
+if (resultado.error.code === "23505") {
+
+    mensaje.textContent =
+        "⚠️ Ese horario ya está reservado. Por favor, elige otra hora.";
+
+    mensaje.className =
+        "mensaje error";
+
+    return;
+}
+
+
+/* OTRO ERROR */
+
 mensaje.textContent =
-"Error al guardar la reserva: " +
-resultado.error.message;
+    "Error al guardar la reserva: " +
+    resultado.error.message;
 
 mensaje.className =
-"mensaje error";
+    "mensaje error";
 
 return;
 
