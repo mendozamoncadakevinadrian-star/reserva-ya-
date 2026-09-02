@@ -4143,6 +4143,18 @@
 
 
       let botonCancelar = "";
+      let botonEliminar = "";
+
+if (!puedeCancelar) {
+  botonEliminar = `
+    <button
+      class="boton pequeno rojo"
+      onclick="eliminarMiReserva('${reserva.id}')"
+    >
+      🗑️ Eliminar
+    </button>
+  `;
+}
 
 
       if (
@@ -4237,6 +4249,7 @@
               ? `
                 <div class="reserva-acciones">
                   ${botonCancelar}
+                  ${botonEliminar}
                 </div>
               `
               : ""
@@ -4246,6 +4259,41 @@
       `;
 
     }
+    
+    async function eliminarMiReserva(idCita) {
+    if (!usuarioActual) {
+        mostrarToast("Debes iniciar sesión.", "error");
+        return;
+    }
+
+    const confirmar = confirm(
+        "¿Quieres eliminar esta reserva de tu historial?\n\nEsta acción no se puede deshacer."
+    );
+
+    if (!confirmar) return;
+
+    try {
+        const { error } = await supabaseClient
+            .from("Citas")
+            .delete()
+            .eq("id", idCita)
+            .eq("usuario", usuarioActual.id);
+
+        if (error) {
+            console.error("Error eliminando reserva:", error);
+            mostrarToast("No se pudo eliminar la reserva.", "error");
+            return;
+        }
+
+        mostrarToast("Reserva eliminada del historial.", "success");
+
+        await cargarMisReservas();
+
+    } catch (error) {
+        console.error("Error inesperado:", error);
+        mostrarToast("Ocurrió un error al eliminar la reserva.", "error");
+    }
+}
 
 
     /* =====================================================
