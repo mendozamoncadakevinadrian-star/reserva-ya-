@@ -4243,17 +4243,16 @@ if (!puedeCancelar) {
 
           </div>
 
-
-          ${
-            botonCancelar
-              ? `
-                <div class="reserva-acciones">
-                  ${botonCancelar}
-                  ${botonEliminar}
-                </div>
-              `
-              : ""
-          }
+${
+  botonCancelar || botonEliminar
+    ? `
+      <div class="reserva-acciones">
+        ${botonCancelar}
+        ${botonEliminar}
+      </div>
+    `
+    : ""
+}
 
         </article>
       `;
