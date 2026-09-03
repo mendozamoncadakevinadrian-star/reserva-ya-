@@ -4312,30 +4312,91 @@ ${
       de la pantalla.
     */
 
-    const tarjeta =
-      document.querySelector(
-        `.reserva-card button[onclick="eliminarMiReserva('${idCita}')"]`
-      )?.closest(".reserva-card");
+const tarjeta =
+  document.querySelector(
+    `.reserva-card button[onclick="eliminarMiReserva('${idCita}')"]`
+  )?.closest(".reserva-card");
 
 
-    if (tarjeta) {
-      tarjeta.remove();
+if (tarjeta) {
+
+  const grupoHistorial =
+    tarjeta.closest(".grupo-reservas");
+
+  tarjeta.remove();
+
+
+  if (grupoHistorial) {
+
+    const contador =
+      grupoHistorial.querySelector(".contador");
+
+    const citasRestantes =
+      grupoHistorial.querySelectorAll(
+        ".reserva-card"
+      ).length;
+
+
+    if (contador) {
+      contador.textContent =
+        citasRestantes;
     }
 
 
-    mostrarToast(
-      "Reserva eliminada del historial.",
-      "success"
-    );
+    if (citasRestantes === 0) {
+
+      const contenidoVacio = `
+        <div class="estado-vacio">
+
+          <div class="emoji">
+            🗂️
+          </div>
+
+          <h3>
+            Todavía no tienes historial
+          </h3>
+
+          <p>
+            Tus reservas anteriores aparecerán aquí.
+          </p>
+
+        </div>
+      `;
+
+      const tituloGrupo =
+        grupoHistorial.querySelector(
+          ".titulo-grupo"
+        );
+
+      if (tituloGrupo) {
+
+        const contenidoAnterior =
+          grupoHistorial.querySelector(
+            ".estado-vacio"
+          );
+
+        if (!contenidoAnterior) {
+
+          grupoHistorial.insertAdjacentHTML(
+            "beforeend",
+            contenidoVacio
+          );
+
+        }
+
+      }
+
+    }
+
+  }
+
+}
 
 
-    /*
-      Después actualizamos los datos para que
-      el contador y el estado vacío también
-      queden correctamente actualizados.
-    */
-
-    await cargarMisReservas();
+mostrarToast(
+  "Reserva eliminada del historial.",
+  "success"
+);
 
 
   } catch (error) {
