@@ -4260,44 +4260,99 @@ ${
     }
     
     async function eliminarMiReserva(idCita) {
-    if (!usuarioActual) {
-        mostrarToast("Debes iniciar sesión.", "error");
-        return;
-    }
 
-    const confirmar = confirm(
-        "¿Quieres eliminar esta reserva de tu historial?\n\nEsta acción no se puede deshacer."
-    );
-
-    if (!confirmar) return;
-
-    try {
-        const { error } = await supabaseClient
-            .from("Citas")
-            .delete()
-            .eq("id", idCita)
-            .eq("usuario", usuarioActual.id);
-if (error) {
-    console.error("ERROR COMPLETO AL ELIMINAR:", error);
-    alert(
-        "No se pudo eliminar la reserva.\n\n" +
-        "Código: " + (error.code || "sin código") + "\n" +
-        "Mensaje: " + (error.message || "sin mensaje")
+  if (!usuarioActual) {
+    mostrarToast(
+      "Debes iniciar sesión.",
+      "error"
     );
     return;
-}
+  }
 
-        mostrarToast("Reserva eliminada del historial.", "success");
 
-setTimeout(async () => {
-    await cargarMisReservas();
-}, 100);
-    } catch (error) {
-        console.error("Error inesperado:", error);
-        mostrarToast("Ocurrió un error al eliminar la reserva.", "error");
+  const confirmar = confirm(
+    "¿Quieres eliminar esta reserva de tu historial?\n\nEsta acción no se puede deshacer."
+  );
+
+
+  if (!confirmar) {
+    return;
+  }
+
+
+  try {
+
+    const { error } =
+      await supabaseClient
+        .from("Citas")
+        .delete()
+        .eq("id", idCita)
+        .eq("usuario", usuarioActual.id);
+
+
+    if (error) {
+
+      console.error(
+        "Error eliminando reserva:",
+        error
+      );
+
+      mostrarToast(
+        "No se pudo eliminar la reserva.",
+        "error"
+      );
+
+      return;
     }
-}
 
+
+    /*
+      El borrado en Supabase fue exitoso.
+      Ahora quitamos inmediatamente la tarjeta
+      de la pantalla.
+    */
+
+    const tarjeta =
+      document.querySelector(
+        `.reserva-card button[onclick="eliminarMiReserva('${idCita}')"]`
+      )?.closest(".reserva-card");
+
+
+    if (tarjeta) {
+      tarjeta.remove();
+    }
+
+
+    mostrarToast(
+      "Reserva eliminada del historial.",
+      "success"
+    );
+
+
+    /*
+      Después actualizamos los datos para que
+      el contador y el estado vacío también
+      queden correctamente actualizados.
+    */
+
+    await cargarMisReservas();
+
+
+  } catch (error) {
+
+    console.error(
+      "Error inesperado:",
+      error
+    );
+
+    mostrarToast(
+      "Ocurrió un error al eliminar la reserva.",
+      "error"
+    );
+
+  }
+
+}
 
     /* =====================================================
        CANCELAR CITA
