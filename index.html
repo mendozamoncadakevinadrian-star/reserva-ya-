@@ -4289,8 +4289,9 @@ if (error) {
 
         mostrarToast("Reserva eliminada del historial.", "success");
 
-        await cargarMisReservas();
-
+setTimeout(async () => {
+    await cargarMisReservas();
+}, 100);
     } catch (error) {
         console.error("Error inesperado:", error);
         mostrarToast("Ocurrió un error al eliminar la reserva.", "error");
