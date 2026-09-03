@@ -4277,12 +4277,15 @@ ${
             .delete()
             .eq("id", idCita)
             .eq("usuario", usuarioActual.id);
-
-        if (error) {
-            console.error("Error eliminando reserva:", error);
-            mostrarToast("No se pudo eliminar la reserva.", "error");
-            return;
-        }
+if (error) {
+    console.error("ERROR COMPLETO AL ELIMINAR:", error);
+    alert(
+        "No se pudo eliminar la reserva.\n\n" +
+        "Código: " + (error.code || "sin código") + "\n" +
+        "Mensaje: " + (error.message || "sin mensaje")
+    );
+    return;
+}
 
         mostrarToast("Reserva eliminada del historial.", "success");
 
