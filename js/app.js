@@ -7,7 +7,17 @@
 /* =====================================================
    ESTADO GLOBAL
 ===================================================== */
+// ==========================================
+// SUPABASE
+// ==========================================
 
+const SUPABASE_URL = "https://mjxiyzapdybzckurootw.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Ox1Wz7UT2Gw6uHOP6SncjQ_sGapEEB-";
+
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
 const ReservaYa = {
 
   version: "3.0.0",
