@@ -941,12 +941,13 @@ async function alternarFavorito(id) {
         usuario_id: ReservaYa.usuario.id,
         negocio_id: id
       });
-
-    if (error) {
-      console.error("Error guardando favorito:", error);
-      mostrarToast("No se pudo guardar el favorito.");
-      return;
-    }
+if (error) {
+  console.error("ERROR COMPLETO FAVORITO:", error);
+  mostrarToast(
+    "Error: " + (error.message || "desconocido")
+  );
+  return;
+}
 
     ReservaYa.favoritos.push(id);
 
