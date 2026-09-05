@@ -1491,6 +1491,34 @@ async function restaurarSesion() {
 }
 restaurarSesion();
 
+// ==========================================
+// CARGAR FAVORITOS DESDE SUPABASE
+// ==========================================
+
+async function cargarFavoritos() {
+
+  if (!ReservaYa.usuario) {
+    ReservaYa.favoritos = [];
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("reserva_favoritos")
+    .select("negocio_id")
+    .eq("usuario_id", ReservaYa.usuario.id);
+
+  if (error) {
+    console.error("Error cargando favoritos:", error);
+    return;
+  }
+
+  ReservaYa.favoritos = (data || [])
+    .map(favorito => favorito.negocio_id)
+    .filter(Boolean);
+
+  renderizarDestacados();
+  renderizarFavoritos();
+}
 /* =====================================================
    CERRAR SESIÓN
 ===================================================== */
