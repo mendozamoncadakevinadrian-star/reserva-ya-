@@ -1416,8 +1416,51 @@ function mostrarTodasCategorias() {
 
 function actualizarInterfazUsuario() {
 
+  const loginBox = document.getElementById("loginBox");
+
+  const profileCard = document.querySelector(
+    "#view-profile .profile-card"
+  );
+
+  const settingsList = document.querySelector(
+    "#view-profile .settings-list"
+  );
+
+  // No hay usuario conectado
+  if (!ReservaYa.usuario) {
+
+    if (loginBox) {
+      loginBox.style.display = "block";
+    }
+
+    if (profileCard) {
+      profileCard.style.display = "none";
+    }
+
+    if (settingsList) {
+      settingsList.style.display = "none";
+    }
+
+    return;
+  }
+
+  // Hay usuario conectado
+  if (loginBox) {
+    loginBox.style.display = "none";
+  }
+
+  if (profileCard) {
+    profileCard.style.display = "block";
+  }
+
+  if (settingsList) {
+    settingsList.style.display = "block";
+  }
+
   const nombre =
-    ReservaYa.usuario?.nombre ||
+    ReservaYa.usuario.nombre ||
+    ReservaYa.usuario.user_metadata?.nombre ||
+    ReservaYa.usuario.email ||
     "Usuario";
 
   const inicial =
@@ -1425,18 +1468,34 @@ function actualizarInterfazUsuario() {
       .charAt(0)
       .toUpperCase();
 
-  document.getElementById(
-    "userAvatar"
-  ).textContent = inicial;
+  const userAvatar =
+    document.getElementById("userAvatar");
 
-  document.getElementById(
-    "profileAvatar"
-  ).textContent = inicial;
+  const profileAvatar =
+    document.getElementById("profileAvatar");
 
-  document.getElementById(
-    "profileName"
-  ).textContent = nombre;
+  const profileName =
+    document.getElementById("profileName");
 
+  const profileEmail =
+    document.getElementById("profileEmail");
+
+  if (userAvatar) {
+    userAvatar.textContent = inicial;
+  }
+
+  if (profileAvatar) {
+    profileAvatar.textContent = inicial;
+  }
+
+  if (profileName) {
+    profileName.textContent = nombre;
+  }
+
+  if (profileEmail) {
+    profileEmail.textContent =
+      ReservaYa.usuario.email || "-";
+  }
 }
 
 
