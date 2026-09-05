@@ -188,84 +188,47 @@ function cargarDatosLocales() {
    DATOS DEMO
 ===================================================== */
 
-function cargarDatosDemo() {
+async function cargarDatosDemo() {
 
-  ReservaYa.negocios = [
+  const { data, error } = await supabaseClient
+    .from("negocios")
+    .select("*")
+    .order("nombre", { ascending: true });
 
-    {
-      id: "demo-1",
-      nombre: "Urban Barber",
-      categoria: "barberia",
-      ciudad: "Villavicencio",
-      ubicacion: "Centro",
-      rating: 4.9,
-      reseñas: 128,
-      destacado: true
-    },
+  if (error) {
+    console.error(
+      "Error cargando negocios:",
+      error
+    );
 
-    {
-      id: "demo-2",
-      nombre: "Belleza Studio",
-      categoria: "belleza",
-      ciudad: "Villavicencio",
-      ubicacion: "Barzal",
-      rating: 4.8,
-      reseñas: 94,
-      destacado: true
-    },
+    mostrarToast(
+      "No se pudieron cargar los negocios."
+    );
 
-    {
-      id: "demo-3",
-      nombre: "Fitness Zone",
-      categoria: "fitness",
-      ciudad: "Villavicencio",
-      ubicacion: "La Esperanza",
-      rating: 4.7,
-      reseñas: 76,
+    return;
+  }
+
+  ReservaYa.negocios = (data || []).map(negocio => {
+
+    return {
+      id: negocio.id,
+      nombre: negocio.nombre || "Negocio",
+      categoria: "otros",
+      ciudad: negocio.direccion || "Ubicación no disponible",
+      ubicacion: negocio.direccion || "",
+      descripcion: negocio.descripcion || "",
+      rating: 0,
+      reseñas: 0,
       destacado: false
-    },
+    };
 
-    {
-      id: "demo-4",
-      nombre: "Clínica Salud Plus",
-      categoria: "salud",
-      ciudad: "Villavicencio",
-      ubicacion: "Buque",
-      rating: 4.9,
-      reseñas: 215,
-      destacado: true
-    },
-
-    {
-      id: "demo-5",
-      nombre: "Pet House",
-      categoria: "mascotas",
-      ciudad: "Villavicencio",
-      ubicacion: "Cofrem",
-      rating: 4.8,
-      reseñas: 63,
-      destacado: false
-    },
-
-    {
-      id: "demo-6",
-      nombre: "Auto Expert",
-      categoria: "automotriz",
-      ciudad: "Villavicencio",
-      ubicacion: "Porfía",
-      rating: 4.6,
-      reseñas: 51,
-      destacado: false
-    }
-
-  ];
+  });
 
   renderizarNegociosCercanos();
 
   renderizarDestacados();
 
 }
-
 
 /* =====================================================
    CATEGORÍAS
