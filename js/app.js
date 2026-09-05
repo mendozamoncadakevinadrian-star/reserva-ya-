@@ -1539,9 +1539,7 @@ async function iniciarSesion() {
 
   ReservaYa.usuario = data.user;
 
-await cargarFavoritos();
-
-actualizarInterfazUsuario();
+  actualizarInterfazUsuario();
    
   mostrarToast("Sesión iniciada.");
 
