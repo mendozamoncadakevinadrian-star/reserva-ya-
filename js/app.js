@@ -1539,8 +1539,9 @@ async function iniciarSesion() {
 
   ReservaYa.usuario = data.user;
 
-  actualizarInterfazUsuario();
+await cargarFavoritos();
 
+actualizarInterfazUsuario();
   mostrarToast("Sesión iniciada.");
 
   document.getElementById("loginBox").style.display = "none";
