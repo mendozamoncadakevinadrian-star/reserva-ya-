@@ -1542,6 +1542,7 @@ async function iniciarSesion() {
 await cargarFavoritos();
 
 actualizarInterfazUsuario();
+   
   mostrarToast("Sesión iniciada.");
 
   document.getElementById("loginBox").style.display = "none";
