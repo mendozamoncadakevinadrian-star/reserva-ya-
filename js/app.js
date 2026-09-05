@@ -1498,7 +1498,35 @@ function actualizarInterfazUsuario() {
       ReservaYa.usuario.email || "-";
   }
 }
+async function restaurarSesion() {
 
+  const { data, error } =
+    await supabaseClient.auth.getSession();
+
+  if (error) {
+    console.error(
+      "Error recuperando sesión:",
+      error
+    );
+    return;
+  }
+
+  if (data.session?.user) {
+
+    ReservaYa.usuario =
+      data.session.user;
+
+    actualizarInterfazUsuario();
+
+  } else {
+
+    ReservaYa.usuario = null;
+
+    actualizarInterfazUsuario();
+
+  }
+}
+restaurarSesion();
 
 /* =====================================================
    CERRAR SESIÓN
