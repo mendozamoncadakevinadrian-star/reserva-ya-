@@ -1479,6 +1479,7 @@ async function restaurarSesion() {
     ReservaYa.usuario =
       data.session.user;
 
+     await cargarFavoritos();
     actualizarInterfazUsuario();
 
   } else {
