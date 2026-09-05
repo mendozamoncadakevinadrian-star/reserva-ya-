@@ -1465,6 +1465,67 @@ async function cerrarSesion() {
   mostrarToast("Sesión cerrada.");
 
 }
+async function iniciarSesion() {
+
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+
+  if (!email || !password) {
+    mostrarToast("Completa correo y contraseña.");
+    return;
+  }
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email: email,
+    password: password
+  });
+
+  if (error) {
+    console.error("Error iniciando sesión:", error);
+    mostrarToast("No se pudo iniciar sesión.");
+    return;
+  }
+
+  ReservaYa.usuario = data.user;
+
+  actualizarInterfazUsuario();
+
+  mostrarToast("Sesión iniciada.");
+
+  document.getElementById("loginBox").style.display = "none";
+
+  cambiarVista("home");
+}
+async function registrarse() {
+
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+
+  if (!email || !password) {
+    mostrarToast("Completa correo y contraseña.");
+    return;
+  }
+
+  const { data, error } = await supabaseClient.auth.signUp({
+    email: email,
+    password: password
+  });
+
+  if (error) {
+    console.error("Error registrando usuario:", error);
+    mostrarToast("No se pudo crear la cuenta.");
+    return;
+  }
+
+  if (data.user && !data.session) {
+    mostrarToast("Cuenta creada. Revisa tu correo para confirmarla.");
+  } else {
+    ReservaYa.usuario = data.user;
+    actualizarInterfazUsuario();
+    mostrarToast("Cuenta creada correctamente.");
+    cambiarVista("home");
+  }
+}
 
 
 /* =====================================================
