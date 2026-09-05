@@ -1474,12 +1474,13 @@ async function restaurarSesion() {
     return;
   }
 
-  if (data.session?.user) {
+if (data.session?.user) {
+  ReservaYa.usuario = data.session.user;
 
-    ReservaYa.usuario =
-      data.session.user;
+  await cargarFavoritos();
 
-    actualizarInterfazUsuario();
+  actualizarInterfazUsuario();
+}
 
   } else {
 
@@ -1491,6 +1492,40 @@ async function restaurarSesion() {
 }
 restaurarSesion();
 
+// ==========================================
+// CARGAR FAVORITOS DESDE SUPABASE
+// ==========================================
+
+async function cargarFavoritos() {
+
+  if (!ReservaYa.usuario) {
+    ReservaYa.favoritos = [];
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("reserva_favoritos")
+    .select("negocio_id")
+    .eq("usuario_id", ReservaYa.usuario.id);
+
+  if (error) {
+    console.error("Error cargando favoritos:", error);
+    mostrarToast("No se pudieron cargar los favoritos.");
+    return;
+  }
+
+  ReservaYa.favoritos = (data || [])
+    .map(favorito => favorito.negocio_id)
+    .filter(Boolean);
+
+  localStorage.setItem(
+    "reservaya_favoritos",
+    JSON.stringify(ReservaYa.favoritos)
+  );
+
+  renderizarDestacados();
+  renderizarFavoritos();
+}
 /* =====================================================
    CERRAR SESIÓN
 ===================================================== */
@@ -1539,10 +1574,11 @@ async function iniciarSesion() {
 
   ReservaYa.usuario = data.user;
 
-  actualizarInterfazUsuario();
+await cargarFavoritos();
 
-  mostrarToast("Sesión iniciada.");
-
+actualizarInterfazUsuario();
+mostrarToast("Sesión iniciada.");
+   
   document.getElementById("loginBox").style.display = "none";
 
   cambiarVista("home");
