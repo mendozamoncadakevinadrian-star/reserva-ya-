@@ -904,46 +904,64 @@ function confirmarReserva(id) {
    FAVORITOS
 ===================================================== */
 
-function alternarFavorito(id) {
+async function alternarFavorito(id) {
 
-  const indice =
-    ReservaYa.favoritos.indexOf(id);
+  if (!ReservaYa.usuario) {
+    mostrarToast("Inicia sesión para guardar favoritos.");
+    return;
+  }
+
+  const indice = ReservaYa.favoritos.indexOf(id);
 
   if (indice >= 0) {
 
-    ReservaYa.favoritos.splice(
-      indice,
-      1
-    );
+    // Eliminar de Supabase
+    const { error } = await supabaseClient
+      .from("reserva_favoritos")
+      .delete()
+      .eq("usuario_id", ReservaYa.usuario.id)
+      .eq("negocio_id", id);
 
-    mostrarToast(
-      "Eliminado de favoritos."
-    );
+    if (error) {
+      console.error("Error eliminando favorito:", error);
+      mostrarToast("No se pudo eliminar el favorito.");
+      return;
+    }
+
+    ReservaYa.favoritos.splice(indice, 1);
+
+    mostrarToast("Eliminado de favoritos.");
 
   } else {
 
+    // Guardar en Supabase
+    const { error } = await supabaseClient
+      .from("reserva_favoritos")
+      .insert({
+        usuario_id: ReservaYa.usuario.id,
+        negocio_id: id
+      });
+
+    if (error) {
+      console.error("Error guardando favorito:", error);
+      mostrarToast("No se pudo guardar el favorito.");
+      return;
+    }
+
     ReservaYa.favoritos.push(id);
 
-    mostrarToast(
-      "Añadido a favoritos."
-    );
-
+    mostrarToast("Añadido a favoritos.");
   }
 
+  // Mantener copia local para que la interfaz siga funcionando
   localStorage.setItem(
     "reservaya_favoritos",
-    JSON.stringify(
-      ReservaYa.favoritos
-    )
+    JSON.stringify(ReservaYa.favoritos)
   );
 
   renderizarDestacados();
-
   renderizarFavoritos();
-
 }
-
-
 /* =====================================================
    FAVORITOS
 ===================================================== */
