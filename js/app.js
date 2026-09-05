@@ -1443,18 +1443,26 @@ function actualizarInterfazUsuario() {
 /* =====================================================
    CERRAR SESIÓN
 ===================================================== */
+async function cerrarSesion() {
 
-function cerrarSesion() {
+  const { error } = await supabaseClient.auth.signOut();
+
+  if (error) {
+    console.error("Error cerrando sesión:", error);
+    mostrarToast("No se pudo cerrar la sesión.");
+    return;
+  }
 
   ReservaYa.usuario = null;
+  ReservaYa.favoritos = [];
+
+  localStorage.removeItem("reservaya_favoritos");
 
   actualizarInterfazUsuario();
 
   cambiarVista("home");
 
-  mostrarToast(
-    "Sesión cerrada."
-  );
+  mostrarToast("Sesión cerrada.");
 
 }
 
