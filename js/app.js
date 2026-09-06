@@ -1062,6 +1062,7 @@ function renderizarFavoritos() {
 /* =====================================================
    RESERVAS
 ===================================================== */
+
 async function mostrarReservas(tipo, boton) {
 
   document
@@ -1085,13 +1086,9 @@ async function mostrarReservas(tipo, boton) {
         text-align:center;
         padding:60px 20px;
       ">
-        <div style="font-size:50px">
-          🔐
-        </div>
+        <div style="font-size:50px">🔐</div>
 
-        <h3>
-          Inicia sesión
-        </h3>
+        <h3>Inicia sesión</h3>
 
         <p style="
           color:#727887;
@@ -1130,9 +1127,7 @@ async function mostrarReservas(tipo, boton) {
         text-align:center;
         padding:60px 20px;
       ">
-        <div style="font-size:50px">
-          ⚠️
-        </div>
+        <div style="font-size:50px">⚠️</div>
 
         <h3>
           No se pudieron cargar las reservas
@@ -1150,6 +1145,8 @@ async function mostrarReservas(tipo, boton) {
     return;
   }
 
+  const ahora = new Date();
+
   ReservaYa.reservas = (data || []).map(reserva => {
 
     const negocio =
@@ -1157,51 +1154,91 @@ async function mostrarReservas(tipo, boton) {
         n => n.id === reserva.negocio_id
       );
 
+    const servicio =
+      reserva.servicio_id
+        ? null
+        : null;
+
+    const fechaHora =
+      new Date(`${reserva.fecha}T${reserva.hora}`);
+
     return {
       id: reserva.id,
       negocio_id: reserva.negocio_id,
       servicio_id: reserva.servicio_id,
       negocio: negocio?.nombre || "Negocio",
+      servicio: servicio?.nombre || "Servicio",
       fecha: reserva.fecha,
       hora: reserva.hora,
-      estado: reserva.estado
+      estado: reserva.estado,
+      fechaHora: fechaHora
     };
 
   });
 
-  const reservas = ReservaYa.reservas;
+  let reservasFiltradas;
+
+  if (tipo === "proximas") {
+
+    reservasFiltradas =
+      ReservaYa.reservas.filter(reserva => {
+
+        const estado =
+          String(reserva.estado || "").toLowerCase();
+
+        return (
+          reserva.fechaHora >= ahora &&
+          estado !== "cancelada" &&
+          estado !== "completada"
+        );
+
+      });
+
+  } else {
+
+    reservasFiltradas =
+      ReservaYa.reservas.filter(reserva => {
+
+        const estado =
+          String(reserva.estado || "").toLowerCase();
+
+        return (
+          reserva.fechaHora < ahora ||
+          estado === "cancelada" ||
+          estado === "completada"
+        );
+
+      });
+
+  }
 
   contenedor.innerHTML =
 
-    reservas.length
+    reservasFiltradas.length
 
-      ? reservas.map(reserva => `
+      ? reservasFiltradas.map(reserva => `
 
           <article class="reservation-card">
 
             <h3>
-              ${escaparHTML(
-                reserva.negocio
-              )}
+              ${escaparHTML(reserva.negocio)}
             </h3>
 
             <div class="reservation-meta">
 
-              📅 ${escaparHTML(
-                reserva.fecha
-              )}
+              📋 ${escaparHTML(reserva.servicio)}
 
               <br>
 
-              🕐 ${escaparHTML(
-                reserva.hora
-              )}
+              📅 ${escaparHTML(reserva.fecha)}
 
               <br>
 
-              📌 ${escaparHTML(
-                reserva.estado
-              )}
+              🕐 ${escaparHTML(reserva.hora)}
+
+              <br>
+
+              📌 ${escaparHTML(reserva.estado)}
 
             </div>
 
@@ -1221,15 +1258,22 @@ async function mostrarReservas(tipo, boton) {
           </div>
 
           <h3>
-            No tienes reservas
+            ${
+              tipo === "proximas"
+                ? "No tienes reservas próximas"
+                : "No tienes historial"
+            }
           </h3>
 
           <p style="
             color:#727887;
             margin-top:7px;
           ">
-            Cuando hagas una reserva
-            aparecerá aquí.
+            ${
+              tipo === "proximas"
+                ? "Cuando hagas una reserva aparecerá aquí."
+                : "Tus reservas anteriores aparecerán aquí."
+            }
           </p>
 
         </div>
@@ -1237,7 +1281,6 @@ async function mostrarReservas(tipo, boton) {
       `;
 
 }
-
 
 /* =====================================================
    NAVEGACIÓN
