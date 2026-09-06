@@ -1880,14 +1880,232 @@ async function administrarServicios() {
 }
 
 
-function administrarHorarios() {
+async function administrarHorarios() {
+
+  if (!ReservaYa.usuario) {
+    mostrarToast("Debes iniciar sesión.");
+    return;
+  }
+
+  if (!ReservaYa.negocioActual) {
+    mostrarToast("No se encontró tu negocio.");
+    return;
+  }
+
+  const negocioId = ReservaYa.negocioActual.id;
+
+  const { data: horarios, error } = await supabaseClient
+    .from("reserva_horarios")
+    .select("*")
+    .eq("negocio_id", negocioId)
+    .order("dia_semana", { ascending: true });
+
+  if (error) {
+    console.error("Error cargando horarios:", error);
+    mostrarToast("No se pudieron cargar los horarios.");
+    return;
+  }
+
+  const dias = [
+    "Domingo",
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado"
+  ];
+
+  const horariosGuardados = horarios || [];
+
+  const contenido = `
+    <h2>🕐 Horarios de ${escaparHTML(ReservaYa.negocioActual.nombre)}</h2>
+
+    <p style="margin-top:10px;">
+      Configura cuándo está abierto tu negocio.
+    </p>
+
+    <div style="margin-top:20px;">
+
+      ${dias.map((dia, indice) => {
+
+        const horario = horariosGuardados.find(
+          h => Number(h.dia_semana) === indice
+        );
+
+        const abierto = horario
+          ? horario.abierto
+          : false;
+
+        const apertura = horario?.hora_apertura || "10:00";
+        const cierre = horario?.hora_cierre || "20:00";
+
+        return `
+          <div class="reservation-card" style="margin-bottom:12px;">
+
+            <div style="
+              display:flex;
+              justify-content:space-between;
+              align-items:center;
+              gap:10px;
+            ">
+
+              <strong>${dia}</strong>
+
+              <label style="display:flex; align-items:center; gap:8px;">
+                <input
+                  type="checkbox"
+                  id="horarioAbierto${indice}"
+                  ${abierto ? "checked" : ""}
+                  onchange="alternarHorario(${indice})"
+                >
+                Abierto
+              </label>
+
+            </div>
+
+            <div
+              id="horarioCampos${indice}"
+              style="
+                display:${abierto ? "grid" : "none"};
+                grid-template-columns:1fr 1fr;
+                gap:10px;
+                margin-top:12px;
+              "
+            >
+
+              <div>
+                <label>Apertura</label>
+                <input
+                  type="time"
+                  id="horaApertura${indice}"
+                  value="${apertura}"
+                >
+              </div>
+
+              <div>
+                <label>Cierre</label>
+                <input
+                  type="time"
+                  id="horaCierre${indice}"
+                  value="${cierre}"
+                >
+              </div>
+
+            </div>
+
+          </div>
+        `;
+
+      }).join("")}
+
+    </div>
+
+    <button
+      class="primary-button"
+      onclick="guardarHorarios()"
+      style="width:100%; margin-top:10px;"
+    >
+      💾 Guardar horarios
+    </button>
+  `;
+
+  abrirModal(contenido);
+}
+function alternarHorario(dia) {
+
+  const checkbox =
+    document.getElementById(`horarioAbierto${dia}`);
+
+  const campos =
+    document.getElementById(`horarioCampos${dia}`);
+
+  if (!checkbox || !campos) return;
+
+  campos.style.display =
+    checkbox.checked ? "grid" : "none";
+}
+async function guardarHorarios() {
+
+  if (!ReservaYa.usuario || !ReservaYa.negocioActual) {
+    mostrarToast("No se encontró tu negocio.");
+    return;
+  }
+
+  const negocioId = ReservaYa.negocioActual.id;
+
+  const dias = [
+    "Domingo",
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado"
+  ];
+
+  const horarios = [];
+
+  for (let dia = 0; dia < 7; dia++) {
+
+    const abierto =
+      document.getElementById(`horarioAbierto${dia}`)?.checked || false;
+
+    const horaApertura =
+      document.getElementById(`horaApertura${dia}`)?.value || null;
+
+    const horaCierre =
+      document.getElementById(`horaCierre${dia}`)?.value || null;
+
+    if (abierto && (!horaApertura || !horaCierre)) {
+      mostrarToast(`Completa el horario de ${dias[dia]}.`);
+      return;
+    }
+
+    horarios.push({
+      negocio_id: negocioId,
+      dia_semana: dia,
+      abierto: abierto,
+      hora_apertura: abierto ? horaApertura : null,
+      hora_cierre: abierto ? horaCierre : null
+    });
+  }
+
+  // Eliminar horarios anteriores del negocio
+  const { error: errorEliminar } = await supabaseClient
+    .from("reserva_horarios")
+    .delete()
+    .eq("negocio_id", negocioId);
+
+  if (errorEliminar) {
+    console.error(
+      "Error eliminando horarios anteriores:",
+      errorEliminar
+    );
+    mostrarToast("No se pudieron actualizar los horarios.");
+    return;
+  }
+
+  // Guardar los nuevos horarios
+  const { error: errorGuardar } = await supabaseClient
+    .from("reserva_horarios")
+    .insert(horarios);
+
+  if (errorGuardar) {
+    console.error(
+      "Error guardando horarios:",
+      errorGuardar
+    );
+    mostrarToast("No se pudieron guardar los horarios.");
+    return;
+  }
+
+  cerrarModal();
 
   mostrarToast(
-    "Administrador de horarios preparado."
+    `Horarios de ${ReservaYa.negocioActual.nombre} guardados correctamente.`
   );
-
 }
-
 
 function administrarEmpleados() {
 
