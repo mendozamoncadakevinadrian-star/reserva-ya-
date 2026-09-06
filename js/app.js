@@ -1807,12 +1807,76 @@ function abrirConfiguracion() {
 }
 
 
-function administrarServicios() {
+async function administrarServicios() {
 
-  mostrarToast(
-    "Administrador de servicios preparado."
-  );
+  if (!ReservaYa.usuario) {
+    mostrarToast("Debes iniciar sesión.");
+    return;
+  }
 
+  if (!ReservaYa.negocioActual) {
+    mostrarToast("No se encontró tu negocio.");
+    return;
+  }
+
+  const { data: servicios, error } = await supabaseClient
+    .from("servicios")
+    .select("*")
+    .eq("negocio_id", ReservaYa.negocioActual.id)
+    .order("nombre", { ascending: true });
+
+  if (error) {
+    console.error("Error cargando servicios:", error);
+    mostrarToast("No se pudieron cargar los servicios.");
+    return;
+  }
+
+  const lista = servicios || [];
+
+  const contenido = `
+    <h2>🛠️ Servicios de ${escaparHTML(ReservaYa.negocioActual.nombre)}</h2>
+
+    <p style="margin-top:10px;">
+      Estos son los servicios registrados actualmente.
+    </p>
+
+    <div style="margin-top:20px;">
+      ${
+        lista.length
+          ? lista.map(servicio => `
+              <div class="reservation-card" style="margin-bottom:12px;">
+                <h3>${escaparHTML(servicio.nombre || "Servicio")}</h3>
+
+                <div class="reservation-meta">
+                  💰 ${
+                    servicio.precio !== null &&
+                    servicio.precio !== undefined
+                      ? "$" + Number(servicio.precio).toLocaleString("es-CO")
+                      : "Precio no definido"
+                  }
+
+                  <br>
+
+                  ⏱️ ${
+                    servicio.duracion
+                      ? escaparHTML(String(servicio.duracion)) + " minutos"
+                      : "Duración no definida"
+                  }
+                </div>
+              </div>
+            `).join("")
+          : `
+              <div class="empty-state">
+                <span>🛠️</span>
+                <h3>No tienes servicios registrados</h3>
+                <p>Cuando agregues servicios aparecerán aquí.</p>
+              </div>
+            `
+      }
+    </div>
+  `;
+
+  abrirModal(contenido);
 }
 
 
