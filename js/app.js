@@ -839,75 +839,101 @@ async function iniciarReserva(id) {
 }
 
 
-function confirmarReserva(id) {
+async function confirmarReserva(id) {
 
-  const fecha =
-    document.getElementById(
-      "reservationDate"
-    )?.value;
-
-  const hora =
-    document.getElementById(
-      "reservationTime"
-    )?.value;
-
-  if (!fecha || !hora) {
-
-    mostrarToast(
-      "Selecciona fecha y hora."
-    );
-
+  if (!ReservaYa.usuario) {
+    mostrarToast("Debes iniciar sesión para reservar.");
     return;
-
   }
 
-  /*
-    IMPORTANTE:
+  const servicioId =
+    document.getElementById("reservationService")?.value;
 
-    En la siguiente etapa esta función
-    se conectará directamente con Supabase
-    y la tabla Citas.
+  const fecha =
+    document.getElementById("reservationDate")?.value;
 
-    Por ahora guardamos una reserva
-    local para probar la interfaz.
-  */
+  const hora =
+    document.getElementById("reservationTime")?.value;
+
+  if (!servicioId) {
+    mostrarToast("Selecciona un servicio.");
+    return;
+  }
+
+  if (!fecha || !hora) {
+    mostrarToast("Selecciona fecha y hora.");
+    return;
+  }
 
   const negocio =
-    ReservaYa.negocios.find(
-      n => n.id === id
-    );
+    ReservaYa.negocios.find(n => n.id === id);
 
-  const reserva = {
+  if (!negocio) {
+    mostrarToast("No se encontró el negocio.");
+    return;
+  }
 
-    id:
-      "local-" +
-      Date.now(),
+  const servicio =
+    await cargarServicioPorId(servicioId);
 
+  const nombreCliente =
+    ReservaYa.usuario.user_metadata?.nombre ||
+    ReservaYa.usuario.email ||
+    "Cliente";
+
+  const { data, error } = await supabaseClient
+    .from("Citas")
+    .insert({
+      negocio_id: id,
+      servicio_id: servicioId,
+      nombre_cliente: nombreCliente,
+      fecha: fecha,
+      hora: hora,
+      estado: "Pendiente",
+      usuario: ReservaYa.usuario.id
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error creando reserva:", error);
+    mostrarToast("No se pudo crear la reserva.");
+    return;
+  }
+
+  ReservaYa.reservas.push({
+    id: data.id,
     negocio_id: id,
-
-    negocio:
-      negocio?.nombre || "Negocio",
-
-    fecha,
-
-    hora,
-
+    servicio_id: servicioId,
+    negocio: negocio.nombre,
+    servicio: servicio?.nombre || "Servicio",
+    fecha: fecha,
+    hora: hora,
     estado: "Pendiente"
-
-  };
-
-  ReservaYa.reservas.push(
-    reserva
-  );
+  });
 
   cerrarModal();
 
-  mostrarToast(
-    "Reserva creada correctamente."
-  );
+  mostrarToast("Reserva creada correctamente.");
 
+  console.log("Reserva guardada:", data);
 }
 
+async function cargarServicioPorId(servicioId) {
+
+  const { data, error } = await supabaseClient
+    .from("servicios")
+    .select("*")
+    .eq("id", servicioId)
+    .single();
+
+  if (error) {
+    console.error("Error cargando servicio:", error);
+    return null;
+  }
+
+  return data;
+}
 
 /* =====================================================
    FAVORITOS
