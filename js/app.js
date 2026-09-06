@@ -711,6 +711,21 @@ function abrirNegocio(id) {
 
 }
 
+async function cargarServiciosReserva(negocioId) {
+
+  const { data, error } = await supabaseClient
+    .from("servicios")
+    .select("*")
+    .eq("negocio_id", negocioId)
+    .order("nombre", { ascending: true });
+
+  if (error) {
+    console.error("Error cargando servicios:", error);
+    return [];
+  }
+
+  return data || [];
+}
 
 /* =====================================================
    RESERVA
