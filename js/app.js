@@ -1791,7 +1791,7 @@ function mostrarTodasCategorias() {
    USUARIO
 ===================================================== */
 
-function actualizarInterfazUsuario() {
+async function actualizarInterfazUsuario() {
 
   const loginBox = document.getElementById("loginBox");
 
@@ -1818,6 +1818,8 @@ function actualizarInterfazUsuario() {
       settingsList.style.display = "none";
     }
 
+    ReservaYa.negocioActual = null;
+
     return;
   }
 
@@ -1841,9 +1843,7 @@ function actualizarInterfazUsuario() {
     "Usuario";
 
   const inicial =
-    nombre
-      .charAt(0)
-      .toUpperCase();
+    nombre.charAt(0).toUpperCase();
 
   const userAvatar =
     document.getElementById("userAvatar");
@@ -1873,7 +1873,43 @@ function actualizarInterfazUsuario() {
     profileEmail.textContent =
       ReservaYa.usuario.email || "-";
   }
+
+  // Buscar si el usuario tiene un negocio
+  const { data: negocio, error } = await supabaseClient
+    .from("negocios")
+    .select("*")
+    .eq("usuario_id", ReservaYa.usuario.id)
+    .maybeSingle();
+
+  if (error) {
+    console.error(
+      "Error buscando negocio del usuario:",
+      error
+    );
+
+    ReservaYa.negocioActual = null;
+    return;
+  }
+
+  if (negocio) {
+
+    ReservaYa.negocioActual = negocio;
+
+    console.log(
+      "Negocio del usuario encontrado:",
+      negocio
+    );
+
+  } else {
+
+    ReservaYa.negocioActual = null;
+
+    console.log(
+      "El usuario no tiene un negocio registrado."
+    );
+  }
 }
+
 async function restaurarSesion() {
 
   const { data, error } =
