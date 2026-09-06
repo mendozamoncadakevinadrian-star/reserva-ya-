@@ -739,7 +739,7 @@ async function iniciarReserva(id) {
     );
 
   if (!negocio) return;
-
+  const servicios = await cargarServiciosReserva(id);
   abrirModal(`
 
     <h2>
@@ -747,9 +747,40 @@ async function iniciarReserva(id) {
       ${escaparHTML(negocio.nombre)}
     </h2>
 
-    <p style="color:#727887;margin-top:6px">
-      Selecciona una fecha para continuar.
-    </p>
+<p style="color:#727887;margin-top:6px">
+  Selecciona un servicio, fecha y hora.
+</p>
+
+<label style="
+  display:block;
+  margin-top:20px;
+  font-weight:700;
+">
+  Servicio
+</label>
+
+<select
+  id="reservationService"
+  style="
+    width:100%;
+    padding:13px;
+    margin-top:7px;
+    border:1px solid #e7e9ef;
+    border-radius:11px;
+  "
+>
+  <option value="">
+    Selecciona un servicio
+  </option>
+
+  ${servicios.map(servicio => `
+    <option value="${servicio.id}">
+      ${escaparHTML(servicio.nombre || "Servicio")}
+      ${servicio.precio != null ? ` — ${formatearPrecio(servicio.precio)}` : ""}
+    </option>
+  `).join("")}
+
+</select>
 
     <label style="
       display:block;
