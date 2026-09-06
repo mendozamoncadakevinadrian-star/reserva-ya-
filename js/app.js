@@ -898,7 +898,7 @@ async function confirmarReserva(id) {
 
   const hora =
     document.getElementById("reservationTime")?.value;
-   
+
   const comentario =
     document.getElementById("reservationComment")?.value.trim() || "";
 
@@ -920,8 +920,41 @@ async function confirmarReserva(id) {
     return;
   }
 
+  // 🕐 Comprobar horario del negocio
+  const horario =
+    await obtenerHorarioDelDia(id, fecha);
+
+  if (!horario) {
+    mostrarToast(
+      "Este negocio todavía no tiene horario configurado para ese día."
+    );
+    return;
+  }
+
+  if (!horario.abierto) {
+    mostrarToast(
+      "El negocio está cerrado ese día."
+    );
+    return;
+  }
+
+  if (
+    hora < horario.hora_apertura ||
+    hora > horario.hora_cierre
+  ) {
+    mostrarToast(
+      `Elige una hora entre ${horario.hora_apertura.slice(0, 5)} y ${horario.hora_cierre.slice(0, 5)}.`
+    );
+    return;
+  }
+
   const servicio =
     await cargarServicioPorId(servicioId);
+
+  if (!servicio) {
+    mostrarToast("No se encontró el servicio.");
+    return;
+  }
 
   const nombreCliente =
     ReservaYa.usuario.user_metadata?.nombre ||
@@ -944,8 +977,15 @@ async function confirmarReserva(id) {
     .single();
 
   if (error) {
-    console.error("Error creando reserva:", error);
-    mostrarToast("No se pudo crear la reserva.");
+    console.error(
+      "Error creando reserva:",
+      error
+    );
+
+    mostrarToast(
+      "No se pudo crear la reserva."
+    );
+
     return;
   }
 
@@ -954,19 +994,19 @@ async function confirmarReserva(id) {
     negocio_id: id,
     servicio_id: servicioId,
     negocio: negocio.nombre,
-    servicio: servicio?.nombre || "Servicio",
+    servicio: servicio.nombre || "Servicio",
     fecha: fecha,
     hora: hora,
+    comentario: comentario,
     estado: "Pendiente"
   });
 
   cerrarModal();
 
-  mostrarToast("Reserva creada correctamente.");
-
-  console.log("Reserva guardada:", data);
+  mostrarToast(
+    "Reserva creada correctamente."
+  );
 }
-
 async function cargarServicioPorId(servicioId) {
 
   const { data, error } = await supabaseClient
