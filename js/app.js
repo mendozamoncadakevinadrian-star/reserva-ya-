@@ -776,7 +776,7 @@ async function iniciarReserva(id) {
   ${servicios.map(servicio => `
     <option value="${servicio.id}">
       ${escaparHTML(servicio.nombre || "Servicio")}
-      ${servicio.precio != null ? ` — ${formatearPrecio(servicio.precio)}` : ""}
+      ${servicio.precio != null ? ` — $${Number(servicio.precio).toLocaleString("es-CO")}` : ""}
     </option>
   `).join("")}
 
