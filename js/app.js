@@ -651,11 +651,10 @@ async function abrirNegocio(id) {
 
   if (!negocio) return;
 
-  ReservaYa.negocioActual =
-    negocio;
+  ReservaYa.negocioActual = negocio;
 
-  // 🕐 Cargar horarios del negocio
-  const { data: horarios, error } =
+  // 🕐 Obtener un resumen del horario
+  const { data: horarios } =
     await supabaseClient
       .from("reserva_horarios")
       .select("*")
@@ -664,80 +663,41 @@ async function abrirNegocio(id) {
         ascending: true
       });
 
-  if (error) {
-    console.error(
-      "Error cargando horarios:",
-      error
+  const horariosGuardados = horarios || [];
+
+  const lunes =
+    horariosGuardados.find(
+      h => Number(h.dia_semana) === 1
     );
+
+  const domingo =
+    horariosGuardados.find(
+      h => Number(h.dia_semana) === 0
+    );
+
+  let resumenHorario =
+    "Horario no configurado";
+
+  if (lunes?.abierto) {
+
+    const apertura =
+      lunes.hora_apertura
+        ? lunes.hora_apertura.slice(0, 5)
+        : "--:--";
+
+    const cierre =
+      lunes.hora_cierre
+        ? lunes.hora_cierre.slice(0, 5)
+        : "--:--";
+
+    resumenHorario =
+      `Lun–Sáb · ${apertura}–${cierre}`;
+
   }
 
-  const dias = [
-    "Domingo",
-    "Lunes",
-    "Martes",
-    "Miércoles",
-    "Jueves",
-    "Viernes",
-    "Sábado"
-  ];
-
-  const horariosGuardados =
-    horarios || [];
-
-  const horariosHTML =
-    dias.map((dia, indice) => {
-
-      const horario =
-        horariosGuardados.find(
-          h =>
-            Number(h.dia_semana) ===
-            indice
-        );
-
-      if (
-        !horario ||
-        !horario.abierto
-      ) {
-        return `
-          <div style="
-            display:flex;
-            justify-content:space-between;
-            padding:7px 0;
-            border-bottom:1px solid #eee;
-          ">
-            <span>${dia}</span>
-            <span style="color:#e05252">
-              Cerrado
-            </span>
-          </div>
-        `;
-      }
-
-      const apertura =
-        horario.hora_apertura
-          ? horario.hora_apertura.slice(0, 5)
-          : "--:--";
-
-      const cierre =
-        horario.hora_cierre
-          ? horario.hora_cierre.slice(0, 5)
-          : "--:--";
-
-      return `
-        <div style="
-          display:flex;
-          justify-content:space-between;
-          padding:7px 0;
-          border-bottom:1px solid #eee;
-        ">
-          <span>${dia}</span>
-          <span style="color:#198754">
-            ${apertura} - ${cierre}
-          </span>
-        </div>
-      `;
-
-    }).join("");
+  if (domingo && !domingo.abierto) {
+    resumenHorario += " · Dom cerrado";
+  }
 
   abrirModal(`
 
@@ -757,9 +717,7 @@ async function abrirNegocio(id) {
         color:#727887;
         margin-top:5px
       ">
-        ${escaparHTML(
-          negocio.ciudad
-        )}
+        ${escaparHTML(negocio.ciudad)}
       </p>
 
       <div style="margin-top:15px">
@@ -767,22 +725,39 @@ async function abrirNegocio(id) {
         · ${negocio.reseñas} reseñas
       </div>
 
-      <!-- 🕐 HORARIOS -->
+      <!-- 🕐 RESUMEN HORARIO -->
       <div style="
-        text-align:left;
-        margin-top:22px;
-        padding:16px;
+        margin-top:20px;
+        padding:14px;
         border-radius:14px;
         background:#f8f9fb;
+        text-align:left;
       ">
 
-        <h3 style="
-          margin:0 0 10px 0;
+        <div style="
+          font-weight:700;
+          margin-bottom:5px;
         ">
           🕐 Horario de atención
-        </h3>
+        </div>
 
-        ${horariosHTML}
+        <div style="
+          color:#727887;
+          font-size:14px;
+        ">
+          ${resumenHorario}
+        </div>
+
+        <button
+          class="secondary-button"
+          style="
+            width:100%;
+            margin-top:10px;
+          "
+          onclick="verHorariosNegocio('${negocio.id}')"
+        >
+          🕐 Ver horarios completos
+        </button>
 
       </div>
 
@@ -790,7 +765,7 @@ async function abrirNegocio(id) {
         class="primary-button"
         style="
           width:100%;
-          margin-top:22px;
+          margin-top:18px;
         "
         onclick="iniciarReserva('${negocio.id}')"
       >
@@ -817,6 +792,150 @@ async function abrirNegocio(id) {
   `);
 
 }
+
+async function verHorariosNegocio(id) {
+
+  const negocio =
+    ReservaYa.negocios.find(
+      n => n.id === id
+    );
+
+  if (!negocio) return;
+
+  const { data: horarios, error } =
+    await supabaseClient
+      .from("reserva_horarios")
+      .select("*")
+      .eq("negocio_id", id)
+      .order("dia_semana", {
+        ascending: true
+      });
+
+  if (error) {
+    console.error(
+      "Error cargando horarios:",
+      error
+    );
+
+    mostrarToast(
+      "No se pudieron cargar los horarios."
+    );
+
+    return;
+  }
+
+  const dias = [
+    "Domingo",
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado"
+  ];
+
+  const horariosGuardados =
+    horarios || [];
+
+  const horariosHTML =
+    dias.map((dia, indice) => {
+
+      const horario =
+        horariosGuardados.find(
+          h =>
+            Number(h.dia_semana) === indice
+        );
+
+      if (!horario || !horario.abierto) {
+
+        return `
+          <div style="
+            display:flex;
+            justify-content:space-between;
+            padding:9px 0;
+            border-bottom:1px solid #eee;
+          ">
+            <span>${dia}</span>
+
+            <span style="
+              color:#e05252;
+              font-weight:600;
+            ">
+              Cerrado
+            </span>
+          </div>
+        `;
+      }
+
+      const apertura =
+        horario.hora_apertura
+          ? horario.hora_apertura.slice(0, 5)
+          : "--:--";
+
+      const cierre =
+        horario.hora_cierre
+          ? horario.hora_cierre.slice(0, 5)
+          : "--:--";
+
+      return `
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          padding:9px 0;
+          border-bottom:1px solid #eee;
+        ">
+          <span>${dia}</span>
+
+          <span style="
+            color:#198754;
+            font-weight:600;
+          ">
+            ${apertura} – ${cierre}
+          </span>
+        </div>
+      `;
+
+    }).join("");
+
+  abrirModal(`
+
+    <div>
+
+      <h2 style="margin-bottom:5px">
+        🕐 Horarios
+      </h2>
+
+      <p style="
+        color:#727887;
+        margin-bottom:18px;
+      ">
+        ${escaparHTML(negocio.nombre)}
+      </p>
+
+      <div style="
+        background:#f8f9fb;
+        padding:12px 15px;
+        border-radius:14px;
+      ">
+        ${horariosHTML}
+      </div>
+
+      <button
+        class="primary-button"
+        style="
+          width:100%;
+          margin-top:18px;
+        "
+        onclick="iniciarReserva('${negocio.id}')"
+      >
+        📅 Reservar cita
+      </button>
+
+    </div>
+
+  `);
+}
+
 
 async function cargarServiciosReserva(negocioId) {
 
