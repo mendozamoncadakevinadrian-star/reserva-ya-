@@ -822,6 +822,28 @@ async function iniciarReserva(id) {
         border-radius:11px;
       "
     >
+    <label style="
+  display:block;
+  margin-top:15px;
+  font-weight:700;
+">
+  Comentario
+</label>
+
+<textarea
+  id="reservationComment"
+  placeholder="¿Quieres agregar algún comentario?"
+  rows="3"
+  style="
+    width:100%;
+    padding:13px;
+    margin-top:7px;
+    border:1px solid #e7e9ef;
+    border-radius:11px;
+    resize:vertical;
+    font-family:inherit;
+  "
+></textarea>
 
     <button
       class="primary-button"
@@ -854,6 +876,9 @@ async function confirmarReserva(id) {
 
   const hora =
     document.getElementById("reservationTime")?.value;
+   
+  const comentario =
+    document.getElementById("reservationComment")?.value.trim() || "";
 
   if (!servicioId) {
     mostrarToast("Selecciona un servicio.");
@@ -889,6 +914,7 @@ async function confirmarReserva(id) {
       nombre_cliente: nombreCliente,
       fecha: fecha,
       hora: hora,
+      comentario: comentario,
       estado: "Pendiente",
       usuario: ReservaYa.usuario.id
     })
