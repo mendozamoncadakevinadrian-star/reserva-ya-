@@ -863,6 +863,7 @@ async function iniciarReserva(id) {
 async function obtenerHorarioDelDia(negocioId, fecha) {
 
   const fechaObj = new Date(`${fecha}T12:00:00`);
+
   const diaSemana = fechaObj.getDay();
 
   const { data, error } = await supabaseClient
@@ -877,10 +878,23 @@ async function obtenerHorarioDelDia(negocioId, fecha) {
       "Error consultando horario:",
       error
     );
+
     return null;
   }
 
-  return data;
+  if (!data) {
+    return {
+      abierto: false,
+      hora_apertura: null,
+      hora_cierre: null
+    };
+  }
+
+  return {
+    abierto: Boolean(data.abierto),
+    hora_apertura: data.hora_apertura,
+    hora_cierre: data.hora_cierre
+  };
 }
 
 async function confirmarReserva(id) {
