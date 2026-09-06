@@ -731,7 +731,7 @@ async function cargarServiciosReserva(negocioId) {
    RESERVA
 ===================================================== */
 
-function iniciarReserva(id) {
+async function iniciarReserva(id) {
 
   const negocio =
     ReservaYa.negocios.find(
