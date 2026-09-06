@@ -1725,21 +1725,69 @@ function abrirMenuUsuario() {
 
 }
 
-function abrirPanelNegocio() {
+async function abrirPanelNegocio() {
 
   if (!ReservaYa.usuario) {
     mostrarToast("Debes iniciar sesión.");
     return;
   }
-
+   
   if (ReservaYa.negocioActual) {
-    cambiarVista("business");
-    return;
-  }
+  cambiarVista("business");
+  await cargarDatosPanelNegocio();
+  return;
+}
 
   mostrarToast("Todavía no tienes un negocio registrado.");
 }
+async function cargarDatosPanelNegocio() {
 
+  if (!ReservaYa.usuario || !ReservaYa.negocioActual) {
+    return;
+  }
+
+  const negocioId = ReservaYa.negocioActual.id;
+
+  const { data: reservas, error } = await supabaseClient
+    .from("Citas")
+    .select("*")
+    .eq("negocio_id", negocioId);
+
+  if (error) {
+    console.error("Error cargando reservas del negocio:", error);
+    mostrarToast("No se pudieron cargar las reservas.");
+    return;
+  }
+
+  const totalReservas = reservas?.length || 0;
+
+  const clientesUnicos = new Set(
+    (reservas || [])
+      .map(reserva => reserva.usuario)
+      .filter(Boolean)
+  );
+
+  const totalClientes = clientesUnicos.size;
+
+  const statReservations =
+    document.getElementById("statReservations");
+
+  const statClients =
+    document.getElementById("statClients");
+
+  if (statReservations) {
+    statReservations.textContent = totalReservas;
+  }
+
+  if (statClients) {
+    statClients.textContent = totalClientes;
+  }
+
+  console.log(
+    "Datos del negocio cargados:",
+    reservas
+  );
+}
 
 function editarPerfil() {
 
