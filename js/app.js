@@ -933,7 +933,7 @@ async function verHorariosNegocio(id) {
 
     </div>
 
-  `);
+    `, "abrirNegocio('" + negocio.id + "')");
 }
 
 
@@ -1879,24 +1879,25 @@ function irInicio() {
    MODAL
 ===================================================== */
 
-function abrirModal(html) {
+function abrirModal(html, accionCerrar = null) {
 
   const overlay =
-    document.getElementById(
-      "modalOverlay"
-    );
+    document.getElementById("modalOverlay");
 
   const content =
-    document.getElementById(
-      "modalContent"
-    );
+    document.getElementById("modalContent");
 
   if (!overlay || !content) return;
+
+  const accionX =
+    accionCerrar
+      ? accionCerrar
+      : "cerrarModal()";
 
   content.innerHTML = `
 
     <button
-      onclick="cerrarModal()"
+      onclick="${accionX}"
       style="
         float:right;
         width:35px;
@@ -1916,7 +1917,6 @@ function abrirModal(html) {
   overlay.classList.remove("hidden");
 
 }
-
 
 function cerrarModal(event) {
 
