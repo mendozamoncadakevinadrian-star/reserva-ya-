@@ -860,6 +860,28 @@ async function iniciarReserva(id) {
 
 }
 
+async function obtenerHorarioDelDia(negocioId, fecha) {
+
+  const fechaObj = new Date(`${fecha}T12:00:00`);
+  const diaSemana = fechaObj.getDay();
+
+  const { data, error } = await supabaseClient
+    .from("reserva_horarios")
+    .select("*")
+    .eq("negocio_id", negocioId)
+    .eq("dia_semana", diaSemana)
+    .maybeSingle();
+
+  if (error) {
+    console.error(
+      "Error consultando horario:",
+      error
+    );
+    return null;
+  }
+
+  return data;
+}
 
 async function confirmarReserva(id) {
 
