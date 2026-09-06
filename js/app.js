@@ -1140,7 +1140,12 @@ async function mostrarReservas(tipo, boton) {
 
   const { data, error } = await supabaseClient
     .from("Citas")
-    .select("*")
+    .select(`
+      *,
+      servicios (
+        nombre
+      )
+    `)
     .eq("usuario", ReservaYa.usuario.id)
     .order("fecha", { ascending: true })
     .order("hora", { ascending: true });
@@ -1180,11 +1185,6 @@ async function mostrarReservas(tipo, boton) {
         n => n.id === reserva.negocio_id
       );
 
-    const servicio =
-      reserva.servicio_id
-        ? null
-        : null;
-
     const fechaHora =
       new Date(`${reserva.fecha}T${reserva.hora}`);
 
@@ -1192,12 +1192,27 @@ async function mostrarReservas(tipo, boton) {
       id: reserva.id,
       negocio_id: reserva.negocio_id,
       servicio_id: reserva.servicio_id,
-      negocio: negocio?.nombre || "Negocio",
-      servicio: servicio?.nombre || "Servicio",
-      fecha: reserva.fecha,
-      hora: reserva.hora,
-      estado: reserva.estado,
-      fechaHora: fechaHora
+
+      negocio:
+        negocio?.nombre || "Negocio",
+
+      servicio:
+        reserva.servicios?.nombre || "Servicio",
+
+      fecha:
+        reserva.fecha,
+
+      hora:
+        reserva.hora,
+
+      comentario:
+        reserva.comentario || "",
+
+      estado:
+        reserva.estado,
+
+      fechaHora:
+        fechaHora
     };
 
   });
@@ -1252,19 +1267,35 @@ async function mostrarReservas(tipo, boton) {
 
             <div class="reservation-meta">
 
-              📋 ${escaparHTML(reserva.servicio)}
+              📋 ${escaparHTML(
+                reserva.servicio
+              )}
 
               <br>
 
-              📅 ${escaparHTML(reserva.fecha)}
+              📅 ${escaparHTML(
+                reserva.fecha
+              )}
 
               <br>
 
-              🕐 ${escaparHTML(reserva.hora)}
+              🕐 ${escaparHTML(
+                reserva.hora
+              )}
 
               <br>
 
-              📌 ${escaparHTML(reserva.estado)}
+              💬 ${
+                reserva.comentario
+                  ? escaparHTML(reserva.comentario)
+                  : "Sin comentario"
+              }
+
+              <br>
+
+              📌 ${escaparHTML(
+                reserva.estado
+              )}
 
             </div>
 
@@ -1307,6 +1338,7 @@ async function mostrarReservas(tipo, boton) {
       `;
 
 }
+
 
 /* =====================================================
    NAVEGACIÓN
