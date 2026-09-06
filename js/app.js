@@ -1062,13 +1062,10 @@ function renderizarFavoritos() {
 /* =====================================================
    RESERVAS
 ===================================================== */
-
-function mostrarReservas(tipo, boton) {
+async function mostrarReservas(tipo, boton) {
 
   document
-    .querySelectorAll(
-      ".reservation-tabs button"
-    )
+    .querySelectorAll(".reservation-tabs button")
     .forEach(b =>
       b.classList.remove("active")
     );
@@ -1078,18 +1075,101 @@ function mostrarReservas(tipo, boton) {
   }
 
   const contenedor =
-    document.getElementById(
-      "reservationsContainer"
-    );
+    document.getElementById("reservationsContainer");
 
   if (!contenedor) return;
 
-  const reservas =
-    tipo === "proximas"
+  if (!ReservaYa.usuario) {
+    contenedor.innerHTML = `
+      <div style="
+        text-align:center;
+        padding:60px 20px;
+      ">
+        <div style="font-size:50px">
+          🔐
+        </div>
 
-      ? ReservaYa.reservas
+        <h3>
+          Inicia sesión
+        </h3>
 
-      : ReservaYa.reservas;
+        <p style="
+          color:#727887;
+          margin-top:7px;
+        ">
+          Inicia sesión para ver tus reservas.
+        </p>
+      </div>
+    `;
+
+    return;
+  }
+
+  contenedor.innerHTML = `
+    <div style="
+      text-align:center;
+      padding:40px 20px;
+      color:#727887;
+    ">
+      Cargando reservas...
+    </div>
+  `;
+
+  const { data, error } = await supabaseClient
+    .from("Citas")
+    .select("*")
+    .eq("usuario", ReservaYa.usuario.id)
+    .order("fecha", { ascending: true })
+    .order("hora", { ascending: true });
+
+  if (error) {
+    console.error("Error cargando reservas:", error);
+
+    contenedor.innerHTML = `
+      <div style="
+        text-align:center;
+        padding:60px 20px;
+      ">
+        <div style="font-size:50px">
+          ⚠️
+        </div>
+
+        <h3>
+          No se pudieron cargar las reservas
+        </h3>
+
+        <p style="
+          color:#727887;
+          margin-top:7px;
+        ">
+          Intenta nuevamente.
+        </p>
+      </div>
+    `;
+
+    return;
+  }
+
+  ReservaYa.reservas = (data || []).map(reserva => {
+
+    const negocio =
+      ReservaYa.negocios.find(
+        n => n.id === reserva.negocio_id
+      );
+
+    return {
+      id: reserva.id,
+      negocio_id: reserva.negocio_id,
+      servicio_id: reserva.servicio_id,
+      negocio: negocio?.nombre || "Negocio",
+      fecha: reserva.fecha,
+      hora: reserva.hora,
+      estado: reserva.estado
+    };
+
+  });
+
+  const reservas = ReservaYa.reservas;
 
   contenedor.innerHTML =
 
