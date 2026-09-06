@@ -642,7 +642,7 @@ function filtrarNegocios() {
    NEGOCIO
 ===================================================== */
 
-function abrirNegocio(id) {
+async function abrirNegocio(id) {
 
   const negocio =
     ReservaYa.negocios.find(
@@ -653,6 +653,91 @@ function abrirNegocio(id) {
 
   ReservaYa.negocioActual =
     negocio;
+
+  // 🕐 Cargar horarios del negocio
+  const { data: horarios, error } =
+    await supabaseClient
+      .from("reserva_horarios")
+      .select("*")
+      .eq("negocio_id", negocio.id)
+      .order("dia_semana", {
+        ascending: true
+      });
+
+  if (error) {
+    console.error(
+      "Error cargando horarios:",
+      error
+    );
+  }
+
+  const dias = [
+    "Domingo",
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado"
+  ];
+
+  const horariosGuardados =
+    horarios || [];
+
+  const horariosHTML =
+    dias.map((dia, indice) => {
+
+      const horario =
+        horariosGuardados.find(
+          h =>
+            Number(h.dia_semana) ===
+            indice
+        );
+
+      if (
+        !horario ||
+        !horario.abierto
+      ) {
+        return `
+          <div style="
+            display:flex;
+            justify-content:space-between;
+            padding:7px 0;
+            border-bottom:1px solid #eee;
+          ">
+            <span>${dia}</span>
+            <span style="color:#e05252">
+              Cerrado
+            </span>
+          </div>
+        `;
+      }
+
+      const apertura =
+        horario.hora_apertura
+          ? horario.hora_apertura.slice(0, 5)
+          : "--:--";
+
+      const cierre =
+        horario.hora_cierre
+          ? horario.hora_cierre.slice(0, 5)
+          : "--:--";
+
+      return `
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          padding:7px 0;
+          border-bottom:1px solid #eee;
+        ">
+          <span>${dia}</span>
+          <span style="color:#198754">
+            ${apertura} - ${cierre}
+          </span>
+        </div>
+      `;
+
+    }).join("");
 
   abrirModal(`
 
@@ -668,7 +753,10 @@ function abrirNegocio(id) {
         ${escaparHTML(negocio.nombre)}
       </h2>
 
-      <p style="color:#727887;margin-top:5px">
+      <p style="
+        color:#727887;
+        margin-top:5px
+      ">
         ${escaparHTML(
           negocio.ciudad
         )}
@@ -677,6 +765,25 @@ function abrirNegocio(id) {
       <div style="margin-top:15px">
         ⭐ ${negocio.rating}
         · ${negocio.reseñas} reseñas
+      </div>
+
+      <!-- 🕐 HORARIOS -->
+      <div style="
+        text-align:left;
+        margin-top:22px;
+        padding:16px;
+        border-radius:14px;
+        background:#f8f9fb;
+      ">
+
+        <h3 style="
+          margin:0 0 10px 0;
+        ">
+          🕐 Horario de atención
+        </h3>
+
+        ${horariosHTML}
+
       </div>
 
       <button
