@@ -1292,14 +1292,41 @@ async function mostrarReservas(tipo, boton) {
               }
 
               <br>
+📌 ${escaparHTML(
+  reserva.estado
+)}
 
-              📌 ${escaparHTML(
-                reserva.estado
-              )}
+</div>
 
-            </div>
+<div style="
+  display:flex;
+  gap:10px;
+  margin-top:15px;
+">
 
-          </article>
+  <button
+    class="secondary-button"
+    onclick="verDetallesReserva('${reserva.id}')"
+  >
+    Ver detalles
+  </button>
+
+  ${
+    String(reserva.estado || "").toLowerCase() !== "cancelada"
+      ? `
+        <button
+          class="secondary-button"
+          onclick="cancelarReserva('${reserva.id}')"
+        >
+          Cancelar
+        </button>
+      `
+      : ""
+  }
+
+</div>
+
+</article>
 
         `).join("")
 
@@ -1339,6 +1366,139 @@ async function mostrarReservas(tipo, boton) {
 
 }
 
+async function verDetallesReserva(id) {
+
+  const reserva =
+    ReservaYa.reservas.find(
+      r => r.id === id
+    );
+
+  if (!reserva) {
+    mostrarToast("No se encontró la reserva.");
+    return;
+  }
+
+  abrirModal(`
+    <h2>
+      Detalles de la reserva
+    </h2>
+
+    <div style="
+      margin-top:20px;
+      line-height:1.8;
+    ">
+
+      <strong>
+        🏢 Negocio
+      </strong>
+
+      <br>
+
+      ${escaparHTML(reserva.negocio)}
+
+      <br><br>
+
+      <strong>
+        📋 Servicio
+      </strong>
+
+      <br>
+
+      ${escaparHTML(reserva.servicio)}
+
+      <br><br>
+
+      <strong>
+        📅 Fecha
+      </strong>
+
+      <br>
+
+      ${escaparHTML(reserva.fecha)}
+
+      <br><br>
+
+      <strong>
+        🕐 Hora
+      </strong>
+
+      <br>
+
+      ${escaparHTML(reserva.hora)}
+
+      <br><br>
+
+      <strong>
+        💬 Comentario
+      </strong>
+
+      <br>
+
+      ${
+        reserva.comentario
+          ? escaparHTML(reserva.comentario)
+          : "Sin comentario"
+      }
+
+      <br><br>
+
+      <strong>
+        📌 Estado
+      </strong>
+
+      <br>
+
+      ${escaparHTML(reserva.estado)}
+
+    </div>
+  `);
+}
+
+
+async function cancelarReserva(id) {
+
+  if (!ReservaYa.usuario) {
+    mostrarToast("Debes iniciar sesión.");
+    return;
+  }
+
+  const confirmar =
+    confirm("¿Quieres cancelar esta reserva?");
+
+  if (!confirmar) return;
+
+  const { error } = await supabaseClient
+    .from("Citas")
+    .update({
+      estado: "Cancelada"
+    })
+    .eq("id", id)
+    .eq("usuario", ReservaYa.usuario.id);
+
+  if (error) {
+    console.error(
+      "Error cancelando reserva:",
+      error
+    );
+
+    mostrarToast(
+      "No se pudo cancelar la reserva."
+    );
+
+    return;
+  }
+
+  mostrarToast(
+    "Reserva cancelada correctamente."
+  );
+
+  await mostrarReservas(
+    "proximas",
+    document.querySelector(
+      ".reservation-tabs button.active"
+    )
+  );
+}
 
 /* =====================================================
    NAVEGACIÓN
