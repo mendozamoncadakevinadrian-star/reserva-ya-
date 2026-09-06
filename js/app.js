@@ -1725,6 +1725,21 @@ function abrirMenuUsuario() {
 
 }
 
+function abrirPanelNegocio() {
+
+  if (!ReservaYa.usuario) {
+    mostrarToast("Debes iniciar sesión.");
+    return;
+  }
+
+  if (ReservaYa.negocioActual) {
+    cambiarVista("business");
+    return;
+  }
+
+  mostrarToast("Todavía no tienes un negocio registrado.");
+}
+
 
 function editarPerfil() {
 
