@@ -1708,8 +1708,7 @@ async function confirmarReserva(id) {
     estado: "Pendiente"
 
   });
-   renderizarReservas();
-
+   
 
   cerrarModal();
 
