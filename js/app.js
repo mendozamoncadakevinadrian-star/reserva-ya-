@@ -965,7 +965,65 @@ async function iniciarReserva(id) {
     );
 
   if (!negocio) return;
-  const servicios = await cargarServiciosReserva(id);
+
+  const servicios =
+    await cargarServiciosReserva(id);
+
+  // 🕐 Cargar horarios del negocio
+  const { data: horarios, error } =
+    await supabaseClient
+      .from("reserva_horarios")
+      .select("*")
+      .eq("negocio_id", id)
+      .order("dia_semana", {
+        ascending: true
+      });
+
+  if (error) {
+    console.error(
+      "Error cargando horarios:",
+      error
+    );
+  }
+
+  const horariosGuardados =
+    horarios || [];
+
+  const dias = [
+    "Domingo",
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado"
+  ];
+
+  // 🕐 Crear resumen del horario
+  const horarioLunes =
+    horariosGuardados.find(
+      h => Number(h.dia_semana) === 1
+    );
+
+  let resumenHorario =
+    "Horario no configurado";
+
+  if (horarioLunes?.abierto) {
+
+    const apertura =
+      horarioLunes.hora_apertura
+        ? horarioLunes.hora_apertura.slice(0, 5)
+        : "--:--";
+
+    const cierre =
+      horarioLunes.hora_cierre
+        ? horarioLunes.hora_cierre.slice(0, 5)
+        : "--:--";
+
+    resumenHorario =
+      `Lun–Sáb · ${apertura}–${cierre}`;
+  }
+
   abrirModal(`
 
     <h2>
@@ -973,41 +1031,90 @@ async function iniciarReserva(id) {
       ${escaparHTML(negocio.nombre)}
     </h2>
 
-<p style="color:#727887;margin-top:6px">
-  Selecciona un servicio, fecha y hora.
-</p>
+    <p style="
+      color:#727887;
+      margin-top:6px;
+    ">
+      Selecciona un servicio, fecha y hora.
+    </p>
 
-<label style="
-  display:block;
-  margin-top:20px;
-  font-weight:700;
-">
-  Servicio
-</label>
+    <!-- 🕐 HORARIO -->
+    <div style="
+      margin-top:18px;
+      padding:13px;
+      background:#f8f9fb;
+      border-radius:13px;
+    ">
 
-<select
-  id="reservationService"
-  style="
-    width:100%;
-    padding:13px;
-    margin-top:7px;
-    border:1px solid #e7e9ef;
-    border-radius:11px;
-  "
->
-  <option value="">
-    Selecciona un servicio
-  </option>
+      <div style="
+        font-weight:700;
+      ">
+        🕐 Horario de atención
+      </div>
 
-  ${servicios.map(servicio => `
-    <option value="${servicio.id}">
-      ${escaparHTML(servicio.nombre || "Servicio")}
-      ${servicio.precio != null ? ` — $${Number(servicio.precio).toLocaleString("es-CO")}` : ""}
-    </option>
-  `).join("")}
+      <div style="
+        color:#727887;
+        font-size:14px;
+        margin-top:4px;
+      ">
+        ${resumenHorario}
+      </div>
 
-</select>
+      <button
+        class="secondary-button"
+        style="
+          width:100%;
+          margin-top:9px;
+        "
+        onclick="verHorariosNegocio('${negocio.id}')"
+      >
+        🕐 Ver horarios completos
+      </button>
 
+    </div>
+
+    <!-- 🛠️ SERVICIO -->
+    <label style="
+      display:block;
+      margin-top:20px;
+      font-weight:700;
+    ">
+      Servicio
+    </label>
+
+    <select
+      id="reservationService"
+      style="
+        width:100%;
+        padding:13px;
+        margin-top:7px;
+        border:1px solid #e7e9ef;
+        border-radius:11px;
+      "
+    >
+
+      <option value="">
+        Selecciona un servicio
+      </option>
+
+      ${servicios.map(servicio => `
+        <option value="${servicio.id}">
+          ${escaparHTML(
+            servicio.nombre || "Servicio"
+          )}
+          ${
+            servicio.precio != null
+              ? ` — $${Number(
+                  servicio.precio
+                ).toLocaleString("es-CO")}`
+              : ""
+          }
+        </option>
+      `).join("")}
+
+    </select>
+
+    <!-- 📅 FECHA -->
     <label style="
       display:block;
       margin-top:20px;
@@ -1029,6 +1136,7 @@ async function iniciarReserva(id) {
       "
     >
 
+    <!-- ⏰ HORA -->
     <label style="
       display:block;
       margin-top:15px;
@@ -1048,28 +1156,30 @@ async function iniciarReserva(id) {
         border-radius:11px;
       "
     >
-    <label style="
-  display:block;
-  margin-top:15px;
-  font-weight:700;
-">
-  Comentario
-</label>
 
-<textarea
-  id="reservationComment"
-  placeholder="¿Quieres agregar algún comentario?"
-  rows="3"
-  style="
-    width:100%;
-    padding:13px;
-    margin-top:7px;
-    border:1px solid #e7e9ef;
-    border-radius:11px;
-    resize:vertical;
-    font-family:inherit;
-  "
-></textarea>
+    <!-- 💬 COMENTARIO -->
+    <label style="
+      display:block;
+      margin-top:15px;
+      font-weight:700;
+    ">
+      Comentario
+    </label>
+
+    <textarea
+      id="reservationComment"
+      placeholder="¿Quieres agregar algún comentario?"
+      rows="3"
+      style="
+        width:100%;
+        padding:13px;
+        margin-top:7px;
+        border:1px solid #e7e9ef;
+        border-radius:11px;
+        resize:vertical;
+        font-family:inherit;
+      "
+    ></textarea>
 
     <button
       class="primary-button"
@@ -1079,12 +1189,13 @@ async function iniciarReserva(id) {
       "
       onclick="confirmarReserva('${negocio.id}')"
     >
-      Confirmar reserva
+      📅 Confirmar reserva
     </button>
 
   `);
 
 }
+
 
 async function obtenerHorarioDelDia(negocioId, fecha) {
 
