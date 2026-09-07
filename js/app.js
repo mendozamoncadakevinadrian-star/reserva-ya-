@@ -1167,6 +1167,25 @@ async function iniciarReserva(id) {
         border-radius:11px;
       "
     >
+    <div
+  style="
+    margin-top:10px;
+    font-size:14px;
+    color:#727887;
+  "
+>
+  🕐 Selecciona una hora disponible
+</div>
+
+<div
+  id="reservationHours"
+  style="
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:8px;
+    margin-top:10px;
+  "
+></div>
 
     <!-- 💬 COMENTARIO -->
     <label style="
@@ -1209,27 +1228,30 @@ async function iniciarReserva(id) {
 async function actualizarHorarioSeleccionado(negocioId) {
 
   const fecha =
-    document.getElementById(
-      "reservationDate"
-    )?.value;
+    document.getElementById("reservationDate")?.value;
 
   const estado =
-    document.getElementById(
-      "reservationScheduleStatus"
-    );
+    document.getElementById("reservationScheduleStatus");
 
   const horaInput =
-    document.getElementById(
-      "reservationTime"
-    );
+    document.getElementById("reservationTime");
+
+  const horasContainer =
+    document.getElementById("reservationHours");
 
   if (!fecha || !estado) return;
+
+
+  // 📅 Saber qué día de la semana es
 
   const fechaObj =
     new Date(`${fecha}T12:00:00`);
 
   const diaSemana =
     fechaObj.getDay();
+
+
+  // 🕐 Buscar horario del negocio
 
   const { data: horario, error } =
     await supabaseClient
@@ -1238,6 +1260,7 @@ async function actualizarHorarioSeleccionado(negocioId) {
       .eq("negocio_id", negocioId)
       .eq("dia_semana", diaSemana)
       .maybeSingle();
+
 
   if (error) {
 
@@ -1252,6 +1275,9 @@ async function actualizarHorarioSeleccionado(negocioId) {
     return;
   }
 
+
+  // 🔴 Negocio cerrado
+
   if (!horario || !horario.abierto) {
 
     estado.innerHTML =
@@ -1261,22 +1287,35 @@ async function actualizarHorarioSeleccionado(negocioId) {
       "#e05252";
 
     if (horaInput) {
-      horaInput.disabled = true;
       horaInput.value = "";
+      horaInput.disabled = true;
+    }
+
+    if (horasContainer) {
+      horasContainer.innerHTML = "";
     }
 
     return;
   }
 
+
   const apertura =
-    horario.hora_apertura
-      ? horario.hora_apertura.slice(0, 5)
-      : "--:--";
+    horario.hora_apertura.slice(0, 5);
 
   const cierre =
-    horario.hora_cierre
-      ? horario.hora_cierre.slice(0, 5)
-      : "--:--";
+    horario.hora_cierre.slice(0, 5);
+
+
+  // 🔎 Buscar reservas existentes
+
+  const horasOcupadas =
+    await cargarHorasOcupadas(
+      negocioId,
+      fecha
+    );
+
+
+  // 🟢 Mostrar estado
 
   estado.innerHTML =
     `🟢 <strong>Abierto</strong> · ${apertura} – ${cierre}`;
@@ -1284,20 +1323,78 @@ async function actualizarHorarioSeleccionado(negocioId) {
   estado.style.color =
     "#198754";
 
+
+  // ⏰ Generar horas
+
+  const horas =
+    generarHorasDisponibles(
+      apertura,
+      cierre,
+      horasOcupadas
+    );
+
+
+  // 🎨 Crear botones
+
+  if (horasContainer) {
+
+    horasContainer.innerHTML =
+      horas.map(item => {
+
+        if (item.ocupada) {
+
+          return `
+            <button
+              type="button"
+              disabled
+              style="
+                padding:11px;
+                border:1px solid #e7e9ef;
+                border-radius:10px;
+                background:#f1f2f5;
+                color:#999;
+                text-decoration:line-through;
+                cursor:not-allowed;
+              "
+            >
+              ${item.hora}
+            </button>
+          `;
+
+        }
+
+
+        return `
+          <button
+            type="button"
+            onclick="seleccionarHora('${item.hora}')"
+            style="
+              padding:11px;
+              border:1px solid #e7e9ef;
+              border-radius:10px;
+              background:white;
+              color:#222;
+              cursor:pointer;
+              font-weight:600;
+            "
+          >
+            ${item.hora}
+          </button>
+        `;
+
+      }).join("");
+
+  }
+
+
+  // 🧹 Limpiar hora anterior
+
   if (horaInput) {
+    horaInput.value = "";
+    horaInput.disabled = true;
+  }
 
-  // 🧹 Limpiar cualquier hora seleccionada anteriormente
-  horaInput.value = "";
-
-  // 🔓 Activar el selector
-  horaInput.disabled = false;
-
-  // ⏰ Limitarlo al horario del negocio
-  horaInput.min = apertura;
-  horaInput.max = cierre;
 }
-}
-
 async function obtenerHorarioDelDia(negocioId, fecha) {
 
   const fechaObj = new Date(`${fecha}T12:00:00`);
@@ -1334,7 +1431,104 @@ async function obtenerHorarioDelDia(negocioId, fecha) {
     hora_cierre: data.hora_cierre
   };
 }
+async function cargarHorasOcupadas(negocioId, fecha) {
 
+  const { data, error } = await supabaseClient
+    .from("Citas")
+    .select("hora")
+    .eq("negocio_id", negocioId)
+    .eq("fecha", fecha)
+    .neq("estado", "Cancelada");
+
+  if (error) {
+    console.error(
+      "Error cargando horas ocupadas:",
+      error
+    );
+
+    return [];
+  }
+
+  return (data || [])
+    .map(cita => cita.hora)
+    .filter(Boolean)
+    .map(hora => hora.slice(0, 5));
+
+}
+
+function generarHorasDisponibles(apertura, cierre, horasOcupadas) {
+
+  const horas = [];
+
+  let [hora, minuto] =
+    apertura.split(":").map(Number);
+
+  const [horaCierre, minutoCierre] =
+    cierre.split(":").map(Number);
+
+  while (
+    hora < horaCierre ||
+    (hora === horaCierre && minuto <= minutoCierre)
+  ) {
+
+    const horaTexto =
+      `${String(hora).padStart(2, "0")}:${String(minuto).padStart(2, "0")}`;
+
+    const ocupada =
+      horasOcupadas.includes(horaTexto);
+
+    horas.push({
+      hora: horaTexto,
+      ocupada: ocupada
+    });
+
+    minuto += 30;
+
+    if (minuto >= 60) {
+      minuto = 0;
+      hora++;
+    }
+
+  }
+
+  return horas;
+
+}
+function seleccionarHora(hora) {
+
+  const horaInput =
+    document.getElementById("reservationTime");
+
+  if (!horaInput) return;
+
+  horaInput.value = hora;
+
+  const botones =
+    document.querySelectorAll(
+      "#reservationHours button:not(:disabled)"
+    );
+
+  botones.forEach(boton => {
+
+    boton.style.background = "white";
+    boton.style.color = "#222";
+    boton.style.borderColor = "#e7e9ef";
+
+  });
+
+  botones.forEach(boton => {
+
+    if (boton.textContent.trim() === hora) {
+
+      boton.style.background = "#111827";
+      boton.style.color = "white";
+      boton.style.borderColor = "#111827";
+
+    }
+
+  });
+
+}
 async function confirmarReserva(id) {
 
   if (!ReservaYa.usuario) {
@@ -1372,7 +1566,9 @@ async function confirmarReserva(id) {
     return;
   }
 
+
   // 🕐 Comprobar horario del negocio
+
   const horario =
     await obtenerHorarioDelDia(id, fecha);
 
@@ -1390,15 +1586,53 @@ async function confirmarReserva(id) {
     return;
   }
 
+
+  // ⏰ Comprobar que la hora esté dentro del horario
+
+  const apertura =
+    horario.hora_apertura.slice(0, 5);
+
+  const cierre =
+    horario.hora_cierre.slice(0, 5);
+
   if (
-    hora < horario.hora_apertura ||
-    hora > horario.hora_cierre
+    hora < apertura ||
+    hora > cierre
   ) {
     mostrarToast(
-      `Elige una hora entre ${horario.hora_apertura.slice(0, 5)} y ${horario.hora_cierre.slice(0, 5)}.`
+      `Elige una hora entre ${apertura} y ${cierre}.`
     );
     return;
   }
+
+
+  // 🔎 Comprobar nuevamente las horas ocupadas
+
+  const horasOcupadas =
+    await cargarHorasOcupadas(
+      id,
+      fecha
+    );
+
+  if (horasOcupadas.includes(hora)) {
+
+    mostrarToast(
+      "❌ Esa hora ya está reservada. Elige otra."
+    );
+
+    // Limpiar la hora seleccionada
+    const horaInput =
+      document.getElementById("reservationTime");
+
+    if (horaInput) {
+      horaInput.value = "";
+    }
+
+    return;
+  }
+
+
+  // 🛠️ Cargar servicio
 
   const servicio =
     await cargarServicioPorId(servicioId);
@@ -1408,27 +1642,36 @@ async function confirmarReserva(id) {
     return;
   }
 
+
+  // 👤 Nombre del cliente
+
   const nombreCliente =
     ReservaYa.usuario.user_metadata?.nombre ||
     ReservaYa.usuario.email ||
     "Cliente";
 
-  const { data, error } = await supabaseClient
-    .from("Citas")
-    .insert({
-      negocio_id: id,
-      servicio_id: servicioId,
-      nombre_cliente: nombreCliente,
-      fecha: fecha,
-      hora: hora,
-      comentario: comentario,
-      estado: "Pendiente",
-      usuario: ReservaYa.usuario.id
-    })
-    .select()
-    .single();
+
+  // 📅 Crear reserva
+
+  const { data, error } =
+    await supabaseClient
+      .from("Citas")
+      .insert({
+        negocio_id: id,
+        servicio_id: servicioId,
+        nombre_cliente: nombreCliente,
+        fecha: fecha,
+        hora: hora,
+        comentario: comentario,
+        estado: "Pendiente",
+        usuario: ReservaYa.usuario.id
+      })
+      .select()
+      .single();
+
 
   if (error) {
+
     console.error(
       "Error creando reserva:",
       error
@@ -1441,23 +1684,38 @@ async function confirmarReserva(id) {
     return;
   }
 
+
+  // 💾 Guardar también en memoria
+
   ReservaYa.reservas.push({
+
     id: data.id,
+
     negocio_id: id,
+
     servicio_id: servicioId,
+
     negocio: negocio.nombre,
+
     servicio: servicio.nombre || "Servicio",
+
     fecha: fecha,
+
     hora: hora,
+
     comentario: comentario,
+
     estado: "Pendiente"
+
   });
+
 
   cerrarModal();
 
   mostrarToast(
-    "Reserva creada correctamente."
+    "✅ Reserva creada correctamente."
   );
+
 }
 async function cargarServicioPorId(servicioId) {
 
