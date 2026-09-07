@@ -1285,11 +1285,17 @@ async function actualizarHorarioSeleccionado(negocioId) {
     "#198754";
 
   if (horaInput) {
-    horaInput.disabled = false;
-    horaInput.min = apertura;
-    horaInput.max = cierre;
-  }
 
+  // 🧹 Limpiar cualquier hora seleccionada anteriormente
+  horaInput.value = "";
+
+  // 🔓 Activar el selector
+  horaInput.disabled = false;
+
+  // ⏰ Limitarlo al horario del negocio
+  horaInput.min = apertura;
+  horaInput.max = cierre;
+}
 }
 
 async function obtenerHorarioDelDia(negocioId, fecha) {
