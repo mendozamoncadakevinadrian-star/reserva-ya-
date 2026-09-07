@@ -1124,17 +1124,28 @@ async function iniciarReserva(id) {
     </label>
 
     <input
-      id="reservationDate"
-      type="date"
-      min="${obtenerFechaHoy()}"
-      style="
-        width:100%;
-        padding:13px;
-        margin-top:7px;
-        border:1px solid #e7e9ef;
-        border-radius:11px;
-      "
-    >
+  id="reservationDate"
+  type="date"
+  min="${obtenerFechaHoy()}"
+  onchange="actualizarHorarioSeleccionado('${negocio.id}')"
+  style="
+    width:100%;
+    padding:13px;
+    margin-top:7px;
+    border:1px solid #e7e9ef;
+    border-radius:11px;
+  "
+>
+<div
+  id="reservationScheduleStatus"
+  style="
+    margin-top:9px;
+    font-size:14px;
+    color:#727887;
+  "
+>
+  Selecciona una fecha para consultar el horario.
+</div>
 
     <!-- ⏰ HORA -->
     <label style="
@@ -1195,7 +1206,91 @@ async function iniciarReserva(id) {
   `);
 
 }
+async function actualizarHorarioSeleccionado(negocioId) {
 
+  const fecha =
+    document.getElementById(
+      "reservationDate"
+    )?.value;
+
+  const estado =
+    document.getElementById(
+      "reservationScheduleStatus"
+    );
+
+  const horaInput =
+    document.getElementById(
+      "reservationTime"
+    );
+
+  if (!fecha || !estado) return;
+
+  const fechaObj =
+    new Date(`${fecha}T12:00:00`);
+
+  const diaSemana =
+    fechaObj.getDay();
+
+  const { data: horario, error } =
+    await supabaseClient
+      .from("reserva_horarios")
+      .select("*")
+      .eq("negocio_id", negocioId)
+      .eq("dia_semana", diaSemana)
+      .maybeSingle();
+
+  if (error) {
+
+    console.error(
+      "Error consultando horario:",
+      error
+    );
+
+    estado.textContent =
+      "No se pudo consultar el horario.";
+
+    return;
+  }
+
+  if (!horario || !horario.abierto) {
+
+    estado.innerHTML =
+      "🔴 <strong>Cerrado ese día.</strong>";
+
+    estado.style.color =
+      "#e05252";
+
+    if (horaInput) {
+      horaInput.disabled = true;
+      horaInput.value = "";
+    }
+
+    return;
+  }
+
+  const apertura =
+    horario.hora_apertura
+      ? horario.hora_apertura.slice(0, 5)
+      : "--:--";
+
+  const cierre =
+    horario.hora_cierre
+      ? horario.hora_cierre.slice(0, 5)
+      : "--:--";
+
+  estado.innerHTML =
+    `🟢 <strong>Abierto</strong> · ${apertura} – ${cierre}`;
+
+  estado.style.color =
+    "#198754";
+
+  if (horaInput) {
+    horaInput.disabled = false;
+    horaInput.min = apertura;
+    horaInput.max = cierre;
+  }
+
+}
 
 async function obtenerHorarioDelDia(negocioId, fecha) {
 
