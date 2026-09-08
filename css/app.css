@@ -1444,22 +1444,21 @@ a:hover {
 }
 
 /* =========================================================
-   FIX V5.1 — MODAL OVERLAY OCULTO POR DEFECTO
+   RESERVAYA V5.1 — FIX MODAL INICIAL
    ========================================================= */
 
-.modal-overlay {
+/* Si el modal tiene la clase hidden, DEBE permanecer oculto */
+.modal-overlay.hidden {
   display: none !important;
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
-/* Cuando JavaScript lo abre */
-.modal-overlay.active,
-.modal-overlay.show,
-.modal-overlay.visible {
+/* Modal abierto */
+.modal-overlay:not(.hidden) {
   display: flex !important;
-  visibility: visible;
-  opacity: 1;
-  pointer-events: auto;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
