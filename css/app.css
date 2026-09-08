@@ -1462,3 +1462,310 @@ a:hover {
   opacity: 1 !important;
   pointer-events: auto !important;
 }
+/* =========================================================
+   RESERVAYA V5.2 — PULIDO MOBILE
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   BOTONES PRINCIPALES DEL HERO
+   --------------------------------------------------------- */
+
+.hero-content > button,
+.hero-content .primary-button,
+.hero-content .secondary-button {
+  min-height: 46px !important;
+  margin-top: 10px;
+  padding: 0 20px !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(155, 140, 255, 0.45) !important;
+  background: linear-gradient(
+    135deg,
+    #7c6cff,
+    #6252e8
+  ) !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  font-size: 14px !important;
+  box-shadow:
+    0 8px 22px rgba(124, 108, 255, 0.25) !important;
+}
+
+/* Efecto al tocar */
+.hero-content > button:active,
+.hero-content .primary-button:active {
+  transform: scale(0.97);
+}
+
+/* ---------------------------------------------------------
+   BOTÓN "VER TODAS"
+   --------------------------------------------------------- */
+
+.section-heading > button,
+.section-heading .primary-button,
+.section-heading .secondary-button,
+.page-header > button {
+  min-height: 42px !important;
+  padding: 0 16px !important;
+  border-radius: 13px !important;
+  border: 1px solid rgba(124, 108, 255, 0.38) !important;
+  background: rgba(124, 108, 255, 0.12) !important;
+  color: #dcd8ff !important;
+  font-weight: 750 !important;
+  cursor: pointer;
+}
+
+.section-heading > button:hover,
+.section-heading .primary-button:hover,
+.section-heading .secondary-button:hover,
+.page-header > button:hover {
+  background: rgba(124, 108, 255, 0.2) !important;
+  border-color: rgba(124, 108, 255, 0.55) !important;
+  color: #ffffff !important;
+}
+
+/* ---------------------------------------------------------
+   BUSCADOR — MÁS LIMPIO
+   --------------------------------------------------------- */
+
+.main-search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.main-search input {
+  flex: 1 1 250px;
+  min-width: 0;
+}
+
+.main-search > button {
+  min-height: 53px !important;
+  padding: 0 20px !important;
+  border-radius: 15px !important;
+  border: 1px solid rgba(155, 140, 255, 0.45) !important;
+  background: linear-gradient(
+    135deg,
+    #7c6cff,
+    #6252e8
+  ) !important;
+  color: white !important;
+  font-weight: 800 !important;
+  box-shadow:
+    0 8px 22px rgba(124,108,255,0.22) !important;
+}
+
+/* ---------------------------------------------------------
+   ATAJOS DEL HERO
+   Cerca de mí / Favoritos / Reservas
+   --------------------------------------------------------- */
+
+.hero-content .secondary-button {
+  border: 1px solid rgba(255,255,255,0.09) !important;
+  background: rgba(255,255,255,0.055) !important;
+  color: #d9dcea !important;
+  box-shadow: none !important;
+}
+
+.hero-content .secondary-button:hover {
+  background: rgba(124,108,255,0.13) !important;
+  border-color: rgba(124,108,255,0.3) !important;
+  color: white !important;
+}
+
+/* ---------------------------------------------------------
+   HEADER MÁS COMPACTO
+   --------------------------------------------------------- */
+
+.brand {
+  min-width: 0;
+}
+
+.brand span,
+.brand strong {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+
+  .topbar {
+    gap: 8px;
+  }
+
+  .brand {
+    gap: 8px;
+    max-width: calc(100% - 95px);
+  }
+
+  .brand-logo {
+    flex: 0 0 auto;
+  }
+
+  .brand span,
+  .brand strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Hero */
+  .hero-content {
+    padding: 25px 18px 22px;
+  }
+
+  .hero h1 {
+    margin-top: 9px;
+    margin-bottom: 11px;
+    font-size: 32px;
+    line-height: 1.06;
+  }
+
+  .hero p {
+    margin-bottom: 18px;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  /* Buscador */
+  .main-search {
+    display: block;
+  }
+
+  .main-search input {
+    display: block;
+    width: 100%;
+    min-height: 54px;
+  }
+
+  .main-search > button {
+    display: block;
+    width: 100%;
+    margin-top: 9px;
+    min-height: 47px !important;
+  }
+
+  /* Botones del hero */
+  .hero-content > button {
+    width: auto;
+  }
+
+  /* Encabezados de secciones */
+  .section-heading,
+  .page-header {
+    gap: 7px;
+  }
+
+  .section-heading h2,
+  .page-header h1 {
+    margin-bottom: 1px;
+  }
+
+  .section-heading > button {
+    min-height: 40px !important;
+  }
+}
+
+/* ---------------------------------------------------------
+   TARJETAS DE CATEGORÍAS
+   --------------------------------------------------------- */
+
+.category-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.category-card::after {
+  content: "";
+  position: absolute;
+  inset: auto -25px -45px;
+  height: 80px;
+  background: rgba(124,108,255,0.08);
+  filter: blur(22px);
+  pointer-events: none;
+}
+
+.category-card:hover {
+  transform: translateY(-3px);
+}
+
+/* ---------------------------------------------------------
+   BUSINESS CARDS — BOTONES MÁS BONITOS
+   --------------------------------------------------------- */
+
+.business-footer .primary-button {
+  background: linear-gradient(
+    135deg,
+    #7c6cff,
+    #6252e8
+  ) !important;
+  color: white !important;
+  border-color: rgba(155,140,255,0.45) !important;
+}
+
+.business-footer .secondary-button {
+  background: rgba(255,255,255,0.045) !important;
+  color: #cdd2e0 !important;
+  border-color: rgba(255,255,255,0.1) !important;
+}
+
+.business-footer .secondary-button:hover {
+  background: rgba(33,212,223,0.08) !important;
+  border-color: rgba(33,212,223,0.35) !important;
+  color: white !important;
+}
+
+/* ---------------------------------------------------------
+   MOBILE — ATAJOS DEL HERO EN FILAS BONITAS
+   --------------------------------------------------------- */
+
+@media (max-width: 640px) {
+
+  .hero-content {
+    display: block;
+  }
+
+  .hero-content .secondary-button {
+    min-height: 44px !important;
+    margin-right: 5px;
+    margin-top: 8px;
+  }
+
+  .hero-content .primary-button {
+    min-height: 45px !important;
+  }
+
+}
+
+/* ---------------------------------------------------------
+   EVITAR DESBORDES HORIZONTALES
+   --------------------------------------------------------- */
+
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.view,
+.section,
+.hero,
+.business-dashboard {
+  max-width: 100%;
+}
+
+/* ---------------------------------------------------------
+   BOTONES GENÉRICOS CON INLINE GRIS
+   --------------------------------------------------------- */
+
+.hero button[style],
+.section-heading button[style],
+.page-header button[style] {
+  background: linear-gradient(
+    135deg,
+    #7c6cff,
+    #6252e8
+  ) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(155,140,255,0.45) !important;
+  border-radius: 13px !important;
+  font-weight: 800 !important;
+}
