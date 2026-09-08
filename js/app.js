@@ -1,26 +1,54 @@
 /* =====================================================
-   RESERVAYA V3
+   RESERVAYA V4
    NÚCLEO PRINCIPAL
+   -----------------------------------------------------
+   Mantiene:
+   - Supabase Auth
+   - Negocios
+   - Favoritos
+   - Reservas
+   - Horarios
+   - Disponibilidad
+   - Perfil
+   - Business
+   - Servicios
+
+   Añade:
+   - Sistema multidioma
+   - Descubrimiento mejorado
+   - Dashboard Business avanzado
+   - ReservaYa Pulse
+   - Estadísticas calculadas
+   - Mejor manejo de reservas
+   - Preparación Premium
+   - Notificaciones preparadas
 ===================================================== */
+
+
+/* =====================================================
+   SUPABASE
+===================================================== */
+
+const SUPABASE_URL =
+  "https://mjxiyzapdybzckurootw.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_Ox1Wz7UT2Gw6uHOP6SncjQ_sGapEEB-";
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
 
 /* =====================================================
    ESTADO GLOBAL
 ===================================================== */
-// ==========================================
-// SUPABASE
-// ==========================================
 
-const SUPABASE_URL = "https://mjxiyzapdybzckurootw.supabase.co";
-const SUPABASE_KEY = "sb_publishable_Ox1Wz7UT2Gw6uHOP6SncjQ_sGapEEB-";
-
-const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
 const ReservaYa = {
 
-  version: "3.0.0",
+  version: "4.0.0",
 
   usuario: null,
 
@@ -35,6 +63,12 @@ const ReservaYa = {
   reservas: [],
 
   notificaciones: [],
+
+  serviciosActuales: [],
+
+  idioma:
+    localStorage.getItem("reservaya_idioma") ||
+    "es",
 
   configuracion: {
 
@@ -129,10 +163,372 @@ const CATEGORIAS = [
 
 
 /* =====================================================
+   IDIOMAS
+===================================================== */
+
+const IDIOMAS = {
+
+  es: {
+    nombre: "Español",
+    bandera: "🇪🇸",
+
+    search: "Buscar negocios, servicios o ciudades...",
+    home: "Inicio",
+    searchTab: "Buscar",
+    favorites: "Favoritos",
+    reservations: "Reservas",
+    profile: "Perfil",
+
+    login: "Iniciar sesión",
+    logout: "Cerrar sesión",
+
+    reserve: "Reservar cita",
+    viewBusiness: "Ver negocio",
+    save: "Guardar",
+    saved: "Guardado",
+
+    noResults: "No encontramos resultados",
+    noResultsText:
+      "Prueba con otro nombre, categoría o ciudad.",
+
+    loginRequired:
+      "Debes iniciar sesión para continuar.",
+
+    reservationCreated:
+      "Reserva creada correctamente.",
+
+    reservationCancelled:
+      "Reserva cancelada.",
+
+    loading: "Cargando...",
+
+    language: "Idioma",
+
+    business: "ReservaYa Business",
+
+    dashboard: "Panel de negocio",
+
+    pulse: "ReservaYa Pulse",
+
+    premium: "ReservaYa Premium"
+
+  },
+
+
+  en: {
+    nombre: "English",
+    bandera: "🇺🇸",
+
+    search: "Search businesses, services or cities...",
+    home: "Home",
+    searchTab: "Search",
+    favorites: "Favorites",
+    reservations: "Bookings",
+    profile: "Profile",
+
+    login: "Sign in",
+    logout: "Sign out",
+
+    reserve: "Book appointment",
+    viewBusiness: "View business",
+    save: "Save",
+    saved: "Saved",
+
+    noResults: "No results found",
+    noResultsText:
+      "Try another business, category or city.",
+
+    loginRequired:
+      "You must sign in to continue.",
+
+    reservationCreated:
+      "Booking created successfully.",
+
+    reservationCancelled:
+      "Booking cancelled.",
+
+    loading: "Loading...",
+
+    language: "Language",
+
+    business: "ReservaYa Business",
+
+    dashboard: "Business dashboard",
+
+    pulse: "ReservaYa Pulse",
+
+    premium: "ReservaYa Premium"
+
+  },
+
+
+  pt: {
+    nombre: "Português",
+    bandera: "🇧🇷",
+
+    search: "Buscar empresas, serviços ou cidades...",
+    home: "Início",
+    searchTab: "Buscar",
+    favorites: "Favoritos",
+    reservations: "Reservas",
+    profile: "Perfil",
+
+    login: "Entrar",
+    logout: "Sair",
+
+    reserve: "Agendar",
+    viewBusiness: "Ver empresa",
+    save: "Salvar",
+    saved: "Salvo",
+
+    noResults: "Nenhum resultado encontrado",
+    noResultsText:
+      "Tente outro nome, categoria ou cidade.",
+
+    loginRequired:
+      "Você precisa entrar para continuar.",
+
+    reservationCreated:
+      "Reserva criada com sucesso.",
+
+    reservationCancelled:
+      "Reserva cancelada.",
+
+    loading: "Carregando...",
+
+    language: "Idioma",
+
+    business: "ReservaYa Business",
+
+    dashboard: "Painel da empresa",
+
+    pulse: "ReservaYa Pulse",
+
+    premium: "ReservaYa Premium"
+
+  },
+
+
+  fr: {
+    nombre: "Français",
+    bandera: "🇫🇷",
+
+    search: "Rechercher des entreprises, services ou villes...",
+    home: "Accueil",
+    searchTab: "Rechercher",
+    favorites: "Favoris",
+    reservations: "Réservations",
+    profile: "Profil",
+
+    login: "Se connecter",
+    logout: "Se déconnecter",
+
+    reserve: "Réserver",
+    viewBusiness: "Voir l'entreprise",
+    save: "Enregistrer",
+    saved: "Enregistré",
+
+    noResults: "Aucun résultat",
+    noResultsText:
+      "Essayez un autre nom, une autre catégorie ou une autre ville.",
+
+    loginRequired:
+      "Vous devez vous connecter pour continuer.",
+
+    reservationCreated:
+      "Réservation créée avec succès.",
+
+    reservationCancelled:
+      "Réservation annulée.",
+
+    loading: "Chargement...",
+
+    language: "Langue",
+
+    business: "ReservaYa Business",
+
+    dashboard: "Tableau de bord",
+
+    pulse: "ReservaYa Pulse",
+
+    premium: "ReservaYa Premium"
+
+  },
+
+
+  de: {
+    nombre: "Deutsch",
+    bandera: "🇩🇪",
+
+    search: "Unternehmen, Dienstleistungen oder Städte suchen...",
+    home: "Startseite",
+    searchTab: "Suchen",
+    favorites: "Favoriten",
+    reservations: "Buchungen",
+    profile: "Profil",
+
+    login: "Anmelden",
+    logout: "Abmelden",
+
+    reserve: "Termin buchen",
+    viewBusiness: "Unternehmen ansehen",
+    save: "Speichern",
+    saved: "Gespeichert",
+
+    noResults: "Keine Ergebnisse gefunden",
+    noResultsText:
+      "Versuche einen anderen Namen, eine Kategorie oder Stadt.",
+
+    loginRequired:
+      "Du musst dich anmelden, um fortzufahren.",
+
+    reservationCreated:
+      "Buchung erfolgreich erstellt.",
+
+    reservationCancelled:
+      "Buchung storniert.",
+
+    loading: "Laden...",
+
+    language: "Sprache",
+
+    business: "ReservaYa Business",
+
+    dashboard: "Unternehmens-Dashboard",
+
+    pulse: "ReservaYa Pulse",
+
+    premium: "ReservaYa Premium"
+
+  },
+
+
+  it: {
+    nombre: "Italiano",
+    bandera: "🇮🇹",
+
+    search: "Cerca attività, servizi o città...",
+    home: "Home",
+    searchTab: "Cerca",
+    favorites: "Preferiti",
+    reservations: "Prenotazioni",
+    profile: "Profilo",
+
+    login: "Accedi",
+    logout: "Esci",
+
+    reserve: "Prenota",
+    viewBusiness: "Vedi attività",
+    save: "Salva",
+    saved: "Salvato",
+
+    noResults: "Nessun risultato",
+    noResultsText:
+      "Prova un altro nome, categoria o città.",
+
+    loginRequired:
+      "Devi accedere per continuare.",
+
+    reservationCreated:
+      "Prenotazione creata correttamente.",
+
+    reservationCancelled:
+      "Prenotazione annullata.",
+
+    loading: "Caricamento...",
+
+    language: "Lingua",
+
+    business: "ReservaYa Business",
+
+    dashboard: "Dashboard attività",
+
+    pulse: "ReservaYa Pulse",
+
+    premium: "ReservaYa Premium"
+
+  }
+
+};
+
+
+/* =====================================================
+   TRADUCCIÓN
+===================================================== */
+
+function t(clave) {
+
+  const idioma =
+    IDIOMAS[ReservaYa.idioma] ||
+    IDIOMAS.es;
+
+  return idioma[clave] || IDIOMAS.es[clave] || clave;
+
+}
+
+
+function cambiarIdioma(idioma) {
+
+  if (!IDIOMAS[idioma]) {
+    idioma = "es";
+  }
+
+  ReservaYa.idioma = idioma;
+
+  localStorage.setItem(
+    "reservaya_idioma",
+    idioma
+  );
+
+  aplicarIdioma();
+
+  mostrarToast(
+    `${IDIOMAS[idioma].bandera} ${IDIOMAS[idioma].nombre}`
+  );
+
+}
+
+
+function aplicarIdioma() {
+
+  const input =
+    document.getElementById("globalSearch");
+
+  if (input) {
+    input.placeholder = t("search");
+  }
+
+  document.documentElement.lang =
+    ReservaYa.idioma;
+
+  actualizarSelectorIdioma();
+
+}
+
+
+function actualizarSelectorIdioma() {
+
+  const select =
+    document.getElementById(
+      "languageSelector"
+    );
+
+  if (!select) return;
+
+  select.value =
+    ReservaYa.idioma;
+
+}
+
+
+/* =====================================================
    INICIO
 ===================================================== */
 
-document.addEventListener("DOMContentLoaded", iniciarReservaYa);
+document.addEventListener(
+  "DOMContentLoaded",
+  iniciarReservaYa
+);
 
 
 function iniciarReservaYa() {
@@ -144,6 +540,8 @@ function iniciarReservaYa() {
   cargarCategorias();
 
   cargarCategoriasFiltro();
+
+  aplicarIdioma();
 
   cargarDatosLocales();
 
@@ -163,7 +561,9 @@ function cargarDatosLocales() {
   try {
 
     const favoritos =
-      localStorage.getItem("reservaya_favoritos");
+      localStorage.getItem(
+        "reservaya_favoritos"
+      );
 
     if (favoritos) {
 
@@ -185,17 +585,23 @@ function cargarDatosLocales() {
 
 
 /* =====================================================
-   DATOS DEMO
+   NEGOCIOS
 ===================================================== */
 
 async function cargarDatosDemo() {
 
-  const { data, error } = await supabaseClient
+  const {
+    data,
+    error
+  } = await supabaseClient
     .from("negocios")
     .select("*")
-    .order("nombre", { ascending: true });
+    .order("nombre", {
+      ascending: true
+    });
 
   if (error) {
+
     console.error(
       "Error cargando negocios:",
       error
@@ -206,29 +612,69 @@ async function cargarDatosDemo() {
     );
 
     return;
+
   }
 
-  ReservaYa.negocios = (data || []).map(negocio => {
+  ReservaYa.negocios =
+    (data || []).map(negocio => {
 
-    return {
-      id: negocio.id,
-      nombre: negocio.nombre || "Negocio",
-      categoria: "otros",
-      ciudad: negocio.direccion || "Ubicación no disponible",
-      ubicacion: negocio.direccion || "",
-      descripcion: negocio.descripcion || "",
-      rating: 0,
-      reseñas: 0,
-      destacado: false
-    };
+      return {
 
-  });
+        id: negocio.id,
+
+        nombre:
+          negocio.nombre ||
+          "Negocio",
+
+        categoria:
+          negocio.categoria ||
+          "otros",
+
+        ciudad:
+          negocio.direccion ||
+          "Ubicación no disponible",
+
+        ubicacion:
+          negocio.direccion ||
+          "",
+
+        descripcion:
+          negocio.descripcion ||
+          "",
+
+        rating:
+          Number(negocio.rating || 0),
+
+        reseñas:
+          Number(
+            negocio.reseñas ||
+            negocio.resenas ||
+            0
+          ),
+
+        destacado:
+          Boolean(
+            negocio.destacado
+          ),
+
+        usuario_id:
+          negocio.usuario_id ||
+          null
+
+      };
+
+    });
 
   renderizarNegociosCercanos();
 
   renderizarDestacados();
 
+  renderizarFavoritos();
+
+  actualizarContadores();
+
 }
+
 
 /* =====================================================
    CATEGORÍAS
@@ -237,20 +683,28 @@ async function cargarDatosDemo() {
 function cargarCategorias() {
 
   const contenedor =
-    document.getElementById("categoryGrid");
+    document.getElementById(
+      "categoryGrid"
+    );
 
   if (!contenedor) return;
 
   contenedor.innerHTML = "";
 
   CATEGORIAS
-    .filter(categoria => categoria.id !== "todos")
+    .filter(
+      categoria =>
+        categoria.id !== "todos"
+    )
     .forEach(categoria => {
 
       const card =
-        document.createElement("button");
+        document.createElement(
+          "button"
+        );
 
-      card.className = "category-card";
+      card.className =
+        "category-card";
 
       card.innerHTML = `
         <span class="category-icon">
@@ -258,7 +712,9 @@ function cargarCategorias() {
         </span>
 
         <strong>
-          ${escaparHTML(categoria.nombre)}
+          ${escaparHTML(
+            categoria.nombre
+          )}
         </strong>
       `;
 
@@ -269,9 +725,15 @@ function cargarCategorias() {
 
         cambiarVista("search");
 
-        document.getElementById(
-          "categoryFilter"
-        ).value = categoria.id;
+        const select =
+          document.getElementById(
+            "categoryFilter"
+          );
+
+        if (select) {
+          select.value =
+            categoria.id;
+        }
 
         filtrarNegocios();
 
@@ -284,30 +746,38 @@ function cargarCategorias() {
 }
 
 
-/* =====================================================
-   SELECT DE CATEGORÍAS
-===================================================== */
-
 function cargarCategoriasFiltro() {
 
   const select =
-    document.getElementById("categoryFilter");
+    document.getElementById(
+      "categoryFilter"
+    );
 
   if (!select) return;
 
+  select.innerHTML =
+    `<option value="">Todas las categorías</option>`;
+
   CATEGORIAS
-    .filter(c => c.id !== "todos")
+    .filter(
+      c => c.id !== "todos"
+    )
     .forEach(categoria => {
 
       const option =
-        document.createElement("option");
+        document.createElement(
+          "option"
+        );
 
-      option.value = categoria.id;
+      option.value =
+        categoria.id;
 
       option.textContent =
         categoria.nombre;
 
-      select.appendChild(option);
+      select.appendChild(
+        option
+      );
 
     });
 
@@ -328,10 +798,74 @@ function renderizarNegociosCercanos() {
   if (!contenedor) return;
 
   const negocios =
-    ReservaYa.negocios.slice(0, 3);
+    ordenarNegociosParaDescubrimiento(
+      ReservaYa.negocios
+    ).slice(0, 3);
 
   contenedor.innerHTML =
-    negocios.map(crearTarjetaNegocio).join("");
+    negocios.length
+      ? negocios
+          .map(
+            crearTarjetaNegocio
+          )
+          .join("")
+      : `
+        <div style="
+          padding:30px;
+          text-align:center;
+          color:#727887;
+        ">
+          No hay negocios disponibles todavía.
+        </div>
+      `;
+
+}
+
+
+/* =====================================================
+   DESCUBRIMIENTO
+===================================================== */
+
+function ordenarNegociosParaDescubrimiento(
+  negocios
+) {
+
+  return [...negocios].sort(
+    (a, b) => {
+
+      if (
+        Boolean(a.destacado) !==
+        Boolean(b.destacado)
+      ) {
+
+        return a.destacado
+          ? -1
+          : 1;
+
+      }
+
+      if (
+        Number(a.rating || 0) !==
+        Number(b.rating || 0)
+      ) {
+
+        return (
+          Number(b.rating || 0) -
+          Number(a.rating || 0)
+        );
+
+      }
+
+      return String(
+        a.nombre || ""
+      ).localeCompare(
+        String(
+          b.nombre || ""
+        )
+      );
+
+    }
+  );
 
 }
 
@@ -350,11 +884,41 @@ function renderizarDestacados() {
   if (!contenedor) return;
 
   const negocios =
-    ReservaYa.negocios
-      .filter(n => n.destacado);
+    ordenarNegociosParaDescubrimiento(
+      ReservaYa.negocios.filter(
+        n => n.destacado
+      )
+    );
 
   contenedor.innerHTML =
-    negocios.map(crearTarjetaNegocio).join("");
+    negocios.length
+      ? negocios
+          .map(
+            crearTarjetaNegocio
+          )
+          .join("")
+      : `
+        <div style="
+          padding:30px;
+          text-align:center;
+          color:#727887;
+        ">
+          <div style="font-size:40px">
+            ✨
+          </div>
+
+          <strong>
+            Próximamente más destacados
+          </strong>
+
+          <p style="
+            margin-top:7px;
+          ">
+            Estamos preparando nuevas
+            oportunidades para negocios.
+          </p>
+        </div>
+      `;
 
 }
 
@@ -363,15 +927,19 @@ function renderizarDestacados() {
    TARJETA DE NEGOCIO
 ===================================================== */
 
-function crearTarjetaNegocio(negocio) {
+function crearTarjetaNegocio(
+  negocio
+) {
 
   const categoria =
     CATEGORIAS.find(
-      c => c.id === negocio.categoria
+      c =>
+        c.id === negocio.categoria
     );
 
   const icono =
-    categoria?.icono || "📍";
+    categoria?.icono ||
+    "📍";
 
   const favorito =
     ReservaYa.favoritos.includes(
@@ -383,47 +951,101 @@ function crearTarjetaNegocio(negocio) {
     <article class="business-card">
 
       <div class="business-cover">
+
         ${icono}
+
+        ${
+          negocio.destacado
+            ? `
+              <span style="
+                position:absolute;
+                top:10px;
+                right:10px;
+                background:#111827;
+                color:white;
+                padding:5px 9px;
+                border-radius:20px;
+                font-size:11px;
+                font-weight:700;
+              ">
+                ✨ DESTACADO
+              </span>
+            `
+            : ""
+        }
+
       </div>
 
       <div class="business-info">
 
         <h3>
-          ${escaparHTML(negocio.nombre)}
+          ${escaparHTML(
+            negocio.nombre
+          )}
         </h3>
 
         <div class="business-category">
+
           ${escaparHTML(
-            categoria?.nombre || "Negocio"
+            categoria?.nombre ||
+            "Negocio"
           )}
+
         </div>
 
         <div class="business-location">
+
           📍
           ${escaparHTML(
-            negocio.ubicacion || negocio.ciudad
+            negocio.ubicacion ||
+            negocio.ciudad
           )}
+
         </div>
 
         <div class="business-rating">
-          ⭐ ${negocio.rating}
-          · ${negocio.reseñas} reseñas
+
+          ⭐
+          ${Number(
+            negocio.rating || 0
+          ).toFixed(1)}
+
+          ·
+
+          ${Number(
+            negocio.reseñas || 0
+          )}
+
+          reseñas
+
         </div>
 
         <div class="business-footer">
 
           <button
             class="secondary-button"
-            onclick="alternarFavorito('${negocio.id}')"
+            onclick="
+              alternarFavorito(
+                '${negocio.id}'
+              )
+            "
           >
-            ${favorito ? "♥ Guardado" : "♡ Guardar"}
+            ${
+              favorito
+                ? "♥ Guardado"
+                : "♡ Guardar"
+            }
           </button>
 
           <button
             class="primary-button"
-            onclick="abrirNegocio('${negocio.id}')"
+            onclick="
+              abrirNegocio(
+                '${negocio.id}'
+              )
+            "
           >
-            Ver negocio
+            ${t("viewBusiness")}
           </button>
 
         </div>
@@ -444,16 +1066,22 @@ function crearTarjetaNegocio(negocio) {
 function buscarGlobal(texto) {
 
   const valor =
-    texto.trim().toLowerCase();
+    String(texto || "")
+      .trim()
+      .toLowerCase();
 
   const suggestions =
     document.getElementById(
       "searchSuggestions"
     );
 
+  if (!suggestions) return;
+
   if (!valor) {
 
-    suggestions.classList.add("hidden");
+    suggestions.classList.add(
+      "hidden"
+    );
 
     return;
 
@@ -463,24 +1091,28 @@ function buscarGlobal(texto) {
     ReservaYa.negocios
       .filter(negocio => {
 
-        return (
+        const categoria =
+          CATEGORIAS.find(
+            c =>
+              c.id ===
+              negocio.categoria
+          );
 
-          negocio.nombre
-            .toLowerCase()
-            .includes(valor)
+        const textoCompleto =
+          [
+            negocio.nombre,
+            negocio.ciudad,
+            negocio.ubicacion,
+            negocio.descripcion,
+            negocio.categoria,
+            categoria?.nombre
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
 
-          ||
-
-          negocio.ciudad
-            .toLowerCase()
-            .includes(valor)
-
-          ||
-
-          negocio.categoria
-            .toLowerCase()
-            .includes(valor)
-
+        return textoCompleto.includes(
+          valor
         );
 
       })
@@ -489,31 +1121,52 @@ function buscarGlobal(texto) {
   suggestions.innerHTML =
     resultados.length
 
-      ? resultados.map(n => `
+      ? resultados
+          .map(
+            n => `
 
-          <button
-            style="
-              width:100%;
-              padding:14px;
-              background:white;
-              text-align:left;
-              border-bottom:1px solid #eee;
-            "
-            onclick="abrirNegocio('${n.id}')"
-          >
-            🔎
-            ${escaparHTML(n.nombre)}
-          </button>
+              <button
+                style="
+                  width:100%;
+                  padding:14px;
+                  background:white;
+                  text-align:left;
+                  border-bottom:1px solid #eee;
+                "
+                onclick="
+                  abrirNegocio(
+                    '${n.id}'
+                  )
+                "
+              >
 
-        `).join("")
+                🔎
+                ${escaparHTML(
+                  n.nombre
+                )}
+
+              </button>
+
+            `
+          )
+          .join("")
 
       : `
-        <div style="padding:15px;color:#727887">
-          No encontramos ese negocio todavía.
-        </div>
-      `;
 
-  suggestions.classList.remove("hidden");
+          <div style="
+            padding:15px;
+            color:#727887;
+          ">
+
+            ${t("noResults")}
+
+          </div>
+
+        `;
+
+  suggestions.classList.remove(
+    "hidden"
+  );
 
 }
 
@@ -526,13 +1179,31 @@ function ejecutarBusqueda() {
     );
 
   const texto =
-    input?.value.trim() || "";
+    input?.value.trim() ||
+    "";
 
   cambiarVista("search");
 
-  document.getElementById(
-    "searchInput"
-  ).value = texto;
+  const searchInput =
+    document.getElementById(
+      "searchInput"
+    );
+
+  if (searchInput) {
+    searchInput.value =
+      texto;
+  }
+
+  const suggestions =
+    document.getElementById(
+      "searchSuggestions"
+    );
+
+  if (suggestions) {
+    suggestions.classList.add(
+      "hidden"
+    );
+  }
 
   filtrarNegocios();
 
@@ -540,7 +1211,7 @@ function ejecutarBusqueda() {
 
 
 /* =====================================================
-   FILTRAR NEGOCIOS
+   FILTRAR
 ===================================================== */
 
 function filtrarNegocios() {
@@ -558,40 +1229,47 @@ function filtrarNegocios() {
     )?.value || "";
 
   const resultados =
-    ReservaYa.negocios.filter(negocio => {
+    ReservaYa.negocios.filter(
+      negocio => {
 
-      const coincideTexto =
+        const categoriaObjeto =
+          CATEGORIAS.find(
+            c =>
+              c.id ===
+              negocio.categoria
+          );
 
-        !texto ||
+        const textoCompleto =
+          [
+            negocio.nombre,
+            negocio.ciudad,
+            negocio.ubicacion,
+            negocio.descripcion,
+            negocio.categoria,
+            categoriaObjeto?.nombre
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
 
-        negocio.nombre
-          .toLowerCase()
-          .includes(texto)
+        const coincideTexto =
+          !texto ||
+          textoCompleto.includes(
+            texto
+          );
 
-        ||
+        const coincideCategoria =
+          !categoria ||
+          negocio.categoria ===
+            categoria;
 
-        negocio.ciudad
-          .toLowerCase()
-          .includes(texto)
+        return (
+          coincideTexto &&
+          coincideCategoria
+        );
 
-        ||
-
-        negocio.ubicacion
-          .toLowerCase()
-          .includes(texto);
-
-      const coincideCategoria =
-
-        !categoria ||
-
-        negocio.categoria === categoria;
-
-      return (
-        coincideTexto &&
-        coincideCategoria
-      );
-
-    });
+      }
+    );
 
   const contenedor =
     document.getElementById(
@@ -601,34 +1279,39 @@ function filtrarNegocios() {
   if (!contenedor) return;
 
   contenedor.innerHTML =
-
     resultados.length
 
-      ? resultados
-          .map(crearTarjetaNegocio)
+      ? ordenarNegociosParaDescubrimiento(
+          resultados
+        )
+          .map(
+            crearTarjetaNegocio
+          )
           .join("")
 
       : `
 
-        <div
-          style="
-            grid-column:1/-1;
-            padding:50px 20px;
-            text-align:center;
-          "
-        >
+        <div style="
+          grid-column:1/-1;
+          padding:50px 20px;
+          text-align:center;
+        ">
 
-          <div style="font-size:45px">
+          <div style="
+            font-size:45px
+          ">
             🔎
           </div>
 
           <h3>
-            No encontramos resultados
+            ${t("noResults")}
           </h3>
 
-          <p style="color:#727887;margin-top:8px">
-            Prueba con otro nombre,
-            categoría o ciudad.
+          <p style="
+            color:#727887;
+            margin-top:8px
+          ">
+            ${t("noResultsText")}
           </p>
 
         </div>
@@ -651,28 +1334,43 @@ async function abrirNegocio(id) {
 
   if (!negocio) return;
 
-  ReservaYa.negocioActual = negocio;
+  ReservaYa.negocioActual =
+    negocio;
 
-  // 🕐 Obtener un resumen del horario
-  const { data: horarios } =
+  const {
+    data: horarios
+  } =
     await supabaseClient
       .from("reserva_horarios")
       .select("*")
-      .eq("negocio_id", negocio.id)
-      .order("dia_semana", {
-        ascending: true
-      });
+      .eq(
+        "negocio_id",
+        negocio.id
+      )
+      .order(
+        "dia_semana",
+        {
+          ascending: true
+        }
+      );
 
-  const horariosGuardados = horarios || [];
+  const horariosGuardados =
+    horarios || [];
 
   const lunes =
     horariosGuardados.find(
-      h => Number(h.dia_semana) === 1
+      h =>
+        Number(
+          h.dia_semana
+        ) === 1
     );
 
   const domingo =
     horariosGuardados.find(
-      h => Number(h.dia_semana) === 0
+      h =>
+        Number(
+          h.dia_semana
+        ) === 0
     );
 
   let resumenHorario =
@@ -682,12 +1380,18 @@ async function abrirNegocio(id) {
 
     const apertura =
       lunes.hora_apertura
-        ? lunes.hora_apertura.slice(0, 5)
+        ? lunes.hora_apertura.slice(
+            0,
+            5
+          )
         : "--:--";
 
     const cierre =
       lunes.hora_cierre
-        ? lunes.hora_cierre.slice(0, 5)
+        ? lunes.hora_cierre.slice(
+            0,
+            5
+          )
         : "--:--";
 
     resumenHorario =
@@ -695,37 +1399,88 @@ async function abrirNegocio(id) {
 
   }
 
-  if (domingo && !domingo.abierto) {
-    resumenHorario += " · Dom cerrado";
+  if (
+    domingo &&
+    !domingo.abierto
+  ) {
+
+    resumenHorario +=
+      " · Dom cerrado";
+
   }
+
+  const categoria =
+    CATEGORIAS.find(
+      c =>
+        c.id === negocio.categoria
+    );
 
   abrirModal(`
 
-    <div style="text-align:center">
+    <div style="
+      text-align:center
+    ">
 
-      <div style="font-size:55px">
-        ${obtenerIconoCategoria(
-          negocio.categoria
-        )}
+      <div style="
+        font-size:55px
+      ">
+        ${
+          categoria?.icono ||
+          "📍"
+        }
       </div>
 
-      <h2 style="margin-top:10px">
-        ${escaparHTML(negocio.nombre)}
+      <h2 style="
+        margin-top:10px
+      ">
+        ${escaparHTML(
+          negocio.nombre
+        )}
       </h2>
 
       <p style="
         color:#727887;
         margin-top:5px
       ">
-        ${escaparHTML(negocio.ciudad)}
+        ${escaparHTML(
+          negocio.ciudad
+        )}
       </p>
 
-      <div style="margin-top:15px">
-        ⭐ ${negocio.rating}
-        · ${negocio.reseñas} reseñas
+      ${
+        negocio.descripcion
+          ? `
+            <p style="
+              margin-top:14px;
+              color:#555;
+              line-height:1.5;
+              text-align:left;
+            ">
+              ${escaparHTML(
+                negocio.descripcion
+              )}
+            </p>
+          `
+          : ""
+      }
+
+      <div style="
+        margin-top:15px
+      ">
+        ⭐
+        ${Number(
+          negocio.rating || 0
+        ).toFixed(1)}
+
+        ·
+
+        ${Number(
+          negocio.reseñas || 0
+        )}
+
+        reseñas
       </div>
 
-      <!-- 🕐 RESUMEN HORARIO -->
       <div style="
         margin-top:20px;
         padding:14px;
@@ -745,7 +1500,9 @@ async function abrirNegocio(id) {
           color:#727887;
           font-size:14px;
         ">
-          ${resumenHorario}
+          ${escaparHTML(
+            resumenHorario
+          )}
         </div>
 
         <button
@@ -754,7 +1511,11 @@ async function abrirNegocio(id) {
             width:100%;
             margin-top:10px;
           "
-          onclick="verHorariosNegocio('${negocio.id}')"
+          onclick="
+            verHorariosNegocio(
+              '${negocio.id}'
+            )
+          "
         >
           🕐 Ver horarios completos
         </button>
@@ -767,9 +1528,13 @@ async function abrirNegocio(id) {
           width:100%;
           margin-top:18px;
         "
-        onclick="iniciarReserva('${negocio.id}')"
+        onclick="
+          iniciarReserva(
+            '${negocio.id}'
+          )
+        "
       >
-        📅 Reservar cita
+        📅 ${t("reserve")}
       </button>
 
       <button
@@ -778,10 +1543,16 @@ async function abrirNegocio(id) {
           width:100%;
           margin-top:8px;
         "
-        onclick="alternarFavorito('${negocio.id}')"
+        onclick="
+          alternarFavorito(
+            '${negocio.id}'
+          )
+        "
       >
         ${
-          ReservaYa.favoritos.includes(id)
+          ReservaYa.favoritos.includes(
+            id
+          )
             ? "♥ Quitar de favoritos"
             : "♡ Añadir a favoritos"
         }
@@ -793,7 +1564,14 @@ async function abrirNegocio(id) {
 
 }
 
-async function verHorariosNegocio(id) {
+
+/* =====================================================
+   HORARIOS
+===================================================== */
+
+async function verHorariosNegocio(
+  id
+) {
 
   const negocio =
     ReservaYa.negocios.find(
@@ -802,16 +1580,26 @@ async function verHorariosNegocio(id) {
 
   if (!negocio) return;
 
-  const { data: horarios, error } =
+  const {
+    data: horarios,
+    error
+  } =
     await supabaseClient
       .from("reserva_horarios")
       .select("*")
-      .eq("negocio_id", id)
-      .order("dia_semana", {
-        ascending: true
-      });
+      .eq(
+        "negocio_id",
+        id
+      )
+      .order(
+        "dia_semana",
+        {
+          ascending: true
+        }
+      );
 
   if (error) {
+
     console.error(
       "Error cargando horarios:",
       error
@@ -822,6 +1610,7 @@ async function verHorariosNegocio(id) {
     );
 
     return;
+
   }
 
   const dias = [
@@ -838,70 +1627,105 @@ async function verHorariosNegocio(id) {
     horarios || [];
 
   const horariosHTML =
-    dias.map((dia, indice) => {
+    dias
+      .map(
+        (
+          dia,
+          indice
+        ) => {
 
-      const horario =
-        horariosGuardados.find(
-          h =>
-            Number(h.dia_semana) === indice
-        );
+          const horario =
+            horariosGuardados.find(
+              h =>
+                Number(
+                  h.dia_semana
+                ) === indice
+            );
 
-      if (!horario || !horario.abierto) {
+          if (
+            !horario ||
+            !horario.abierto
+          ) {
 
-        return `
-          <div style="
-            display:flex;
-            justify-content:space-between;
-            padding:9px 0;
-            border-bottom:1px solid #eee;
-          ">
-            <span>${dia}</span>
+            return `
 
-            <span style="
-              color:#e05252;
-              font-weight:600;
+              <div style="
+                display:flex;
+                justify-content:space-between;
+                padding:9px 0;
+                border-bottom:1px solid #eee;
+              ">
+
+                <span>
+                  ${dia}
+                </span>
+
+                <span style="
+                  color:#e05252;
+                  font-weight:600;
+                ">
+                  Cerrado
+                </span>
+
+              </div>
+
+            `;
+
+          }
+
+          const apertura =
+            horario.hora_apertura
+              ? horario.hora_apertura.slice(
+                  0,
+                  5
+                )
+              : "--:--";
+
+          const cierre =
+            horario.hora_cierre
+              ? horario.hora_cierre.slice(
+                  0,
+                  5
+                )
+              : "--:--";
+
+          return `
+
+            <div style="
+              display:flex;
+              justify-content:space-between;
+              padding:9px 0;
+              border-bottom:1px solid #eee;
             ">
-              Cerrado
-            </span>
-          </div>
-        `;
-      }
 
-      const apertura =
-        horario.hora_apertura
-          ? horario.hora_apertura.slice(0, 5)
-          : "--:--";
+              <span>
+                ${dia}
+              </span>
 
-      const cierre =
-        horario.hora_cierre
-          ? horario.hora_cierre.slice(0, 5)
-          : "--:--";
+              <span style="
+                color:#198754;
+                font-weight:600;
+              ">
+                ${apertura}
+                –
+                ${cierre}
+              </span>
 
-      return `
-        <div style="
-          display:flex;
-          justify-content:space-between;
-          padding:9px 0;
-          border-bottom:1px solid #eee;
-        ">
-          <span>${dia}</span>
+            </div>
 
-          <span style="
-            color:#198754;
-            font-weight:600;
-          ">
-            ${apertura} – ${cierre}
-          </span>
-        </div>
-      `;
+          `;
 
-    }).join("");
+        }
+      )
+      .join("");
 
   abrirModal(`
 
     <div>
 
-      <h2 style="margin-bottom:5px">
+      <h2 style="
+        margin-bottom:5px
+      ">
         🕐 Horarios
       </h2>
 
@@ -909,7 +1733,9 @@ async function verHorariosNegocio(id) {
         color:#727887;
         margin-bottom:18px;
       ">
-        ${escaparHTML(negocio.nombre)}
+        ${escaparHTML(
+          negocio.nombre
+        )}
       </p>
 
       <div style="
@@ -926,567 +1752,472 @@ async function verHorariosNegocio(id) {
           width:100%;
           margin-top:18px;
         "
-        onclick="iniciarReserva('${negocio.id}')"
+        onclick="
+          iniciarReserva(
+            '${negocio.id}'
+          )
+        "
       >
-        📅 Reservar cita
+        📅 ${t("reserve")}
       </button>
 
     </div>
 
-    `, "abrirNegocio('" + negocio.id + "')");
+  `, `
+    abrirNegocio(
+      '${negocio.id}'
+    )
+  `);
+
 }
 
-
-async function cargarServiciosReserva(negocioId) {
-
-  const { data, error } = await supabaseClient
-    .from("servicios")
-    .select("*")
-    .eq("negocio_id", negocioId)
-    .order("nombre", { ascending: true });
-
-  if (error) {
-    console.error("Error cargando servicios:", error);
-    return [];
-  }
-
-  return data || [];
-}
 
 /* =====================================================
-   RESERVA
+   INICIAR RESERVA
 ===================================================== */
 
-async function iniciarReserva(id) {
+async function iniciarReserva(
+  negocioId
+) {
+
+  if (!ReservaYa.usuario) {
+
+    mostrarToast(
+      t("loginRequired")
+    );
+
+    return;
+
+  }
 
   const negocio =
     ReservaYa.negocios.find(
-      n => n.id === id
+      n => n.id === negocioId
     );
 
   if (!negocio) return;
 
-  const servicios =
-    await cargarServiciosReserva(id);
+  ReservaYa.negocioActual =
+    negocio;
 
-  // 🕐 Cargar horarios del negocio
-  const { data: horarios, error } =
+  const {
+    data: servicios,
+    error
+  } =
     await supabaseClient
-      .from("reserva_horarios")
+      .from("servicios")
       .select("*")
-      .eq("negocio_id", id)
-      .order("dia_semana", {
-        ascending: true
-      });
+      .eq(
+        "negocio_id",
+        negocioId
+      )
+      .order(
+        "nombre",
+        {
+          ascending: true
+        }
+      );
 
   if (error) {
+
     console.error(
-      "Error cargando horarios:",
+      "Error cargando servicios:",
       error
     );
-  }
 
-  const horariosGuardados =
-    horarios || [];
-
-  const dias = [
-    "Domingo",
-    "Lunes",
-    "Martes",
-    "Miércoles",
-    "Jueves",
-    "Viernes",
-    "Sábado"
-  ];
-
-  // 🕐 Crear resumen del horario
-  const horarioLunes =
-    horariosGuardados.find(
-      h => Number(h.dia_semana) === 1
+    mostrarToast(
+      "No se pudieron cargar los servicios."
     );
 
-  let resumenHorario =
-    "Horario no configurado";
+    return;
 
-  if (horarioLunes?.abierto) {
-
-    const apertura =
-      horarioLunes.hora_apertura
-        ? horarioLunes.hora_apertura.slice(0, 5)
-        : "--:--";
-
-    const cierre =
-      horarioLunes.hora_cierre
-        ? horarioLunes.hora_cierre.slice(0, 5)
-        : "--:--";
-
-    resumenHorario =
-      `Lun–Sáb · ${apertura}–${cierre}`;
   }
+
+  ReservaYa.serviciosActuales =
+    servicios || [];
+
+  const opciones =
+    (servicios || [])
+      .map(
+        servicio => `
+
+          <option
+            value="${servicio.id}"
+          >
+            ${escaparHTML(
+              servicio.nombre
+            )}
+
+            ${
+              servicio.precio !== null &&
+              servicio.precio !== undefined
+                ? ` · ${formatearPrecio(
+                    servicio.precio
+                  )}`
+                : ""
+            }
+
+          </option>
+
+        `
+      )
+      .join("");
 
   abrirModal(`
 
-    <h2>
-      Reservar en
-      ${escaparHTML(negocio.nombre)}
-    </h2>
+    <div>
 
-    <p style="
-      color:#727887;
-      margin-top:6px;
-    ">
-      Selecciona un servicio, fecha y hora.
-    </p>
+      <h2>
+        📅 Reservar cita
+      </h2>
 
-    <!-- 🕐 HORARIO -->
-    <div style="
-      margin-top:18px;
-      padding:13px;
-      background:#f8f9fb;
-      border-radius:13px;
-    ">
-
-      <div style="
-        font-weight:700;
-      ">
-        🕐 Horario de atención
-      </div>
-
-      <div style="
+      <p style="
         color:#727887;
-        font-size:14px;
-        margin-top:4px;
+        margin:5px 0 18px;
       ">
-        ${resumenHorario}
-      </div>
+        ${escaparHTML(
+          negocio.nombre
+        )}
+      </p>
 
-      <button
-        class="secondary-button"
+      <label style="
+        display:block;
+        font-weight:700;
+        margin-bottom:7px;
+      ">
+        🛠️ Servicio
+      </label>
+
+      <select
+        id="reservationService"
         style="
           width:100%;
-          margin-top:9px;
+          padding:12px;
+          border:1px solid #ddd;
+          border-radius:10px;
+          margin-bottom:16px;
         "
-        onclick="verHorariosNegocio('${negocio.id}')"
       >
-        🕐 Ver horarios completos
+        <option value="">
+          Selecciona un servicio
+        </option>
+
+        ${
+          opciones ||
+          `
+            <option value="">
+              No hay servicios configurados
+            </option>
+          `
+        }
+
+      </select>
+
+      <label style="
+        display:block;
+        font-weight:700;
+        margin-bottom:7px;
+      ">
+        📅 Fecha
+      </label>
+
+      <input
+        id="reservationDate"
+        type="date"
+        min="${obtenerFechaHoy()}"
+        onchange="
+          actualizarHorarioSeleccionado(
+            '${negocio.id}'
+          )
+        "
+        style="
+          width:100%;
+          padding:12px;
+          border:1px solid #ddd;
+          border-radius:10px;
+          margin-bottom:12px;
+        "
+      >
+
+      <div
+        id="reservationScheduleStatus"
+        style="
+          font-size:13px;
+          margin-bottom:12px;
+        "
+      ></div>
+
+      <label style="
+        display:block;
+        font-weight:700;
+        margin-bottom:7px;
+      ">
+        🕐 Hora
+      </label>
+
+      <input
+        id="reservationTime"
+        type="time"
+        disabled
+        style="
+          width:100%;
+          padding:12px;
+          border:1px solid #ddd;
+          border-radius:10px;
+          margin-bottom:12px;
+        "
+      >
+
+      <div
+        id="reservationHours"
+        style="
+          display:grid;
+          grid-template-columns:
+            repeat(3,1fr);
+          gap:8px;
+          margin-bottom:16px;
+        "
+      ></div>
+
+      <label style="
+        display:block;
+        font-weight:700;
+        margin-bottom:7px;
+      ">
+        💬 Comentario
+      </label>
+
+      <textarea
+        id="reservationComment"
+        rows="3"
+        placeholder="¿Algo que quieras comentar?"
+        style="
+          width:100%;
+          padding:12px;
+          border:1px solid #ddd;
+          border-radius:10px;
+          resize:vertical;
+        "
+      ></textarea>
+
+      <button
+        class="primary-button"
+        style="
+          width:100%;
+          margin-top:18px;
+        "
+        onclick="
+          confirmarReserva(
+            '${negocio.id}'
+          )
+        "
+      >
+        ✅ Confirmar reserva
       </button>
 
     </div>
 
-    <!-- 🛠️ SERVICIO -->
-    <label style="
-      display:block;
-      margin-top:20px;
-      font-weight:700;
-    ">
-      Servicio
-    </label>
-
-    <select
-      id="reservationService"
-      style="
-        width:100%;
-        padding:13px;
-        margin-top:7px;
-        border:1px solid #e7e9ef;
-        border-radius:11px;
-      "
-    >
-
-      <option value="">
-        Selecciona un servicio
-      </option>
-
-      ${servicios.map(servicio => `
-        <option value="${servicio.id}">
-          ${escaparHTML(
-            servicio.nombre || "Servicio"
-          )}
-          ${
-            servicio.precio != null
-              ? ` — $${Number(
-                  servicio.precio
-                ).toLocaleString("es-CO")}`
-              : ""
-          }
-        </option>
-      `).join("")}
-
-    </select>
-
-    <!-- 📅 FECHA -->
-    <label style="
-      display:block;
-      margin-top:20px;
-      font-weight:700;
-    ">
-      Fecha
-    </label>
-
-    <input
-  id="reservationDate"
-  type="date"
-  min="${obtenerFechaHoy()}"
-  onchange="actualizarHorarioSeleccionado('${negocio.id}')"
-  style="
-    width:100%;
-    padding:13px;
-    margin-top:7px;
-    border:1px solid #e7e9ef;
-    border-radius:11px;
-  "
->
-<div
-  id="reservationScheduleStatus"
-  style="
-    margin-top:9px;
-    font-size:14px;
-    color:#727887;
-  "
->
-  Selecciona una fecha para consultar el horario.
-</div>
-
-    <!-- ⏰ HORA -->
-    <label style="
-      display:block;
-      margin-top:15px;
-      font-weight:700;
-    ">
-      Hora
-    </label>
-
-    <input
-      id="reservationTime"
-      type="time"
-      style="
-        width:100%;
-        padding:13px;
-        margin-top:7px;
-        border:1px solid #e7e9ef;
-        border-radius:11px;
-      "
-    >
-    <div
-  style="
-    margin-top:10px;
-    font-size:14px;
-    color:#727887;
-  "
->
-  🕐 Selecciona una hora disponible
-</div>
-
-<div
-  id="reservationHours"
-  style="
-    display:grid;
-    grid-template-columns:repeat(3, 1fr);
-    gap:8px;
-    margin-top:10px;
-  "
-></div>
-
-    <!-- 💬 COMENTARIO -->
-    <label style="
-      display:block;
-      margin-top:15px;
-      font-weight:700;
-    ">
-      Comentario
-    </label>
-
-    <textarea
-      id="reservationComment"
-      placeholder="¿Quieres agregar algún comentario?"
-      rows="3"
-      style="
-        width:100%;
-        padding:13px;
-        margin-top:7px;
-        border:1px solid #e7e9ef;
-        border-radius:11px;
-        resize:vertical;
-        font-family:inherit;
-      "
-    ></textarea>
-
-    <button
-      class="primary-button"
-      style="
-        width:100%;
-        margin-top:20px;
-      "
-      onclick="confirmarReserva('${negocio.id}')"
-    >
-      📅 Confirmar reserva
-    </button>
-
   `);
 
 }
-async function actualizarHorarioSeleccionado(negocioId) {
-
-  const fecha =
-    document.getElementById("reservationDate")?.value;
-
-  const estado =
-    document.getElementById("reservationScheduleStatus");
-
-  const horaInput =
-    document.getElementById("reservationTime");
-
-  const horasContainer =
-    document.getElementById("reservationHours");
-
-  if (!fecha || !estado) return;
 
 
-  // 📅 Saber qué día de la semana es
+/* =====================================================
+   HORARIO DEL DÍA
+===================================================== */
+
+async function obtenerHorarioDelDia(
+  negocioId,
+  fecha
+) {
 
   const fechaObj =
-    new Date(`${fecha}T12:00:00`);
+    new Date(
+      `${fecha}T12:00:00`
+    );
 
   const diaSemana =
     fechaObj.getDay();
 
-
-  // 🕐 Buscar horario del negocio
-
-  const { data: horario, error } =
+  const {
+    data,
+    error
+  } =
     await supabaseClient
       .from("reserva_horarios")
       .select("*")
-      .eq("negocio_id", negocioId)
-      .eq("dia_semana", diaSemana)
+      .eq(
+        "negocio_id",
+        negocioId
+      )
+      .eq(
+        "dia_semana",
+        diaSemana
+      )
       .maybeSingle();
 
-
   if (error) {
 
-    console.error(
-      "Error consultando horario:",
-      error
-    );
-
-    estado.textContent =
-      "No se pudo consultar el horario.";
-
-    return;
-  }
-
-
-  // 🔴 Negocio cerrado
-
-  if (!horario || !horario.abierto) {
-
-    estado.innerHTML =
-      "🔴 <strong>Cerrado ese día.</strong>";
-
-    estado.style.color =
-      "#e05252";
-
-    if (horaInput) {
-      horaInput.value = "";
-      horaInput.disabled = true;
-    }
-
-    if (horasContainer) {
-      horasContainer.innerHTML = "";
-    }
-
-    return;
-  }
-
-
-  const apertura =
-    horario.hora_apertura.slice(0, 5);
-
-  const cierre =
-    horario.hora_cierre.slice(0, 5);
-
-
-  // 🔎 Buscar reservas existentes
-
-  const horasOcupadas =
-    await cargarHorasOcupadas(
-      negocioId,
-      fecha
-    );
-
-
-  // 🟢 Mostrar estado
-
-  estado.innerHTML =
-    `🟢 <strong>Abierto</strong> · ${apertura} – ${cierre}`;
-
-  estado.style.color =
-    "#198754";
-
-
-  // ⏰ Generar horas
-
-  const horas =
-    generarHorasDisponibles(
-      apertura,
-      cierre,
-      horasOcupadas
-    );
-
-
-  // 🎨 Crear botones
-
-  if (horasContainer) {
-
-    horasContainer.innerHTML =
-      horas.map(item => {
-
-        if (item.ocupada) {
-
-          return `
-            <button
-              type="button"
-              disabled
-              style="
-                padding:11px;
-                border:1px solid #e7e9ef;
-                border-radius:10px;
-                background:#f1f2f5;
-                color:#999;
-                text-decoration:line-through;
-                cursor:not-allowed;
-              "
-            >
-              ${item.hora}
-            </button>
-          `;
-
-        }
-
-
-        return `
-          <button
-            type="button"
-            onclick="seleccionarHora('${item.hora}')"
-            style="
-              padding:11px;
-              border:1px solid #e7e9ef;
-              border-radius:10px;
-              background:white;
-              color:#222;
-              cursor:pointer;
-              font-weight:600;
-            "
-          >
-            ${item.hora}
-          </button>
-        `;
-
-      }).join("");
-
-  }
-
-
-  // 🧹 Limpiar hora anterior
-
-  if (horaInput) {
-    horaInput.value = "";
-    horaInput.disabled = true;
-  }
-
-}
-async function obtenerHorarioDelDia(negocioId, fecha) {
-
-  const fechaObj = new Date(`${fecha}T12:00:00`);
-
-  const diaSemana = fechaObj.getDay();
-
-  const { data, error } = await supabaseClient
-    .from("reserva_horarios")
-    .select("*")
-    .eq("negocio_id", negocioId)
-    .eq("dia_semana", diaSemana)
-    .maybeSingle();
-
-  if (error) {
     console.error(
       "Error consultando horario:",
       error
     );
 
     return null;
+
   }
 
   if (!data) {
+
     return {
+
       abierto: false,
+
       hora_apertura: null,
+
       hora_cierre: null
+
     };
+
   }
 
   return {
-    abierto: Boolean(data.abierto),
-    hora_apertura: data.hora_apertura,
-    hora_cierre: data.hora_cierre
-  };
-}
-async function cargarHorasOcupadas(negocioId, fecha) {
 
-  const { data, error } = await supabaseClient
-    .from("Citas")
-    .select("hora")
-    .eq("negocio_id", negocioId)
-    .eq("fecha", fecha)
-    .neq("estado", "Cancelada");
+    abierto:
+      Boolean(
+        data.abierto
+      ),
+
+    hora_apertura:
+      data.hora_apertura,
+
+    hora_cierre:
+      data.hora_cierre
+
+  };
+
+}
+
+
+/* =====================================================
+   HORAS OCUPADAS
+===================================================== */
+
+async function cargarHorasOcupadas(
+  negocioId,
+  fecha
+) {
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("Citas")
+      .select("hora")
+      .eq(
+        "negocio_id",
+        negocioId
+      )
+      .eq(
+        "fecha",
+        fecha
+      )
+      .neq(
+        "estado",
+        "Cancelada"
+      );
 
   if (error) {
+
     console.error(
       "Error cargando horas ocupadas:",
       error
     );
 
     return [];
+
   }
 
   return (data || [])
-    .map(cita => cita.hora)
+    .map(
+      cita => cita.hora
+    )
     .filter(Boolean)
-    .map(hora => hora.slice(0, 5));
+    .map(
+      hora =>
+        hora.slice(0, 5)
+    );
 
 }
 
-function generarHorasDisponibles(apertura, cierre, horasOcupadas) {
+
+/* =====================================================
+   GENERAR HORAS
+===================================================== */
+
+function generarHorasDisponibles(
+  apertura,
+  cierre,
+  horasOcupadas
+) {
 
   const horas = [];
 
-  let [hora, minuto] =
-    apertura.split(":").map(Number);
+  if (!apertura || !cierre) {
+    return horas;
+  }
 
-  const [horaCierre, minutoCierre] =
-    cierre.split(":").map(Number);
+  let [
+    hora,
+    minuto
+  ] =
+    apertura
+      .split(":")
+      .map(Number);
+
+  const [
+    horaCierre,
+    minutoCierre
+  ] =
+    cierre
+      .split(":")
+      .map(Number);
 
   while (
     hora < horaCierre ||
-    (hora === horaCierre && minuto <= minutoCierre)
+    (
+      hora === horaCierre &&
+      minuto <= minutoCierre
+    )
   ) {
 
     const horaTexto =
-      `${String(hora).padStart(2, "0")}:${String(minuto).padStart(2, "0")}`;
-
-    const ocupada =
-      horasOcupadas.includes(horaTexto);
+      `${String(
+        hora
+      ).padStart(2, "0")}:${String(
+        minuto
+      ).padStart(2, "0")}`;
 
     horas.push({
+
       hora: horaTexto,
-      ocupada: ocupada
+
+      ocupada:
+        horasOcupadas.includes(
+          horaTexto
+        )
+
     });
 
     minuto += 30;
 
     if (minuto >= 60) {
+
       minuto = 0;
+
       hora++;
+
     }
 
   }
@@ -1494,119 +2225,393 @@ function generarHorasDisponibles(apertura, cierre, horasOcupadas) {
   return horas;
 
 }
-function seleccionarHora(hora) {
+
+
+/* =====================================================
+   ACTUALIZAR HORARIO
+===================================================== */
+
+async function actualizarHorarioSeleccionado(
+  negocioId
+) {
+
+  const fecha =
+    document.getElementById(
+      "reservationDate"
+    )?.value;
+
+  const status =
+    document.getElementById(
+      "reservationScheduleStatus"
+    );
+
+  const timeInput =
+    document.getElementById(
+      "reservationTime"
+    );
+
+  const hoursContainer =
+    document.getElementById(
+      "reservationHours"
+    );
+
+  if (!fecha) {
+
+    if (status) {
+      status.textContent = "";
+    }
+
+    if (timeInput) {
+      timeInput.value = "";
+      timeInput.disabled = true;
+    }
+
+    if (hoursContainer) {
+      hoursContainer.innerHTML = "";
+    }
+
+    return;
+
+  }
+
+  const horario =
+    await obtenerHorarioDelDia(
+      negocioId,
+      fecha
+    );
+
+  if (
+    !horario ||
+    !horario.abierto
+  ) {
+
+    if (status) {
+
+      status.innerHTML = `
+        <span style="
+          color:#e05252;
+          font-weight:600;
+        ">
+          🔴 Cerrado ese día.
+        </span>
+      `;
+
+    }
+
+    if (timeInput) {
+
+      timeInput.value = "";
+
+      timeInput.disabled = true;
+
+    }
+
+    if (hoursContainer) {
+      hoursContainer.innerHTML = "";
+    }
+
+    return;
+
+  }
+
+  const apertura =
+    horario.hora_apertura
+      ? horario.hora_apertura.slice(
+          0,
+          5
+        )
+      : null;
+
+  const cierre =
+    horario.hora_cierre
+      ? horario.hora_cierre.slice(
+          0,
+          5
+        )
+      : null;
+
+  const ocupadas =
+    await cargarHorasOcupadas(
+      negocioId,
+      fecha
+    );
+
+  const horas =
+    generarHorasDisponibles(
+      apertura,
+      cierre,
+      ocupadas
+    );
+
+  if (status) {
+
+    status.innerHTML = `
+      <span style="
+        color:#198754;
+        font-weight:600;
+      ">
+        🟢 Abierto:
+        ${apertura}
+        –
+        ${cierre}
+      </span>
+    `;
+
+  }
+
+  if (timeInput) {
+
+    timeInput.value = "";
+
+    timeInput.disabled = true;
+
+  }
+
+  if (!hoursContainer) {
+    return;
+  }
+
+  hoursContainer.innerHTML =
+    horas
+      .map(
+        item => {
+
+          if (item.ocupada) {
+
+            return `
+
+              <button
+                type="button"
+                disabled
+                style="
+                  padding:9px 5px;
+                  border-radius:9px;
+                  border:1px solid #eee;
+                  background:#f1f1f1;
+                  color:#aaa;
+                  text-decoration:line-through;
+                "
+              >
+                ${item.hora}
+              </button>
+
+            `;
+
+          }
+
+          return `
+
+            <button
+              type="button"
+              onclick="
+                seleccionarHora(
+                  '${item.hora}'
+                )
+              "
+              style="
+                padding:9px 5px;
+                border-radius:9px;
+                border:1px solid #e7e9ef;
+                background:white;
+                color:#222;
+              "
+            >
+              ${item.hora}
+            </button>
+
+          `;
+
+        }
+      )
+      .join("");
+
+}
+
+
+/* =====================================================
+   SELECCIONAR HORA
+===================================================== */
+
+function seleccionarHora(
+  hora
+) {
 
   const horaInput =
-    document.getElementById("reservationTime");
+    document.getElementById(
+      "reservationTime"
+    );
 
   if (!horaInput) return;
 
-  horaInput.value = hora;
+  horaInput.value =
+    hora;
 
   const botones =
     document.querySelectorAll(
       "#reservationHours button:not(:disabled)"
     );
 
-  botones.forEach(boton => {
+  botones.forEach(
+    boton => {
 
-    boton.style.background = "white";
-    boton.style.color = "#222";
-    boton.style.borderColor = "#e7e9ef";
+      boton.style.background =
+        "white";
 
-  });
+      boton.style.color =
+        "#222";
 
-  botones.forEach(boton => {
-
-    if (boton.textContent.trim() === hora) {
-
-      boton.style.background = "#111827";
-      boton.style.color = "white";
-      boton.style.borderColor = "#111827";
+      boton.style.borderColor =
+        "#e7e9ef";
 
     }
+  );
 
-  });
+  botones.forEach(
+    boton => {
+
+      if (
+        boton.textContent.trim() ===
+        hora
+      ) {
+
+        boton.style.background =
+          "#111827";
+
+        boton.style.color =
+          "white";
+
+        boton.style.borderColor =
+          "#111827";
+
+      }
+
+    }
+  );
 
 }
-async function confirmarReserva(id) {
+
+
+/* =====================================================
+   CONFIRMAR RESERVA
+===================================================== */
+
+async function confirmarReserva(
+  id
+) {
 
   if (!ReservaYa.usuario) {
-    mostrarToast("Debes iniciar sesión para reservar.");
+
+    mostrarToast(
+      t("loginRequired")
+    );
+
     return;
+
   }
 
   const servicioId =
-    document.getElementById("reservationService")?.value;
+    document.getElementById(
+      "reservationService"
+    )?.value;
 
   const fecha =
-    document.getElementById("reservationDate")?.value;
+    document.getElementById(
+      "reservationDate"
+    )?.value;
 
   const hora =
-    document.getElementById("reservationTime")?.value;
+    document.getElementById(
+      "reservationTime"
+    )?.value;
 
   const comentario =
-    document.getElementById("reservationComment")?.value.trim() || "";
+    document.getElementById(
+      "reservationComment"
+    )?.value.trim() ||
+    "";
 
   if (!servicioId) {
-    mostrarToast("Selecciona un servicio.");
+
+    mostrarToast(
+      "Selecciona un servicio."
+    );
+
     return;
+
   }
 
-  if (!fecha || !hora) {
-    mostrarToast("Selecciona fecha y hora.");
+  if (!fecha) {
+
+    mostrarToast(
+      "Selecciona una fecha."
+    );
+
     return;
+
   }
 
-  const negocio =
-    ReservaYa.negocios.find(n => n.id === id);
+  if (!hora) {
 
-  if (!negocio) {
-    mostrarToast("No se encontró el negocio.");
+    mostrarToast(
+      "Selecciona una hora."
+    );
+
     return;
+
   }
-
-
-  // 🕐 Comprobar horario del negocio
 
   const horario =
-    await obtenerHorarioDelDia(id, fecha);
-
-  if (!horario) {
-    mostrarToast(
-      "Este negocio todavía no tiene horario configurado para ese día."
+    await obtenerHorarioDelDia(
+      id,
+      fecha
     );
-    return;
-  }
 
-  if (!horario.abierto) {
+  if (
+    !horario ||
+    !horario.abierto
+  ) {
+
     mostrarToast(
       "El negocio está cerrado ese día."
     );
+
     return;
+
   }
 
-
-  // ⏰ Comprobar que la hora esté dentro del horario
-
   const apertura =
-    horario.hora_apertura.slice(0, 5);
+    horario.hora_apertura
+      ? horario.hora_apertura.slice(
+          0,
+          5
+        )
+      : null;
 
   const cierre =
-    horario.hora_cierre.slice(0, 5);
+    horario.hora_cierre
+      ? horario.hora_cierre.slice(
+          0,
+          5
+        )
+      : null;
 
   if (
     hora < apertura ||
     hora > cierre
   ) {
+
     mostrarToast(
-      `Elige una hora entre ${apertura} y ${cierre}.`
+      "La hora seleccionada está fuera del horario."
     );
+
     return;
+
   }
 
-
-  // 🔎 Comprobar nuevamente las horas ocupadas
+  /*
+     SEGUNDA COMPROBACIÓN
+     JUSTO ANTES DE INSERTAR.
+  */
 
   const horasOcupadas =
     await cargarHorasOcupadas(
@@ -1614,61 +2619,86 @@ async function confirmarReserva(id) {
       fecha
     );
 
-  if (horasOcupadas.includes(hora)) {
+  if (
+    horasOcupadas.includes(
+      hora
+    )
+  ) {
 
     mostrarToast(
-      "❌ Esa hora ya está reservada. Elige otra."
+      "Esa hora acaba de ser ocupada. Selecciona otra."
     );
 
-    // Limpiar la hora seleccionada
-    const horaInput =
-      document.getElementById("reservationTime");
-
-    if (horaInput) {
-      horaInput.value = "";
-    }
+    await actualizarHorarioSeleccionado(
+      id
+    );
 
     return;
+
   }
-
-
-  // 🛠️ Cargar servicio
 
   const servicio =
-    await cargarServicioPorId(servicioId);
+    await cargarServicioPorId(
+      servicioId
+    );
 
   if (!servicio) {
-    mostrarToast("No se encontró el servicio.");
+
+    mostrarToast(
+      "No se pudo encontrar el servicio."
+    );
+
     return;
+
   }
 
-
-  // 👤 Nombre del cliente
+  const negocio =
+    ReservaYa.negocios.find(
+      n => n.id === id
+    );
 
   const nombreCliente =
-    ReservaYa.usuario.user_metadata?.nombre ||
+    ReservaYa.usuario
+      .user_metadata
+      ?.nombre ||
     ReservaYa.usuario.email ||
     "Cliente";
 
-
-  // 📅 Crear reserva
-
-  const { data, error } =
+  const {
+    data,
+    error
+  } =
     await supabaseClient
       .from("Citas")
       .insert({
-        negocio_id: id,
-        servicio_id: servicioId,
-        nombre_cliente: nombreCliente,
-        fecha: fecha,
-        hora: hora,
-        comentario: comentario,
-        estado: "Pendiente",
-        usuario: ReservaYa.usuario.id
+
+        negocio_id:
+          id,
+
+        servicio_id:
+          servicioId,
+
+        nombre_cliente:
+          nombreCliente,
+
+        fecha:
+          fecha,
+
+        hora:
+          hora,
+
+        comentario:
+          comentario,
+
+        estado:
+          "Pendiente",
+
+        usuario:
+          ReservaYa.usuario.id
+
       })
       .select()
       .single();
-
 
   if (error) {
 
@@ -1682,122 +2712,313 @@ async function confirmarReserva(id) {
     );
 
     return;
+
   }
 
+  const reservaLocal = {
 
-  // 💾 Guardar también en memoria
+    id:
+      data.id,
 
-  ReservaYa.reservas.push({
+    negocio_id:
+      id,
 
-    id: data.id,
+    servicio_id:
+      servicioId,
 
-    negocio_id: id,
+    negocio:
+      negocio?.nombre ||
+      "Negocio",
 
-    servicio_id: servicioId,
+    servicio:
+      servicio.nombre,
 
-    negocio: negocio.nombre,
+    fecha:
+      fecha,
 
-    servicio: servicio.nombre || "Servicio",
+    hora:
+      hora,
 
-    fecha: fecha,
+    comentario:
+      comentario,
 
-    hora: hora,
+    estado:
+      "Pendiente"
 
-    comentario: comentario,
+  };
 
-    estado: "Pendiente"
-
-  });
-   
+  ReservaYa.reservas.push(
+    reservaLocal
+  );
 
   cerrarModal();
 
   mostrarToast(
-    "✅ Reserva creada correctamente."
+    t("reservationCreated")
   );
 
-}
-async function cargarServicioPorId(servicioId) {
+  /*
+     Actualizamos inmediatamente
+     la pantalla de reservas.
+  */
 
-  const { data, error } = await supabaseClient
-    .from("servicios")
-    .select("*")
-    .eq("id", servicioId)
-    .single();
+  if (
+    document
+      .getElementById(
+        "view-reservations"
+      )
+      ?.classList.contains(
+        "active"
+      )
+  ) {
 
-  if (error) {
-    console.error("Error cargando servicio:", error);
-    return null;
+    await mostrarReservas(
+      "proximas"
+    );
+
   }
 
-  return data;
 }
+
+
+/* =====================================================
+   SERVICIO
+===================================================== */
+
+async function cargarServicioPorId(
+  servicioId
+) {
+
+  const local =
+    ReservaYa.serviciosActuales
+      .find(
+        servicio =>
+          servicio.id ===
+          servicioId
+      );
+
+  if (local) {
+    return local;
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("servicios")
+      .select("*")
+      .eq(
+        "id",
+        servicioId
+      )
+      .maybeSingle();
+
+  if (error) {
+
+    console.error(
+      "Error cargando servicio:",
+      error
+    );
+
+    return null;
+
+  }
+
+  return data || null;
+
+}
+
 
 /* =====================================================
    FAVORITOS
 ===================================================== */
 
-async function alternarFavorito(id) {
+async function cargarFavoritos() {
 
   if (!ReservaYa.usuario) {
-    mostrarToast("Inicia sesión para guardar favoritos.");
+
+    ReservaYa.favoritos = [];
+
     return;
+
   }
 
-  const indice = ReservaYa.favoritos.indexOf(id);
-
-  if (indice >= 0) {
-
-    // Eliminar de Supabase
-    const { error } = await supabaseClient
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
       .from("reserva_favoritos")
-      .delete()
-      .eq("usuario_id", ReservaYa.usuario.id)
-      .eq("negocio_id", id);
+      .select(
+        "negocio_id"
+      )
+      .eq(
+        "usuario_id",
+        ReservaYa.usuario.id
+      );
 
-    if (error) {
-      console.error("Error eliminando favorito:", error);
-      mostrarToast("No se pudo eliminar el favorito.");
-      return;
-    }
+  if (error) {
 
-    ReservaYa.favoritos.splice(indice, 1);
+    console.error(
+      "Error cargando favoritos:",
+      error
+    );
 
-    mostrarToast("Eliminado de favoritos.");
+    return;
 
-  } else {
-
-    // Guardar en Supabase
-    const { error } = await supabaseClient
-      .from("reserva_favoritos")
-      .insert({
-        usuario_id: ReservaYa.usuario.id,
-        negocio_id: id
-      });
-if (error) {
-  console.error("ERROR COMPLETO FAVORITO:", error);
-  mostrarToast(
-    "Error: " + (error.message || "desconocido")
-  );
-  return;
-}
-
-    ReservaYa.favoritos.push(id);
-
-    mostrarToast("Añadido a favoritos.");
   }
 
-  // Mantener copia local para que la interfaz siga funcionando
+  ReservaYa.favoritos =
+    (data || [])
+      .map(
+        favorito =>
+          favorito.negocio_id
+      )
+      .filter(Boolean);
+
   localStorage.setItem(
     "reservaya_favoritos",
-    JSON.stringify(ReservaYa.favoritos)
+    JSON.stringify(
+      ReservaYa.favoritos
+    )
   );
 
   renderizarDestacados();
+
   renderizarFavoritos();
+
 }
+
+
+async function alternarFavorito(
+  id
+) {
+
+  if (!ReservaYa.usuario) {
+
+    mostrarToast(
+      t("loginRequired")
+    );
+
+    return;
+
+  }
+
+  const indice =
+    ReservaYa.favoritos.indexOf(
+      id
+    );
+
+  if (indice >= 0) {
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from(
+          "reserva_favoritos"
+        )
+        .delete()
+        .eq(
+          "usuario_id",
+          ReservaYa.usuario.id
+        )
+        .eq(
+          "negocio_id",
+          id
+        );
+
+    if (error) {
+
+      console.error(
+        "Error eliminando favorito:",
+        error
+      );
+
+      mostrarToast(
+        "No se pudo eliminar el favorito."
+      );
+
+      return;
+
+    }
+
+    ReservaYa.favoritos.splice(
+      indice,
+      1
+    );
+
+    mostrarToast(
+      "Eliminado de favoritos."
+    );
+
+  } else {
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from(
+          "reserva_favoritos"
+        )
+        .insert({
+
+          usuario_id:
+            ReservaYa.usuario.id,
+
+          negocio_id:
+            id
+
+        });
+
+    if (error) {
+
+      console.error(
+        "ERROR COMPLETO FAVORITO:",
+        error
+      );
+
+      mostrarToast(
+        "Error: " +
+        (
+          error.message ||
+          "desconocido"
+        )
+      );
+
+      return;
+
+    }
+
+    ReservaYa.favoritos.push(
+      id
+    );
+
+    mostrarToast(
+      "Añadido a favoritos."
+    );
+
+  }
+
+  localStorage.setItem(
+    "reservaya_favoritos",
+    JSON.stringify(
+      ReservaYa.favoritos
+    )
+  );
+
+  renderizarNegociosCercanos();
+
+  renderizarDestacados();
+
+  renderizarFavoritos();
+
+}
+
+
 /* =====================================================
-   FAVORITOS
+   FAVORITOS UI
 ===================================================== */
 
 function renderizarFavoritos() {
@@ -1812,42 +3033,43 @@ function renderizarFavoritos() {
   const negocios =
     ReservaYa.negocios.filter(
       negocio =>
-        ReservaYa.favoritos
-          .includes(negocio.id)
+        ReservaYa.favoritos.includes(
+          negocio.id
+        )
     );
 
   contenedor.innerHTML =
-
     negocios.length
 
       ? negocios
-          .map(crearTarjetaNegocio)
+          .map(
+            crearTarjetaNegocio
+          )
           .join("")
 
       : `
 
-        <div
-          style="
-            grid-column:1/-1;
-            text-align:center;
-            padding:60px 20px;
-          "
-        >
+        <div style="
+          grid-column:1/-1;
+          padding:50px 20px;
+          text-align:center;
+        ">
 
-          <div style="font-size:50px">
+          <div style="
+            font-size:50px
+          ">
             ♡
           </div>
 
           <h3>
-            Todavía no tienes favoritos
+            No tienes favoritos todavía
           </h3>
 
           <p style="
             color:#727887;
-            margin-top:7px;
+            margin-top:8px
           ">
-            Guarda negocios para
-            encontrarlos rápidamente.
+            Guarda negocios para encontrarlos rápidamente.
           </p>
 
         </div>
@@ -1861,393 +3083,877 @@ function renderizarFavoritos() {
    RESERVAS
 ===================================================== */
 
-async function mostrarReservas(tipo, boton) {
+async function mostrarReservas(
+  tipo = "proximas",
+  boton = null
+) {
 
   document
-    .querySelectorAll(".reservation-tabs button")
-    .forEach(b =>
-      b.classList.remove("active")
+    .querySelectorAll(
+      ".reservation-tabs button"
+    )
+    .forEach(
+      btn =>
+        btn.classList.remove(
+          "active"
+        )
     );
 
   if (boton) {
-    boton.classList.add("active");
+
+    boton.classList.add(
+      "active"
+    );
+
+  } else {
+
+    const botones =
+      document.querySelectorAll(
+        ".reservation-tabs button"
+      );
+
+    if (
+      botones.length
+    ) {
+
+      if (
+        tipo === "proximas"
+      ) {
+
+        botones[0].classList.add(
+          "active"
+        );
+
+      } else {
+
+        botones[1]?.classList.add(
+          "active"
+        );
+
+      }
+
+    }
+
   }
 
   const contenedor =
-    document.getElementById("reservationsContainer");
+    document.getElementById(
+      "reservationsContainer"
+    );
 
   if (!contenedor) return;
 
   if (!ReservaYa.usuario) {
+
     contenedor.innerHTML = `
+
       <div style="
         text-align:center;
-        padding:60px 20px;
+        padding:50px 20px;
       ">
-        <div style="font-size:50px">🔐</div>
 
-        <h3>Inicia sesión</h3>
+        <div style="
+          font-size:45px
+        ">
+          🔐
+        </div>
+
+        <h3>
+          Inicia sesión
+        </h3>
 
         <p style="
           color:#727887;
-          margin-top:7px;
+          margin-top:8px
         ">
-          Inicia sesión para ver tus reservas.
+          Necesitas una cuenta para ver tus reservas.
         </p>
+
       </div>
+
     `;
 
     return;
+
   }
 
   contenedor.innerHTML = `
+
     <div style="
       text-align:center;
-      padding:40px 20px;
+      padding:35px;
       color:#727887;
     ">
-      Cargando reservas...
+      ⏳ ${t("loading")}
     </div>
+
   `;
 
-  const { data, error } = await supabaseClient
-    .from("Citas")
-    .select(`
-      *,
-      servicios (
-        nombre
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("Citas")
+      .select(`
+        *,
+        servicios (
+          nombre,
+          precio,
+          duracion
+        )
+      `)
+      .eq(
+        "usuario",
+        ReservaYa.usuario.id
       )
-    `)
-    .eq("usuario", ReservaYa.usuario.id)
-    .order("fecha", { ascending: true })
-    .order("hora", { ascending: true });
+      .order(
+        "fecha",
+        {
+          ascending: true
+        }
+      )
+      .order(
+        "hora",
+        {
+          ascending: true
+        }
+      );
 
   if (error) {
-    console.error("Error cargando reservas:", error);
+
+    console.error(
+      "Error cargando reservas:",
+      error
+    );
 
     contenedor.innerHTML = `
+
       <div style="
         text-align:center;
-        padding:60px 20px;
+        padding:40px;
       ">
-        <div style="font-size:50px">⚠️</div>
+
+        <div style="
+          font-size:40px
+        ">
+          ⚠️
+        </div>
 
         <h3>
           No se pudieron cargar las reservas
         </h3>
 
-        <p style="
-          color:#727887;
-          margin-top:7px;
-        ">
-          Intenta nuevamente.
-        </p>
       </div>
+
     `;
 
     return;
+
   }
 
-  const ahora = new Date();
+  const ahora =
+    new Date();
 
-  ReservaYa.reservas = (data || []).map(reserva => {
+  const reservas =
+    (data || [])
+      .map(
+        reserva => {
 
-    const negocio =
-      ReservaYa.negocios.find(
-        n => n.id === reserva.negocio_id
+          const negocio =
+            ReservaYa.negocios.find(
+              n =>
+                n.id ===
+                reserva.negocio_id
+            );
+
+          const fechaHora =
+            new Date(
+              `${reserva.fecha}T${String(
+                reserva.hora ||
+                "00:00"
+              ).slice(0,5)}`
+            );
+
+          return {
+
+            id:
+              reserva.id,
+
+            negocioId:
+              reserva.negocio_id,
+
+            negocio:
+              negocio?.nombre ||
+              "Negocio",
+
+            servicio:
+              reserva.servicios
+                ?.nombre ||
+              "Servicio",
+
+            precio:
+              reserva.servicios
+                ?.precio ??
+              null,
+
+            duracion:
+              reserva.servicios
+                ?.duracion ??
+              null,
+
+            fecha:
+              reserva.fecha,
+
+            hora:
+              String(
+                reserva.hora ||
+                ""
+              ).slice(
+                0,
+                5
+              ),
+
+            comentario:
+              reserva.comentario ||
+              "",
+
+            estado:
+              reserva.estado ||
+              "Pendiente",
+
+            fechaHora
+
+          };
+
+        }
       );
 
-    const fechaHora =
-      new Date(`${reserva.fecha}T${reserva.hora}`);
+  ReservaYa.reservas =
+    reservas;
 
-    return {
-      id: reserva.id,
-      negocio_id: reserva.negocio_id,
-      servicio_id: reserva.servicio_id,
-
-      negocio:
-        negocio?.nombre || "Negocio",
-
-      servicio:
-        reserva.servicios?.nombre || "Servicio",
-
-      fecha:
-        reserva.fecha,
-
-      hora:
-        reserva.hora,
-
-      comentario:
-        reserva.comentario || "",
-
-      estado:
-        reserva.estado,
-
-      fechaHora:
-        fechaHora
-    };
-
-  });
-
-  let reservasFiltradas;
-
-  if (tipo === "proximas") {
-
-    reservasFiltradas =
-      ReservaYa.reservas.filter(reserva => {
+  const filtradas =
+    reservas.filter(
+      reserva => {
 
         const estado =
-          String(reserva.estado || "").toLowerCase();
+          String(
+            reserva.estado
+          ).toLowerCase();
+
+        const finalizada =
+          [
+            "cancelada",
+            "completada",
+            "completed",
+            "cancelled"
+          ].includes(
+            estado
+          );
+
+        if (
+          tipo ===
+          "proximas"
+        ) {
+
+          return (
+            reserva.fechaHora >=
+              ahora &&
+            !finalizada
+          );
+
+        }
 
         return (
-          reserva.fechaHora >= ahora &&
-          estado !== "cancelada" &&
-          estado !== "completada"
+          reserva.fechaHora <
+            ahora ||
+          finalizada
         );
 
-      });
+      }
+    );
 
-  } else {
+  if (!filtradas.length) {
 
-    reservasFiltradas =
-      ReservaYa.reservas.filter(reserva => {
+    contenedor.innerHTML = `
 
-        const estado =
-          String(reserva.estado || "").toLowerCase();
+      <div style="
+        text-align:center;
+        padding:50px 20px;
+      ">
 
-        return (
-          reserva.fechaHora < ahora ||
-          estado === "cancelada" ||
-          estado === "completada"
-        );
+        <div style="
+          font-size:48px
+        ">
+          ${
+            tipo ===
+            "proximas"
+              ? "📅"
+              : "🗂️"
+          }
+        </div>
 
-      });
+        <h3>
+          ${
+            tipo ===
+            "proximas"
+              ? "No tienes próximas reservas"
+              : "No tienes historial todavía"
+          }
+        </h3>
+
+        <p style="
+          color:#727887;
+          margin-top:8px
+        ">
+          ${
+            tipo ===
+            "proximas"
+              ? "Cuando reserves una cita aparecerá aquí."
+              : "Tus reservas anteriores aparecerán aquí."
+          }
+        </p>
+
+      </div>
+
+    `;
+
+    return;
 
   }
 
   contenedor.innerHTML =
-
-    reservasFiltradas.length
-
-      ? reservasFiltradas.map(reserva => `
-
-          <article class="reservation-card">
-
-            <h3>
-              ${escaparHTML(reserva.negocio)}
-            </h3>
-
-            <div class="reservation-meta">
-
-              📋 ${escaparHTML(
-                reserva.servicio
-              )}
-
-              <br>
-
-              📅 ${escaparHTML(
-                reserva.fecha
-              )}
-
-              <br>
-
-              🕐 ${escaparHTML(
-                reserva.hora
-              )}
-
-              <br>
-
-              💬 ${
-                reserva.comentario
-                  ? escaparHTML(reserva.comentario)
-                  : "Sin comentario"
-              }
-
-              <br>
-📌 ${escaparHTML(
-  reserva.estado
-)}
-
-</div>
-
-<div style="
-  display:flex;
-  gap:10px;
-  margin-top:15px;
-">
-
-  <button
-    class="secondary-button"
-    onclick="verDetallesReserva('${reserva.id}')"
-  >
-    Ver detalles
-  </button>
-
-  ${
-    String(reserva.estado || "").toLowerCase() !== "cancelada"
-      ? `
-        <button
-          class="secondary-button"
-          onclick="cancelarReserva('${reserva.id}')"
-        >
-          Cancelar
-        </button>
-      `
-      : ""
-  }
-
-</div>
-
-</article>
-
-        `).join("")
-
-      : `
-
-        <div style="
-          text-align:center;
-          padding:60px 20px;
-        ">
-
-          <div style="font-size:50px">
-            📅
-          </div>
-
-          <h3>
-            ${
-              tipo === "proximas"
-                ? "No tienes reservas próximas"
-                : "No tienes historial"
-            }
-          </h3>
-
-          <p style="
-            color:#727887;
-            margin-top:7px;
-          ">
-            ${
-              tipo === "proximas"
-                ? "Cuando hagas una reserva aparecerá aquí."
-                : "Tus reservas anteriores aparecerán aquí."
-            }
-          </p>
-
-        </div>
-
-      `;
+    filtradas
+      .map(
+        crearTarjetaReserva
+      )
+      .join("");
 
 }
 
-async function verDetallesReserva(id) {
+
+/* =====================================================
+   TARJETA RESERVA
+===================================================== */
+
+function crearTarjetaReserva(
+  reserva
+) {
+
+  const estado =
+    String(
+      reserva.estado ||
+      "Pendiente"
+    );
+
+  const estadoLower =
+    estado.toLowerCase();
+
+  const cancelada =
+    [
+      "cancelada",
+      "cancelled"
+    ].includes(
+      estadoLower
+    );
+
+  const fechaBonita =
+    formatearFecha(
+      reserva.fecha
+    );
+
+  return `
+
+    <article
+      class="reservation-card"
+      style="
+        padding:18px;
+        border-radius:18px;
+        border:1px solid #eceef3;
+        margin-bottom:14px;
+        background:white;
+      "
+    >
+
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        gap:12px;
+      ">
+
+        <div>
+
+          <strong style="
+            font-size:17px;
+          ">
+            ${escaparHTML(
+              reserva.negocio
+            )}
+          </strong>
+
+          <div style="
+            margin-top:6px;
+            color:#727887;
+          ">
+            🛠️
+            ${escaparHTML(
+              reserva.servicio
+            )}
+          </div>
+
+        </div>
+
+        <span style="
+          align-self:flex-start;
+          padding:5px 9px;
+          border-radius:20px;
+          background:${
+            cancelada
+              ? "#fbeaea"
+              : "#eef8f1"
+          };
+          color:${
+            cancelada
+              ? "#c94b4b"
+              : "#198754"
+          };
+          font-size:11px;
+          font-weight:700;
+        ">
+          ${escaparHTML(
+            estado
+          )}
+        </span>
+
+      </div>
+
+      <div style="
+        margin-top:16px;
+        display:grid;
+        gap:7px;
+        color:#444;
+      ">
+
+        <div>
+          📅
+          ${fechaBonita}
+        </div>
+
+        <div>
+          🕐
+          ${escaparHTML(
+            reserva.hora
+          )}
+        </div>
+
+        ${
+          reserva.duracion
+            ? `
+              <div>
+                ⏱️
+                ${Number(
+                  reserva.duracion
+                )} min
+              </div>
+            `
+            : ""
+        }
+
+        ${
+          reserva.precio !== null
+            ? `
+              <div>
+                💰
+                ${formatearPrecio(
+                  reserva.precio
+                )}
+              </div>
+            `
+            : ""
+        }
+
+        ${
+          reserva.comentario
+            ? `
+              <div style="
+                color:#727887;
+                margin-top:4px;
+              ">
+                💬
+                ${escaparHTML(
+                  reserva.comentario
+                )}
+              </div>
+            `
+            : ""
+        }
+
+      </div>
+
+      <div style="
+        display:flex;
+        gap:8px;
+        margin-top:16px;
+      ">
+
+        <button
+          class="secondary-button"
+          onclick="
+            verDetallesReserva(
+              '${reserva.id}'
+            )
+          "
+        >
+          Ver detalles
+        </button>
+
+        ${
+          !cancelada &&
+          reserva.fechaHora >=
+            new Date()
+            ? `
+              <button
+                class="secondary-button"
+                onclick="
+                  cancelarReserva(
+                    '${reserva.id}'
+                  )
+                "
+              >
+                Cancelar
+              </button>
+            `
+            : ""
+        }
+
+      </div>
+
+    </article>
+
+  `;
+
+}
+
+
+/* =====================================================
+   DETALLES RESERVA
+===================================================== */
+
+async function verDetallesReserva(
+  id
+) {
+
+  let reserva =
+    ReservaYa.reservas.find(
+      r => r.id === id
+    );
+
+  if (!reserva) {
+
+    const {
+      data
+    } =
+      await supabaseClient
+        .from("Citas")
+        .select(`
+          *,
+          servicios (
+            nombre,
+            precio,
+            duracion
+          )
+        `)
+        .eq(
+          "id",
+          id
+        )
+        .maybeSingle();
+
+    if (!data) {
+
+      mostrarToast(
+        "No se encontró la reserva."
+      );
+
+      return;
+
+    }
+
+    const negocio =
+      ReservaYa.negocios.find(
+        n =>
+          n.id ===
+          data.negocio_id
+      );
+
+    reserva = {
+
+      id:
+        data.id,
+
+      negocio:
+        negocio?.nombre ||
+        "Negocio",
+
+      servicio:
+        data.servicios
+          ?.nombre ||
+        "Servicio",
+
+      precio:
+        data.servicios
+          ?.precio ??
+        null,
+
+      duracion:
+        data.servicios
+          ?.duracion ??
+        null,
+
+      fecha:
+        data.fecha,
+
+      hora:
+        String(
+          data.hora || ""
+        ).slice(
+          0,
+          5
+        ),
+
+      comentario:
+        data.comentario ||
+        "",
+
+      estado:
+        data.estado ||
+        "Pendiente"
+
+    };
+
+  }
+
+  abrirModal(`
+
+    <div>
+
+      <h2>
+        📅 Detalles de reserva
+      </h2>
+
+      <div style="
+        margin-top:20px;
+        display:grid;
+        gap:12px;
+      ">
+
+        <div>
+          <strong>
+            🏢 Negocio
+          </strong>
+
+          <div style="
+            color:#727887;
+            margin-top:4px;
+          ">
+            ${escaparHTML(
+              reserva.negocio
+            )}
+          </div>
+        </div>
+
+        <div>
+          <strong>
+            🛠️ Servicio
+          </strong>
+
+          <div style="
+            color:#727887;
+            margin-top:4px;
+          ">
+            ${escaparHTML(
+              reserva.servicio
+            )}
+          </div>
+        </div>
+
+        <div>
+          <strong>
+            📅 Fecha
+          </strong>
+
+          <div style="
+            color:#727887;
+            margin-top:4px;
+          ">
+            ${formatearFecha(
+              reserva.fecha
+            )}
+          </div>
+        </div>
+
+        <div>
+          <strong>
+            🕐 Hora
+          </strong>
+
+          <div style="
+            color:#727887;
+            margin-top:4px;
+          ">
+            ${escaparHTML(
+              reserva.hora
+            )}
+          </div>
+        </div>
+
+        ${
+          reserva.duracion
+            ? `
+              <div>
+                <strong>
+                  ⏱️ Duración
+                </strong>
+
+                <div style="
+                  color:#727887;
+                  margin-top:4px;
+                ">
+                  ${Number(
+                    reserva.duracion
+                  )} minutos
+                </div>
+              </div>
+            `
+            : ""
+        }
+
+        ${
+          reserva.precio !== null
+            ? `
+              <div>
+                <strong>
+                  💰 Precio
+                </strong>
+
+                <div style="
+                  color:#727887;
+                  margin-top:4px;
+                ">
+                  ${formatearPrecio(
+                    reserva.precio
+                  )}
+                </div>
+              </div>
+            `
+            : ""
+        }
+
+        ${
+          reserva.comentario
+            ? `
+              <div>
+                <strong>
+                  💬 Comentario
+                </strong>
+
+                <div style="
+                  color:#727887;
+                  margin-top:4px;
+                ">
+                  ${escaparHTML(
+                    reserva.comentario
+                  )}
+                </div>
+              </div>
+            `
+            : ""
+        }
+
+        <div>
+
+          <strong>
+            Estado
+          </strong>
+
+          <div style="
+            margin-top:5px;
+            font-weight:700;
+          ">
+            ${escaparHTML(
+              reserva.estado
+            )}
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  `);
+
+}
+
+
+/* =====================================================
+   CANCELAR RESERVA
+===================================================== */
+
+async function cancelarReserva(
+  id
+) {
+
+  if (!ReservaYa.usuario) {
+
+    mostrarToast(
+      t("loginRequired")
+    );
+
+    return;
+
+  }
 
   const reserva =
     ReservaYa.reservas.find(
       r => r.id === id
     );
 
-  if (!reserva) {
-    mostrarToast("No se encontró la reserva.");
-    return;
-  }
-
-  abrirModal(`
-    <h2>
-      Detalles de la reserva
-    </h2>
-
-    <div style="
-      margin-top:20px;
-      line-height:1.8;
-    ">
-
-      <strong>
-        🏢 Negocio
-      </strong>
-
-      <br>
-
-      ${escaparHTML(reserva.negocio)}
-
-      <br><br>
-
-      <strong>
-        📋 Servicio
-      </strong>
-
-      <br>
-
-      ${escaparHTML(reserva.servicio)}
-
-      <br><br>
-
-      <strong>
-        📅 Fecha
-      </strong>
-
-      <br>
-
-      ${escaparHTML(reserva.fecha)}
-
-      <br><br>
-
-      <strong>
-        🕐 Hora
-      </strong>
-
-      <br>
-
-      ${escaparHTML(reserva.hora)}
-
-      <br><br>
-
-      <strong>
-        💬 Comentario
-      </strong>
-
-      <br>
-
-      ${
-        reserva.comentario
-          ? escaparHTML(reserva.comentario)
-          : "Sin comentario"
-      }
-
-      <br><br>
-
-      <strong>
-        📌 Estado
-      </strong>
-
-      <br>
-
-      ${escaparHTML(reserva.estado)}
-
-    </div>
-  `);
-}
-
-
-async function cancelarReserva(id) {
-
-  if (!ReservaYa.usuario) {
-    mostrarToast("Debes iniciar sesión.");
-    return;
-  }
-
   const confirmar =
-    confirm("¿Quieres cancelar esta reserva?");
+    window.confirm(
+      `¿Quieres cancelar esta reserva${
+        reserva?.negocio
+          ? ` con ${reserva.negocio}`
+          : ""
+      }?`
+    );
 
-  if (!confirmar) return;
+  if (!confirmar) {
+    return;
+  }
 
-  const { error } = await supabaseClient
-    .from("Citas")
-    .update({
-      estado: "Cancelada"
-    })
-    .eq("id", id)
-    .eq("usuario", ReservaYa.usuario.id);
+  const {
+    error
+  } =
+    await supabaseClient
+      .from("Citas")
+      .update({
+
+        estado:
+          "Cancelada"
+
+      })
+      .eq(
+        "id",
+        id
+      )
+      .eq(
+        "usuario",
+        ReservaYa.usuario.id
+      );
 
   if (error) {
+
     console.error(
       "Error cancelando reserva:",
       error
@@ -2258,33 +3964,49 @@ async function cancelarReserva(id) {
     );
 
     return;
+
+  }
+
+  const local =
+    ReservaYa.reservas.find(
+      r => r.id === id
+    );
+
+  if (local) {
+    local.estado =
+      "Cancelada";
   }
 
   mostrarToast(
-    "Reserva cancelada correctamente."
+    t("reservationCancelled")
   );
 
   await mostrarReservas(
-    "proximas",
-    document.querySelector(
-      ".reservation-tabs button.active"
-    )
+    "proximas"
   );
+
 }
+
 
 /* =====================================================
    NAVEGACIÓN
 ===================================================== */
 
-function cambiarVista(nombre, boton = null) {
+function cambiarVista(
+  nombre,
+  boton = null
+) {
 
   document
-    .querySelectorAll(".view")
-    .forEach(view => {
-
-      view.classList.remove("active");
-
-    });
+    .querySelectorAll(
+      ".view"
+    )
+    .forEach(
+      view =>
+        view.classList.remove(
+          "active"
+        )
+    );
 
   const vista =
     document.getElementById(
@@ -2292,47 +4014,75 @@ function cambiarVista(nombre, boton = null) {
     );
 
   if (vista) {
-
-    vista.classList.add("active");
-
+    vista.classList.add(
+      "active"
+    );
   }
 
   document
-    .querySelectorAll(".bottom-nav button")
-    .forEach(btn =>
-      btn.classList.remove("active")
+    .querySelectorAll(
+      ".bottom-nav button"
+    )
+    .forEach(
+      btn =>
+        btn.classList.remove(
+          "active"
+        )
     );
 
   if (boton) {
 
-    boton.classList.add("active");
+    boton.classList.add(
+      "active"
+    );
 
   } else {
 
-    const nav =
-      document.querySelector(
+    document
+      .querySelector(
         `.bottom-nav button[data-view="${nombre}"]`
+      )
+      ?.classList.add(
+        "active"
       );
-
-    nav?.classList.add("active");
 
   }
 
-  if (nombre === "favorites") {
+  if (
+    nombre ===
+    "favorites"
+  ) {
 
     renderizarFavoritos();
 
   }
 
-  if (nombre === "reservations") {
+  if (
+    nombre ===
+    "reservations"
+  ) {
 
-    mostrarReservas("proximas");
+    mostrarReservas(
+      "proximas"
+    );
+
+  }
+
+  if (
+    nombre ===
+    "business"
+  ) {
+
+    cargarDatosPanelNegocio();
 
   }
 
   window.scrollTo({
+
     top: 0,
+
     behavior: "smooth"
+
   });
 
 }
@@ -2340,7 +4090,9 @@ function cambiarVista(nombre, boton = null) {
 
 function irInicio() {
 
-  cambiarVista("home");
+  cambiarVista(
+    "home"
+  );
 
 }
 
@@ -2349,20 +4101,28 @@ function irInicio() {
    MODAL
 ===================================================== */
 
-function abrirModal(html, accionCerrar = null) {
+function abrirModal(
+  html,
+  accionCerrar = null
+) {
 
   const overlay =
-    document.getElementById("modalOverlay");
+    document.getElementById(
+      "modalOverlay"
+    );
 
   const content =
-    document.getElementById("modalContent");
+    document.getElementById(
+      "modalContent"
+    );
 
-  if (!overlay || !content) return;
+  if (!overlay || !content) {
+    return;
+  }
 
   const accionX =
-    accionCerrar
-      ? accionCerrar
-      : "cerrarModal()";
+    accionCerrar ||
+    "cerrarModal()";
 
   content.innerHTML = `
 
@@ -2374,6 +4134,8 @@ function abrirModal(html, accionCerrar = null) {
         height:35px;
         border-radius:50%;
         background:#f0f2f7;
+        border:none;
+        cursor:pointer;
       "
       aria-label="Cerrar"
     >
@@ -2384,24 +4146,34 @@ function abrirModal(html, accionCerrar = null) {
 
   `;
 
-  overlay.classList.remove("hidden");
+  overlay.classList.remove(
+    "hidden"
+  );
 
 }
 
-function cerrarModal(event) {
+
+function cerrarModal(
+  event
+) {
 
   if (
     event &&
-    event.target !== event.currentTarget
+    event.target !==
+      event.currentTarget
   ) {
+
     return;
+
   }
 
   document
     .getElementById(
       "modalOverlay"
     )
-    ?.classList.add("hidden");
+    ?.classList.add(
+      "hidden"
+    );
 
 }
 
@@ -2414,39 +4186,74 @@ function abrirPremium() {
 
   abrirModal(`
 
-    <div style="text-align:center">
+    <div style="
+      text-align:center;
+    ">
 
-      <div style="font-size:55px">
+      <div style="
+        font-size:55px;
+      ">
         🚀
       </div>
 
-      <h2 style="margin-top:10px">
+      <span style="
+        display:inline-block;
+        margin-top:10px;
+        padding:5px 10px;
+        border-radius:20px;
+        background:#111827;
+        color:white;
+        font-size:11px;
+        font-weight:700;
+      ">
+        PREMIUM
+      </span>
+
+      <h2 style="
+        margin-top:12px;
+      ">
         ReservaYa Business
       </h2>
 
       <p style="
         color:#727887;
-        margin-top:10px;
-        line-height:1.6;
+        line-height:1.5;
       ">
-        Estamos preparando herramientas
-        avanzadas para que los negocios
-        puedan crecer dentro de ReservaYa.
+        Herramientas para que tu negocio
+        consiga más visibilidad y tome
+        mejores decisiones.
       </p>
 
       <div style="
         text-align:left;
-        margin-top:22px;
+        margin-top:20px;
         display:grid;
-        gap:10px;
+        gap:12px;
       ">
 
-        <div>📍 Mayor visibilidad</div>
-        <div>📊 Estadísticas avanzadas</div>
-        <div>📣 Promociones</div>
-        <div>👥 Gestión de empleados</div>
-        <div>🏢 Gestión de sucursales</div>
-        <div>🚀 Posicionamiento destacado</div>
+        <div>
+          ✨ Mayor visibilidad
+        </div>
+
+        <div>
+          📊 Estadísticas avanzadas
+        </div>
+
+        <div>
+          🎯 ReservaYa Pulse
+        </div>
+
+        <div>
+          📣 Promociones
+        </div>
+
+        <div>
+          📈 Herramientas de crecimiento
+        </div>
+
+        <div>
+          🌎 Mayor exposición
+        </div>
 
       </div>
 
@@ -2456,10 +4263,13 @@ function abrirPremium() {
           width:100%;
           margin-top:22px;
         "
-        onclick="mostrarToast('Esta función estará disponible próximamente.')"
+        onclick="
+          mostrarToast(
+            'La suscripción Premium estará disponible próximamente.'
+          )
+        "
       >
-        Próximamente
-
+        🚀 Próximamente
       </button>
 
     </div>
@@ -2470,213 +4280,1197 @@ function abrirPremium() {
 
 
 /* =====================================================
-   FUNCIONES PREPARADAS
+   BUSINESS
 ===================================================== */
-
-function buscarCercanos() {
-
-  mostrarToast(
-    "La búsqueda por ubicación estará disponible al conectar geolocalización."
-  );
-
-}
-
-
-function abrirNotificaciones() {
-
-  mostrarToast(
-    "Centro de notificaciones preparado para la siguiente versión."
-  );
-
-}
-
-
-function abrirMenuUsuario() {
-
-  cambiarVista("profile");
-
-}
 
 async function abrirPanelNegocio() {
 
   if (!ReservaYa.usuario) {
-    mostrarToast("Debes iniciar sesión.");
-    return;
-  }
-   
-  if (ReservaYa.negocioActual) {
-  cambiarVista("business");
-  await cargarDatosPanelNegocio();
-  return;
-}
 
-  mostrarToast("Todavía no tienes un negocio registrado.");
-}
-async function cargarDatosPanelNegocio() {
+    mostrarToast(
+      "Debes iniciar sesión."
+    );
 
-  if (!ReservaYa.usuario || !ReservaYa.negocioActual) {
     return;
+
   }
 
-  const negocioId = ReservaYa.negocioActual.id;
+  if (
+    !ReservaYa.negocioActual
+  ) {
 
-  const { data: reservas, error } = await supabaseClient
-    .from("Citas")
-    .select("*")
-    .eq("negocio_id", negocioId);
+    await detectarNegocioUsuario();
+
+  }
+
+  if (
+    ReservaYa.negocioActual
+  ) {
+
+    cambiarVista(
+      "business"
+    );
+
+    await cargarDatosPanelNegocio();
+
+    return;
+
+  }
+
+  mostrarToast(
+    "Todavía no tienes un negocio registrado."
+  );
+
+}
+
+
+/* =====================================================
+   DETECTAR NEGOCIO
+===================================================== */
+
+async function detectarNegocioUsuario() {
+
+  if (!ReservaYa.usuario) {
+
+    ReservaYa.negocioActual =
+      null;
+
+    return null;
+
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("negocios")
+      .select("*")
+      .eq(
+        "usuario_id",
+        ReservaYa.usuario.id
+      )
+      .maybeSingle();
 
   if (error) {
-    console.error("Error cargando reservas del negocio:", error);
-    mostrarToast("No se pudieron cargar las reservas.");
+
+    console.error(
+      "Error buscando negocio:",
+      error
+    );
+
+    ReservaYa.negocioActual =
+      null;
+
+    return null;
+
+  }
+
+  ReservaYa.negocioActual =
+    data || null;
+
+  return data || null;
+
+}
+
+
+/* =====================================================
+   DASHBOARD BUSINESS
+===================================================== */
+
+async function cargarDatosPanelNegocio() {
+
+  if (
+    !ReservaYa.usuario
+  ) {
+
+    return;
+
+  }
+
+  if (
+    !ReservaYa.negocioActual
+  ) {
+
+    await detectarNegocioUsuario();
+
+  }
+
+  if (
+    !ReservaYa.negocioActual
+  ) {
+
+    return;
+
+  }
+
+  const negocioId =
+    ReservaYa.negocioActual.id;
+
+  const [
+    citasResponse,
+    serviciosResponse
+  ] =
+    await Promise.all([
+
+      supabaseClient
+        .from("Citas")
+        .select("*")
+        .eq(
+          "negocio_id",
+          negocioId
+        ),
+
+      supabaseClient
+        .from("servicios")
+        .select("*")
+        .eq(
+          "negocio_id",
+          negocioId
+        )
+
+    ]);
+
+  if (
+    citasResponse.error
+  ) {
+
+    console.error(
+      "Error cargando citas Business:",
+      citasResponse.error
+    );
+
+    mostrarToast(
+      "No se pudieron cargar los datos del negocio."
+    );
+
+    return;
+
+  }
+
+  const reservas =
+    citasResponse.data ||
+    [];
+
+  const servicios =
+    serviciosResponse.data ||
+    [];
+
+  const totalReservas =
+    reservas.length;
+
+  const clientesUnicos =
+    new Set(
+      reservas
+        .map(
+          reserva =>
+            reserva.usuario
+        )
+        .filter(Boolean)
+    );
+
+  const totalClientes =
+    clientesUnicos.size;
+
+  const pendientes =
+    reservas.filter(
+      r =>
+        ![
+          "Cancelada",
+          "Completada"
+        ].includes(
+          String(
+            r.estado
+          )
+        )
+    ).length;
+
+  const completadas =
+    reservas.filter(
+      r =>
+        String(
+          r.estado
+        ).toLowerCase() ===
+        "completada"
+    ).length;
+
+  const canceladas =
+    reservas.filter(
+      r =>
+        String(
+          r.estado
+        ).toLowerCase() ===
+        "cancelada"
+    ).length;
+
+  const ingresos =
+    calcularIngresos(
+      reservas,
+      servicios
+    );
+
+  actualizarElemento(
+    "statReservations",
+    totalReservas
+  );
+
+  actualizarElemento(
+    "statClients",
+    totalClientes
+  );
+
+  actualizarElemento(
+    "statViews",
+    "—"
+  );
+
+  actualizarElemento(
+    "statRating",
+    Number(
+      ReservaYa.negocioActual.rating ||
+      0
+    ).toFixed(1)
+  );
+
+  actualizarElemento(
+    "businessPendingReservations",
+    pendientes
+  );
+
+  actualizarElemento(
+    "businessCompletedReservations",
+    completadas
+  );
+
+  actualizarElemento(
+    "businessCancelledReservations",
+    canceladas
+  );
+
+  actualizarElemento(
+    "businessRevenue",
+    formatearPrecio(
+      ingresos
+    )
+  );
+
+  actualizarElemento(
+    "businessName",
+    ReservaYa.negocioActual.nombre
+  );
+
+  actualizarElemento(
+    "businessDescription",
+    ReservaYa.negocioActual.descripcion ||
+      "Administra tu negocio desde ReservaYa."
+  );
+
+  renderizarResumenBusiness(
+    reservas,
+    servicios
+  );
+
+  renderizarPulse(
+    reservas,
+    servicios
+  );
+
+}
+
+
+/* =====================================================
+   INGRESOS
+===================================================== */
+
+function calcularIngresos(
+  reservas,
+  servicios
+) {
+
+  let total = 0;
+
+  reservas.forEach(
+    reserva => {
+
+      const estado =
+        String(
+          reserva.estado ||
+          ""
+        ).toLowerCase();
+
+      if (
+        [
+          "cancelada",
+          "cancelled"
+        ].includes(
+          estado
+        )
+      ) {
+
+        return;
+
+      }
+
+      const servicio =
+        servicios.find(
+          s =>
+            s.id ===
+            reserva.servicio_id
+        );
+
+      if (servicio) {
+
+        total +=
+          Number(
+            servicio.precio || 0
+          );
+
+      }
+
+    }
+  );
+
+  return total;
+
+}
+
+
+/* =====================================================
+   RESUMEN BUSINESS
+===================================================== */
+
+function renderizarResumenBusiness(
+  reservas,
+  servicios
+) {
+
+  const contenedor =
+    document.getElementById(
+      "businessSummary"
+    );
+
+  if (!contenedor) return;
+
+  const pendientes =
+    reservas.filter(
+      r =>
+        ![
+          "Cancelada",
+          "Completada"
+        ].includes(
+          String(
+            r.estado
+          )
+        )
+    );
+
+  const proximas =
+    pendientes
+      .map(
+        r => {
+
+          return {
+
+            ...r,
+
+            fechaHora:
+              new Date(
+                `${r.fecha}T${String(
+                  r.hora ||
+                  "00:00"
+                ).slice(0,5)}`
+              )
+
+          };
+
+        }
+      )
+      .filter(
+        r =>
+          r.fechaHora >=
+          new Date()
+      )
+      .sort(
+        (
+          a,
+          b
+        ) =>
+          a.fechaHora -
+          b.fechaHora
+      )
+      .slice(0, 5);
+
+  if (!proximas.length) {
+
+    contenedor.innerHTML = `
+
+      <div style="
+        padding:25px;
+        border:1px solid #eee;
+        border-radius:16px;
+        text-align:center;
+        color:#727887;
+      ">
+
+        <div style="
+          font-size:35px;
+        ">
+          📅
+        </div>
+
+        <strong>
+          No tienes próximas reservas
+        </strong>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+  contenedor.innerHTML = proximas
+    .map(
+      reserva => {
+
+        const servicio =
+          servicios.find(
+            s =>
+              s.id ===
+              reserva.servicio_id
+          );
+
+        return `
+
+          <div style="
+            padding:15px;
+            border-bottom:1px solid #eee;
+            display:flex;
+            justify-content:space-between;
+            gap:15px;
+          ">
+
+            <div>
+
+              <strong>
+                ${escaparHTML(
+                  reserva.nombre_cliente ||
+                  "Cliente"
+                )}
+              </strong>
+
+              <div style="
+                color:#727887;
+                margin-top:4px;
+              ">
+                ${
+                  servicio?.nombre ||
+                  "Servicio"
+                }
+              </div>
+
+            </div>
+
+            <div style="
+              text-align:right;
+              white-space:nowrap;
+            ">
+
+              <strong>
+                ${formatearFecha(
+                  reserva.fecha
+                )}
+              </strong>
+
+              <div style="
+                color:#727887;
+                margin-top:4px;
+              ">
+                ${escaparHTML(
+                  String(
+                    reserva.hora ||
+                    ""
+                  ).slice(0,5)
+                )}
+              </div>
+
+            </div>
+
+          </div>
+
+        `;
+
+      }
+    )
+    .join("");
+
+}
+
+
+/* =====================================================
+   RESERVAYA PULSE
+===================================================== */
+
+function analizarPulse(
+  reservas,
+  servicios
+) {
+
+  const ahora =
+    new Date();
+
+  const hace30Dias =
+    new Date(
+      ahora.getTime() -
+      30 *
+        24 *
+        60 *
+        60 *
+        1000
+    );
+
+  const hace60Dias =
+    new Date(
+      ahora.getTime() -
+      60 *
+        24 *
+        60 *
+        60 *
+        1000
+    );
+
+  const recientes =
+    reservas.filter(
+      reserva => {
+
+        const fecha =
+          new Date(
+            `${reserva.fecha}T12:00:00`
+          );
+
+        return fecha >=
+          hace30Dias;
+
+      }
+    );
+
+  const anteriores =
+    reservas.filter(
+      reserva => {
+
+        const fecha =
+          new Date(
+            `${reserva.fecha}T12:00:00`
+          );
+
+        return (
+          fecha >= hace60Dias &&
+          fecha < hace30Dias
+        );
+
+      }
+    );
+
+  const crecimiento =
+    anteriores.length
+      ? (
+          (
+            recientes.length -
+            anteriores.length
+          ) /
+          anteriores.length
+        ) *
+        100
+      : null;
+
+  const servicioContador =
+    {};
+
+  reservas.forEach(
+    reserva => {
+
+      if (
+        !reserva.servicio_id
+      ) return;
+
+      servicioContador[
+        reserva.servicio_id
+      ] =
+        (
+          servicioContador[
+            reserva.servicio_id
+          ] ||
+          0
+        ) + 1;
+
+    }
+  );
+
+  let servicioTop =
+    null;
+
+  Object.entries(
+    servicioContador
+  ).forEach(
+    ([
+      id,
+      cantidad
+    ]) => {
+
+      if (
+        !servicioTop ||
+        cantidad >
+          servicioTop.cantidad
+      ) {
+
+        servicioTop = {
+
+          id,
+
+          cantidad
+
+        };
+
+      }
+
+    }
+  );
+
+  const servicioTopInfo =
+    servicios.find(
+      servicio =>
+        servicio.id ===
+        servicioTop?.id
+    );
+
+  const horarios = {};
+
+  reservas.forEach(
+    reserva => {
+
+      if (!reserva.hora) {
+        return;
+      }
+
+      const hora =
+        String(
+          reserva.hora
+        ).slice(0,5);
+
+      horarios[hora] =
+        (
+          horarios[hora] ||
+          0
+        ) + 1;
+
+    }
+  );
+
+  let horaTop =
+    null;
+
+  Object.entries(
+    horarios
+  ).forEach(
+    ([
+      hora,
+      cantidad
+    ]) => {
+
+      if (
+        !horaTop ||
+        cantidad >
+          horaTop.cantidad
+      ) {
+
+        horaTop = {
+
+          hora,
+
+          cantidad
+
+        };
+
+      }
+
+    }
+  );
+
+  return {
+
+    total:
+      reservas.length,
+
+    recientes:
+      recientes.length,
+
+    anteriores:
+      anteriores.length,
+
+    crecimiento,
+
+    servicioTop:
+      servicioTopInfo
+        ? {
+            nombre:
+              servicioTopInfo.nombre,
+
+            cantidad:
+              servicioTop.cantidad
+          }
+        : null,
+
+    horaTop
+
+  };
+
+}
+
+
+function renderizarPulse(
+  reservas,
+  servicios
+) {
+
+  const contenedor =
+    document.getElementById(
+      "pulseContainer"
+    );
+
+  if (!contenedor) {
     return;
   }
 
-  const totalReservas = reservas?.length || 0;
+  const datos =
+    analizarPulse(
+      reservas,
+      servicios
+    );
 
-  const clientesUnicos = new Set(
-    (reservas || [])
-      .map(reserva => reserva.usuario)
-      .filter(Boolean)
-  );
+  const tarjetas = [];
 
-  const totalClientes = clientesUnicos.size;
+  if (
+    datos.crecimiento !== null
+  ) {
 
-  const statReservations =
-    document.getElementById("statReservations");
+    const positivo =
+      datos.crecimiento >= 0;
 
-  const statClients =
-    document.getElementById("statClients");
+    tarjetas.push(`
 
-  if (statReservations) {
-    statReservations.textContent = totalReservas;
+      <div style="
+        padding:16px;
+        border-radius:16px;
+        background:#f8f9fb;
+      ">
+
+        <div style="
+          font-size:25px;
+        ">
+          ${
+            positivo
+              ? "📈"
+              : "📉"
+          }
+        </div>
+
+        <strong>
+          ${
+            positivo
+              ? "Tu demanda está creciendo"
+              : "Tu demanda bajó"
+          }
+        </strong>
+
+        <div style="
+          margin-top:5px;
+          color:#727887;
+        ">
+          ${
+            positivo
+              ? "+"
+              : ""
+          }${datos.crecimiento.toFixed(
+            0
+          )}%
+          frente al período anterior.
+        </div>
+
+      </div>
+
+    `);
+
+  } else {
+
+    tarjetas.push(`
+
+      <div style="
+        padding:16px;
+        border-radius:16px;
+        background:#f8f9fb;
+      ">
+
+        <div style="
+          font-size:25px;
+        ">
+          🌱
+        </div>
+
+        <strong>
+          ReservaYa está aprendiendo
+        </strong>
+
+        <div style="
+          margin-top:5px;
+          color:#727887;
+        ">
+          Necesitamos más reservas
+          para detectar tendencias.
+        </div>
+
+      </div>
+
+    `);
+
   }
 
-  if (statClients) {
-    statClients.textContent = totalClientes;
+  if (
+    datos.servicioTop
+  ) {
+
+    tarjetas.push(`
+
+      <div style="
+        padding:16px;
+        border-radius:16px;
+        background:#f8f9fb;
+      ">
+
+        <div style="
+          font-size:25px;
+        ">
+          🏆
+        </div>
+
+        <strong>
+          Servicio más reservado
+        </strong>
+
+        <div style="
+          margin-top:5px;
+          color:#727887;
+        ">
+          ${escaparHTML(
+            datos.servicioTop.nombre
+          )}
+
+          ·
+
+          ${datos.servicioTop.cantidad}
+          reservas
+        </div>
+
+      </div>
+
+    `);
+
   }
 
-  console.log(
-    "Datos del negocio cargados:",
-    reservas
-  );
+  if (
+    datos.horaTop
+  ) {
+
+    tarjetas.push(`
+
+      <div style="
+        padding:16px;
+        border-radius:16px;
+        background:#f8f9fb;
+      ">
+
+        <div style="
+          font-size:25px;
+        ">
+          🔥
+        </div>
+
+        <strong>
+          Hora con más reservas
+        </strong>
+
+        <div style="
+          margin-top:5px;
+          color:#727887;
+        ">
+          ${datos.horaTop.hora}
+          ·
+          ${datos.horaTop.cantidad}
+          reservas
+        </div>
+
+      </div>
+
+    `);
+
+  }
+
+  tarjetas.push(`
+
+    <div style="
+      padding:16px;
+      border-radius:16px;
+      background:#f8f9fb;
+    ">
+
+      <div style="
+        font-size:25px;
+      ">
+        💡
+      </div>
+
+      <strong>
+        Oportunidad
+      </strong>
+
+      <div style="
+        margin-top:5px;
+        color:#727887;
+      ">
+
+        Usa tus horarios disponibles
+        para atraer nuevos clientes.
+
+      </div>
+
+    </div>
+
+  `);
+
+  contenedor.innerHTML = `
+
+    <div style="
+      display:grid;
+      gap:10px;
+    ">
+
+      ${tarjetas.join("")}
+
+    </div>
+
+  `;
+
 }
 
-function editarPerfil() {
 
-  mostrarToast(
-    "Editor de perfil preparado."
-  );
-
-}
-
-
-function abrirConfiguracion() {
-
-  mostrarToast(
-    "Configuración preparada."
-  );
-
-}
-
+/* =====================================================
+   SERVICIOS BUSINESS
+===================================================== */
 
 async function administrarServicios() {
 
-  if (!ReservaYa.usuario) {
-    mostrarToast("Debes iniciar sesión.");
+  if (
+    !ReservaYa.usuario ||
+    !ReservaYa.negocioActual
+  ) {
+
+    mostrarToast(
+      "Necesitas un negocio registrado."
+    );
+
     return;
+
   }
 
-  if (!ReservaYa.negocioActual) {
-    mostrarToast("No se encontró tu negocio.");
-    return;
-  }
-
-  const { data: servicios, error } = await supabaseClient
-    .from("servicios")
-    .select("*")
-    .eq("negocio_id", ReservaYa.negocioActual.id)
-    .order("nombre", { ascending: true });
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("servicios")
+      .select("*")
+      .eq(
+        "negocio_id",
+        ReservaYa.negocioActual.id
+      )
+      .order(
+        "nombre",
+        {
+          ascending: true
+        }
+      );
 
   if (error) {
-    console.error("Error cargando servicios:", error);
-    mostrarToast("No se pudieron cargar los servicios.");
+
+    console.error(
+      "Error cargando servicios:",
+      error
+    );
+
+    mostrarToast(
+      "No se pudieron cargar los servicios."
+    );
+
     return;
+
   }
 
-  const lista = servicios || [];
+  const servicios =
+    data || [];
 
-  const contenido = `
-    <h2>🛠️ Servicios de ${escaparHTML(ReservaYa.negocioActual.nombre)}</h2>
+  abrirModal(`
 
-    <p style="margin-top:10px;">
-      Estos son los servicios registrados actualmente.
-    </p>
+    <div>
 
-    <div style="margin-top:20px;">
+      <h2>
+        🛠️ Servicios
+      </h2>
+
+      <p style="
+        color:#727887;
+        margin:5px 0 18px;
+      ">
+        Servicios configurados para tu negocio.
+      </p>
+
       ${
-        lista.length
-          ? lista.map(servicio => `
-              <div class="reservation-card" style="margin-bottom:12px;">
-                <h3>${escaparHTML(servicio.nombre || "Servicio")}</h3>
+        servicios.length
 
-                <div class="reservation-meta">
-                  💰 ${
-                    servicio.precio !== null &&
-                    servicio.precio !== undefined
-                      ? "$" + Number(servicio.precio).toLocaleString("es-CO")
-                      : "Precio no definido"
-                  }
+          ? servicios
+              .map(
+                servicio => `
 
-                  <br>
+                  <div style="
+                    padding:14px 0;
+                    border-bottom:1px solid #eee;
+                    display:flex;
+                    justify-content:space-between;
+                    gap:10px;
+                  ">
 
-                  ⏱️ ${
-                    servicio.duracion
-                      ? escaparHTML(String(servicio.duracion)) + " minutos"
-                      : "Duración no definida"
-                  }
-                </div>
-              </div>
-            `).join("")
+                    <div>
+
+                      <strong>
+                        ${escaparHTML(
+                          servicio.nombre
+                        )}
+                      </strong>
+
+                      ${
+                        servicio.duracion
+                          ? `
+                            <div style="
+                              color:#727887;
+                              margin-top:4px;
+                              font-size:13px;
+                            ">
+                              ⏱️
+                              ${Number(
+                                servicio.duracion
+                              )} min
+                            </div>
+                          `
+                          : ""
+                      }
+
+                    </div>
+
+                    <strong>
+                      ${
+                        servicio.precio !== null
+                          ? formatearPrecio(
+                              servicio.precio
+                            )
+                          : "—"
+                      }
+                    </strong>
+
+                  </div>
+
+                `
+              )
+              .join("")
+
           : `
-              <div class="empty-state">
-                <span>🛠️</span>
-                <h3>No tienes servicios registrados</h3>
-                <p>Cuando agregues servicios aparecerán aquí.</p>
+
+              <div style="
+                padding:30px;
+                text-align:center;
+                color:#727887;
+              ">
+
+                🛠️
+
+                <p>
+                  Todavía no tienes servicios configurados.
+                </p>
+
               </div>
+
             `
       }
-    </div>
-  `;
 
-  abrirModal(contenido);
+    </div>
+
+  `);
+
 }
 
 
+/* =====================================================
+   HORARIOS BUSINESS
+===================================================== */
+
 async function administrarHorarios() {
 
-  if (!ReservaYa.usuario) {
-    mostrarToast("Debes iniciar sesión.");
+  if (
+    !ReservaYa.usuario ||
+    !ReservaYa.negocioActual
+  ) {
+
+    mostrarToast(
+      "Necesitas un negocio registrado."
+    );
+
     return;
+
   }
 
-  if (!ReservaYa.negocioActual) {
-    mostrarToast("No se encontró tu negocio.");
-    return;
-  }
-
-  const negocioId = ReservaYa.negocioActual.id;
-
-  const { data: horarios, error } = await supabaseClient
-    .from("reserva_horarios")
-    .select("*")
-    .eq("negocio_id", negocioId)
-    .order("dia_semana", { ascending: true });
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("reserva_horarios")
+      .select("*")
+      .eq(
+        "negocio_id",
+        ReservaYa.negocioActual.id
+      )
+      .order(
+        "dia_semana",
+        {
+          ascending: true
+        }
+      );
 
   if (error) {
-    console.error("Error cargando horarios:", error);
-    mostrarToast("No se pudieron cargar los horarios.");
+
+    console.error(
+      "Error cargando horarios:",
+      error
+    );
+
+    mostrarToast(
+      "No se pudieron cargar los horarios."
+    );
+
     return;
+
   }
+
+  const horarios =
+    data || [];
 
   const dias = [
     "Domingo",
@@ -2688,123 +5482,241 @@ async function administrarHorarios() {
     "Sábado"
   ];
 
-  const horariosGuardados = horarios || [];
+  const contenido =
+    dias
+      .map(
+        (
+          dia,
+          indice
+        ) => {
 
-  const contenido = `
-    <h2>🕐 Horarios de ${escaparHTML(ReservaYa.negocioActual.nombre)}</h2>
+          const horario =
+            horarios.find(
+              h =>
+                Number(
+                  h.dia_semana
+                ) === indice
+            );
 
-    <p style="margin-top:10px;">
-      Configura cuándo está abierto tu negocio.
-    </p>
+          const abierto =
+            horario
+              ? Boolean(
+                  horario.abierto
+                )
+              : false;
 
-    <div style="margin-top:20px;">
+          const apertura =
+            horario?.hora_apertura
+              ? horario.hora_apertura.slice(
+                  0,
+                  5
+                )
+              : "06:30";
 
-      ${dias.map((dia, indice) => {
+          const cierre =
+            horario?.hora_cierre
+              ? horario.hora_cierre.slice(
+                  0,
+                  5
+                )
+              : "20:00";
 
-        const horario = horariosGuardados.find(
-          h => Number(h.dia_semana) === indice
-        );
-
-        const abierto = horario
-          ? horario.abierto
-          : false;
-
-        const apertura = horario?.hora_apertura || "10:00";
-        const cierre = horario?.hora_cierre || "20:00";
-
-        return `
-          <div class="reservation-card" style="margin-bottom:12px;">
+          return `
 
             <div style="
-              display:flex;
-              justify-content:space-between;
-              align-items:center;
-              gap:10px;
+              padding:15px 0;
+              border-bottom:1px solid #eee;
             ">
 
-              <strong>${dia}</strong>
+              <div style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+              ">
 
-              <label style="display:flex; align-items:center; gap:8px;">
-                <input
-                  type="checkbox"
-                  id="horarioAbierto${indice}"
-                  ${abierto ? "checked" : ""}
-                  onchange="alternarHorario(${indice})"
-                >
-                Abierto
-              </label>
+                <strong>
+                  ${dia}
+                </strong>
+
+                <label style="
+                  display:flex;
+                  gap:7px;
+                  align-items:center;
+                  font-size:13px;
+                ">
+
+                  <input
+                    id="horarioAbierto${indice}"
+                    type="checkbox"
+                    ${
+                      abierto
+                        ? "checked"
+                        : ""
+                    }
+                    onchange="
+                      alternarHorario(
+                        ${indice}
+                      )
+                    "
+                  >
+
+                  Abierto
+
+                </label>
+
+              </div>
+
+              <div
+                id="horarioCampos${indice}"
+                style="
+                  display:${
+                    abierto
+                      ? "grid"
+                      : "none"
+                  };
+                  grid-template-columns:
+                    1fr 1fr;
+                  gap:10px;
+                  margin-top:10px;
+                "
+              >
+
+                <div>
+
+                  <small>
+                    Apertura
+                  </small>
+
+                  <input
+                    id="horaApertura${indice}"
+                    type="time"
+                    value="${apertura}"
+                    style="
+                      width:100%;
+                      padding:10px;
+                      border:1px solid #ddd;
+                      border-radius:9px;
+                      margin-top:4px;
+                    "
+                  >
+
+                </div>
+
+                <div>
+
+                  <small>
+                    Cierre
+                  </small>
+
+                  <input
+                    id="horaCierre${indice}"
+                    type="time"
+                    value="${cierre}"
+                    style="
+                      width:100%;
+                      padding:10px;
+                      border:1px solid #ddd;
+                      border-radius:9px;
+                      margin-top:4px;
+                    "
+                  >
+
+                </div>
+
+              </div>
 
             </div>
 
-            <div
-              id="horarioCampos${indice}"
-              style="
-                display:${abierto ? "grid" : "none"};
-                grid-template-columns:1fr 1fr;
-                gap:10px;
-                margin-top:12px;
-              "
-            >
+          `;
 
-              <div>
-                <label>Apertura</label>
-                <input
-                  type="time"
-                  id="horaApertura${indice}"
-                  value="${apertura}"
-                >
-              </div>
+        }
+      )
+      .join("");
 
-              <div>
-                <label>Cierre</label>
-                <input
-                  type="time"
-                  id="horaCierre${indice}"
-                  value="${cierre}"
-                >
-              </div>
+  abrirModal(`
 
-            </div>
+    <div>
 
-          </div>
-        `;
+      <h2>
+        🕐 Horarios
+      </h2>
 
-      }).join("")}
+      <p style="
+        color:#727887;
+        margin:5px 0 15px;
+      ">
+        Configura cuándo puede recibir reservas tu negocio.
+      </p>
+
+      ${contenido}
+
+      <button
+        class="primary-button"
+        style="
+          width:100%;
+          margin-top:18px;
+        "
+        onclick="
+          guardarHorarios()
+        "
+      >
+        💾 Guardar horarios
+      </button>
 
     </div>
 
-    <button
-      class="primary-button"
-      onclick="guardarHorarios()"
-      style="width:100%; margin-top:10px;"
-    >
-      💾 Guardar horarios
-    </button>
-  `;
+  `);
 
-  abrirModal(contenido);
 }
-function alternarHorario(dia) {
+
+
+function alternarHorario(
+  dia
+) {
 
   const checkbox =
-    document.getElementById(`horarioAbierto${dia}`);
+    document.getElementById(
+      `horarioAbierto${dia}`
+    );
 
   const campos =
-    document.getElementById(`horarioCampos${dia}`);
+    document.getElementById(
+      `horarioCampos${dia}`
+    );
 
-  if (!checkbox || !campos) return;
-
-  campos.style.display =
-    checkbox.checked ? "grid" : "none";
-}
-async function guardarHorarios() {
-
-  if (!ReservaYa.usuario || !ReservaYa.negocioActual) {
-    mostrarToast("No se encontró tu negocio.");
+  if (!checkbox || !campos) {
     return;
   }
 
-  const negocioId = ReservaYa.negocioActual.id;
+  campos.style.display =
+    checkbox.checked
+      ? "grid"
+      : "none";
+
+}
+
+
+/* =====================================================
+   GUARDAR HORARIOS
+===================================================== */
+
+async function guardarHorarios() {
+
+  if (
+    !ReservaYa.usuario ||
+    !ReservaYa.negocioActual
+  ) {
+
+    mostrarToast(
+      "Necesitas un negocio registrado."
+    );
+
+    return;
+
+  }
+
+  const negocioId =
+    ReservaYa.negocioActual.id;
 
   const dias = [
     "Domingo",
@@ -2818,58 +5730,141 @@ async function guardarHorarios() {
 
   const horarios = [];
 
-  for (let dia = 0; dia < 7; dia++) {
+  for (
+    let dia = 0;
+    dia < 7;
+    dia++
+  ) {
 
     const abierto =
-      document.getElementById(`horarioAbierto${dia}`)?.checked || false;
+      document.getElementById(
+        `horarioAbierto${dia}`
+      )?.checked ||
+      false;
 
     const horaApertura =
-      document.getElementById(`horaApertura${dia}`)?.value || null;
+      document.getElementById(
+        `horaApertura${dia}`
+      )?.value ||
+      null;
 
     const horaCierre =
-      document.getElementById(`horaCierre${dia}`)?.value || null;
+      document.getElementById(
+        `horaCierre${dia}`
+      )?.value ||
+      null;
 
-    if (abierto && (!horaApertura || !horaCierre)) {
-      mostrarToast(`Completa el horario de ${dias[dia]}.`);
+    if (
+      abierto &&
+      (
+        !horaApertura ||
+        !horaCierre
+      )
+    ) {
+
+      mostrarToast(
+        `Completa el horario de ${dias[dia]}.`
+      );
+
       return;
+
+    }
+
+    if (
+      abierto &&
+      horaApertura >=
+        horaCierre
+    ) {
+
+      mostrarToast(
+        `El horario de ${dias[dia]} no es válido.`
+      );
+
+      return;
+
     }
 
     horarios.push({
-      negocio_id: negocioId,
-      dia_semana: dia,
-      abierto: abierto,
-      hora_apertura: abierto ? horaApertura : null,
-      hora_cierre: abierto ? horaCierre : null
+
+      negocio_id:
+        negocioId,
+
+      dia_semana:
+        dia,
+
+      abierto:
+        abierto,
+
+      hora_apertura:
+        abierto
+          ? horaApertura
+          : null,
+
+      hora_cierre:
+        abierto
+          ? horaCierre
+          : null
+
     });
+
   }
 
-  // Eliminar horarios anteriores del negocio
-  const { error: errorEliminar } = await supabaseClient
-    .from("reserva_horarios")
-    .delete()
-    .eq("negocio_id", negocioId);
+  const {
+    error:
+      errorEliminar
+  } =
+    await supabaseClient
+      .from(
+        "reserva_horarios"
+      )
+      .delete()
+      .eq(
+        "negocio_id",
+        negocioId
+      );
 
-  if (errorEliminar) {
+  if (
+    errorEliminar
+  ) {
+
     console.error(
-      "Error eliminando horarios anteriores:",
       errorEliminar
     );
-    mostrarToast("No se pudieron actualizar los horarios.");
+
+    mostrarToast(
+      "No se pudieron actualizar los horarios."
+    );
+
     return;
+
   }
 
-  // Guardar los nuevos horarios
-  const { error: errorGuardar } = await supabaseClient
-    .from("reserva_horarios")
-    .insert(horarios);
+  const {
+    error:
+      errorGuardar
+  } =
+    await supabaseClient
+      .from(
+        "reserva_horarios"
+      )
+      .insert(
+        horarios
+      );
 
-  if (errorGuardar) {
+  if (
+    errorGuardar
+  ) {
+
     console.error(
-      "Error guardando horarios:",
       errorGuardar
     );
-    mostrarToast("No se pudieron guardar los horarios.");
+
+    mostrarToast(
+      "No se pudieron guardar los horarios."
+    );
+
     return;
+
   }
 
   cerrarModal();
@@ -2877,302 +5872,1585 @@ async function guardarHorarios() {
   mostrarToast(
     `Horarios de ${ReservaYa.negocioActual.nombre} guardados correctamente.`
   );
-}
-
-function administrarEmpleados() {
-
-  mostrarToast(
-    "Gestión de empleados preparada."
-  );
-
-}
-
-
-function abrirEstadisticas() {
-
-  mostrarToast(
-    "Estadísticas avanzadas preparadas."
-  );
-
-}
-
-
-function mostrarTodasCategorias() {
-
-  cambiarVista("search");
 
 }
 
 
 /* =====================================================
-   USUARIO
+   EMPLEADOS
+===================================================== */
+
+function administrarEmpleados() {
+
+  abrirModal(`
+
+    <div style="
+      text-align:center;
+    ">
+
+      <div style="
+        font-size:50px;
+      ">
+        👥
+      </div>
+
+      <h2>
+        Gestión de empleados
+      </h2>
+
+      <p style="
+        color:#727887;
+        line-height:1.5;
+      ">
+        Esta herramienta está preparada
+        para una futura versión de
+        ReservaYa Business.
+      </p>
+
+      <div style="
+        margin-top:18px;
+        padding:15px;
+        border-radius:14px;
+        background:#f8f9fb;
+        text-align:left;
+      ">
+
+        <strong>
+          Próximamente podrás:
+        </strong>
+
+        <div style="
+          margin-top:10px;
+          display:grid;
+          gap:7px;
+          color:#555;
+        ">
+
+          <div>
+            👤 Gestionar empleados
+          </div>
+
+          <div>
+            📅 Asignar horarios
+          </div>
+
+          <div>
+            🛠️ Asignar servicios
+          </div>
+
+          <div>
+            📊 Ver rendimiento
+          </div>
+
+        </div>
+
+      </div>
+
+      <p style="
+        font-size:12px;
+        color:#999;
+        margin-top:15px;
+      ">
+        Requiere nuevas estructuras de datos
+        en Supabase para funcionar completamente.
+      </p>
+
+    </div>
+
+  `);
+
+}
+
+
+/* =====================================================
+   ESTADÍSTICAS
+===================================================== */
+
+async function abrirEstadisticas() {
+
+  if (
+    !ReservaYa.negocioActual
+  ) {
+
+    mostrarToast(
+      "No hay un negocio seleccionado."
+    );
+
+    return;
+
+  }
+
+  const negocioId =
+    ReservaYa.negocioActual.id;
+
+  const {
+    data: reservas,
+    error
+  } =
+    await supabaseClient
+      .from("Citas")
+      .select("*")
+      .eq(
+        "negocio_id",
+        negocioId
+      );
+
+  if (error) {
+
+    console.error(
+      error
+    );
+
+    mostrarToast(
+      "No se pudieron cargar las estadísticas."
+    );
+
+    return;
+
+  }
+
+  const total =
+    (reservas || []).length;
+
+  const canceladas =
+    (reservas || []).filter(
+      r =>
+        String(
+          r.estado
+        ).toLowerCase() ===
+        "cancelada"
+    ).length;
+
+  const completadas =
+    (reservas || []).filter(
+      r =>
+        String(
+          r.estado
+        ).toLowerCase() ===
+        "completada"
+    ).length;
+
+  const clientes =
+    new Set(
+      (reservas || [])
+        .map(
+          r => r.usuario
+        )
+        .filter(Boolean)
+    ).size;
+
+  const tasaCancelacion =
+    total
+      ? (
+          canceladas /
+          total
+        ) *
+        100
+      : 0;
+
+  abrirModal(`
+
+    <div>
+
+      <h2>
+        📊 Estadísticas
+      </h2>
+
+      <p style="
+        color:#727887;
+      ">
+        Datos calculados a partir de
+        tus reservas actuales.
+      </p>
+
+      <div style="
+        display:grid;
+        grid-template-columns:
+          repeat(2,1fr);
+        gap:10px;
+        margin-top:20px;
+      ">
+
+        ${crearStatModal(
+          "📅",
+          total,
+          "Reservas"
+        )}
+
+        ${crearStatModal(
+          "👥",
+          clientes,
+          "Clientes"
+        )}
+
+        ${crearStatModal(
+          "✅",
+          completadas,
+          "Completadas"
+        )}
+
+        ${crearStatModal(
+          "❌",
+          canceladas,
+          "Canceladas"
+        )}
+
+      </div>
+
+      <div style="
+        margin-top:15px;
+        padding:15px;
+        border-radius:14px;
+        background:#f8f9fb;
+      ">
+
+        <strong>
+          Tasa de cancelación
+        </strong>
+
+        <div style="
+          font-size:25px;
+          font-weight:800;
+          margin-top:5px;
+        ">
+          ${tasaCancelacion.toFixed(
+            1
+          )}%
+        </div>
+
+      </div>
+
+    </div>
+
+  `);
+
+}
+
+
+function crearStatModal(
+  icono,
+  valor,
+  titulo
+) {
+
+  return `
+
+    <div style="
+      padding:15px;
+      border:1px solid #eee;
+      border-radius:14px;
+    ">
+
+      <div style="
+        font-size:25px;
+      ">
+        ${icono}
+      </div>
+
+      <strong style="
+        font-size:24px;
+        display:block;
+        margin-top:5px;
+      ">
+        ${valor}
+      </strong>
+
+      <small style="
+        color:#727887;
+      ">
+        ${titulo}
+      </small>
+
+    </div>
+
+  `;
+
+}
+
+
+/* =====================================================
+   PERFIL / USUARIO
 ===================================================== */
 
 async function actualizarInterfazUsuario() {
 
-  const loginBox = document.getElementById("loginBox");
+  const loginBox =
+    document.getElementById(
+      "loginBox"
+    );
 
-  const profileCard = document.querySelector(
-    "#view-profile .profile-card"
-  );
+  const profileCard =
+    document.querySelector(
+      "#view-profile .profile-card"
+    );
 
-  const settingsList = document.querySelector(
-    "#view-profile .settings-list"
-  );
+  const settingsList =
+    document.querySelector(
+      "#view-profile .settings-list"
+    );
 
-  // No hay usuario conectado
   if (!ReservaYa.usuario) {
 
     if (loginBox) {
-      loginBox.style.display = "block";
+      loginBox.style.display =
+        "block";
     }
 
     if (profileCard) {
-      profileCard.style.display = "none";
+      profileCard.style.display =
+        "none";
     }
 
     if (settingsList) {
-      settingsList.style.display = "none";
+      settingsList.style.display =
+        "none";
     }
 
-    ReservaYa.negocioActual = null;
+    ReservaYa.negocioActual =
+      null;
+
+    actualizarBotonBusiness(
+      null
+    );
 
     return;
+
   }
 
-  // Hay usuario conectado
   if (loginBox) {
-    loginBox.style.display = "none";
+    loginBox.style.display =
+      "none";
   }
 
   if (profileCard) {
-    profileCard.style.display = "block";
+    profileCard.style.display =
+      "block";
   }
 
   if (settingsList) {
-    settingsList.style.display = "block";
+    settingsList.style.display =
+      "block";
   }
 
   const nombre =
     ReservaYa.usuario.nombre ||
-    ReservaYa.usuario.user_metadata?.nombre ||
+    ReservaYa.usuario.user_metadata
+      ?.nombre ||
     ReservaYa.usuario.email ||
     "Usuario";
 
   const inicial =
-    nombre.charAt(0).toUpperCase();
+    nombre
+      .charAt(0)
+      .toUpperCase();
 
   const userAvatar =
-    document.getElementById("userAvatar");
+    document.getElementById(
+      "userAvatar"
+    );
 
   const profileAvatar =
-    document.getElementById("profileAvatar");
+    document.getElementById(
+      "profileAvatar"
+    );
 
   const profileName =
-    document.getElementById("profileName");
+    document.getElementById(
+      "profileName"
+    );
 
   const profileEmail =
-    document.getElementById("profileEmail");
+    document.getElementById(
+      "profileEmail"
+    );
 
   if (userAvatar) {
-    userAvatar.textContent = inicial;
+    userAvatar.textContent =
+      inicial;
   }
 
   if (profileAvatar) {
-    profileAvatar.textContent = inicial;
+    profileAvatar.textContent =
+      inicial;
   }
 
   if (profileName) {
-    profileName.textContent = nombre;
+    profileName.textContent =
+      nombre;
   }
 
   if (profileEmail) {
     profileEmail.textContent =
-      ReservaYa.usuario.email || "-";
+      ReservaYa.usuario.email ||
+      "-";
   }
 
-  // Buscar si el usuario tiene un negocio
-  const { data: negocio, error } = await supabaseClient
-    .from("negocios")
-    .select("*")
-    .eq("usuario_id", ReservaYa.usuario.id)
-    .maybeSingle();
+  await detectarNegocioUsuario();
 
-  if (error) {
-    console.error(
-      "Error buscando negocio del usuario:",
-      error
+  actualizarBotonBusiness(
+    ReservaYa.negocioActual
+  );
+
+}
+
+
+function actualizarBotonBusiness(
+  negocio
+) {
+
+  const boton =
+    document.getElementById(
+      "businessProfileButton"
     );
 
-    ReservaYa.negocioActual = null;
-    return;
-  }
+  const texto =
+    document.getElementById(
+      "businessProfileButtonText"
+    );
+
+  if (!boton) return;
 
   if (negocio) {
 
-    ReservaYa.negocioActual = negocio;
+    boton.style.display =
+      "flex";
 
-    console.log(
-      "Negocio del usuario encontrado:",
-      negocio
-    );
+    if (texto) {
+
+      texto.textContent =
+        negocio.nombre
+          ? `Business · ${negocio.nombre}`
+          : "ReservaYa Business";
+
+    }
 
   } else {
 
-    ReservaYa.negocioActual = null;
+    boton.style.display =
+      "flex";
 
-    console.log(
-      "El usuario no tiene un negocio registrado."
-    );
+    if (texto) {
+
+      texto.textContent =
+        "ReservaYa Business";
+
+    }
+
   }
+
 }
+
+
+/* =====================================================
+   SESIÓN
+===================================================== */
 
 async function restaurarSesion() {
 
-  const { data, error } =
-    await supabaseClient.auth.getSession();
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.auth
+      .getSession();
 
   if (error) {
+
     console.error(
       "Error recuperando sesión:",
       error
     );
+
     return;
+
   }
 
-  if (data.session?.user) {
+  if (
+    data.session?.user
+  ) {
 
     ReservaYa.usuario =
       data.session.user;
 
-     await cargarFavoritos();
-    actualizarInterfazUsuario();
+    await cargarFavoritos();
+
+    await actualizarInterfazUsuario();
 
   } else {
 
-    ReservaYa.usuario = null;
+    ReservaYa.usuario =
+      null;
 
     actualizarInterfazUsuario();
 
   }
+
 }
+
+
+supabaseClient.auth.onAuthStateChange(
+  async (
+    event,
+    session
+  ) => {
+
+    if (
+      event ===
+        "SIGNED_IN" ||
+      event ===
+        "TOKEN_REFRESHED"
+    ) {
+
+      ReservaYa.usuario =
+        session?.user ||
+        null;
+
+      await cargarFavoritos();
+
+      await actualizarInterfazUsuario();
+
+    }
+
+    if (
+      event ===
+      "SIGNED_OUT"
+    ) {
+
+      ReservaYa.usuario =
+        null;
+
+      ReservaYa.favoritos =
+        [];
+
+      ReservaYa.negocioActual =
+        null;
+
+      actualizarInterfazUsuario();
+
+    }
+
+  }
+);
+
+
 restaurarSesion();
 
-// ==========================================
-// CARGAR FAVORITOS DESDE SUPABASE
-// ==========================================
 
-async function cargarFavoritos() {
+/* =====================================================
+   LOGIN
+===================================================== */
 
-  if (!ReservaYa.usuario) {
-    ReservaYa.favoritos = [];
+async function iniciarSesion() {
+
+  const email =
+    document.getElementById(
+      "loginEmail"
+    )?.value.trim();
+
+  const password =
+    document.getElementById(
+      "loginPassword"
+    )?.value;
+
+  if (
+    !email ||
+    !password
+  ) {
+
+    mostrarToast(
+      "Completa correo y contraseña."
+    );
+
     return;
+
   }
 
-  const { data, error } = await supabaseClient
-    .from("reserva_favoritos")
-    .select("negocio_id")
-    .eq("usuario_id", ReservaYa.usuario.id);
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.auth
+      .signInWithPassword({
+
+        email,
+
+        password
+
+      });
 
   if (error) {
-    console.error("Error cargando favoritos:", error);
+
+    console.error(
+      "Error iniciando sesión:",
+      error
+    );
+
+    mostrarToast(
+      "No se pudo iniciar sesión."
+    );
+
     return;
+
   }
 
-  ReservaYa.favoritos = (data || [])
-    .map(favorito => favorito.negocio_id)
-    .filter(Boolean);
+  ReservaYa.usuario =
+    data.user;
 
-  renderizarDestacados();
-  renderizarFavoritos();
+  await cargarFavoritos();
+
+  await actualizarInterfazUsuario();
+
+  mostrarToast(
+    "Sesión iniciada."
+  );
+
+  const loginBox =
+    document.getElementById(
+      "loginBox"
+    );
+
+  if (loginBox) {
+    loginBox.style.display =
+      "none";
+  }
+
+  cambiarVista(
+    "home"
+  );
+
 }
+
+
+/* =====================================================
+   REGISTRO
+===================================================== */
+
+async function registrarse() {
+
+  const email =
+    document.getElementById(
+      "loginEmail"
+    )?.value.trim();
+
+  const password =
+    document.getElementById(
+      "loginPassword"
+    )?.value;
+
+  if (
+    !email ||
+    !password
+  ) {
+
+    mostrarToast(
+      "Completa correo y contraseña."
+    );
+
+    return;
+
+  }
+
+  if (password.length < 6) {
+
+    mostrarToast(
+      "La contraseña debe tener al menos 6 caracteres."
+    );
+
+    return;
+
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.auth
+      .signUp({
+
+        email,
+
+        password
+
+      });
+
+  if (error) {
+
+    console.error(
+      "Error registrando usuario:",
+      error
+    );
+
+    mostrarToast(
+      "No se pudo crear la cuenta."
+    );
+
+    return;
+
+  }
+
+  if (
+    data.user &&
+    !data.session
+  ) {
+
+    mostrarToast(
+      "Cuenta creada. Revisa tu correo para confirmarla."
+    );
+
+  } else {
+
+    ReservaYa.usuario =
+      data.user;
+
+    await actualizarInterfazUsuario();
+
+    mostrarToast(
+      "Cuenta creada correctamente."
+    );
+
+    cambiarVista(
+      "home"
+    );
+
+  }
+
+}
+
+
 /* =====================================================
    CERRAR SESIÓN
 ===================================================== */
+
 async function cerrarSesion() {
 
-  const { error } = await supabaseClient.auth.signOut();
+  const {
+    error
+  } =
+    await supabaseClient.auth
+      .signOut();
 
   if (error) {
-    console.error("Error cerrando sesión:", error);
-    mostrarToast("No se pudo cerrar la sesión.");
+
+    console.error(
+      "Error cerrando sesión:",
+      error
+    );
+
+    mostrarToast(
+      "No se pudo cerrar la sesión."
+    );
+
     return;
+
   }
 
-  ReservaYa.usuario = null;
-  ReservaYa.favoritos = [];
+  ReservaYa.usuario =
+    null;
 
-  localStorage.removeItem("reservaya_favoritos");
+  ReservaYa.favoritos =
+    [];
+
+  ReservaYa.negocioActual =
+    null;
+
+  localStorage.removeItem(
+    "reservaya_favoritos"
+  );
 
   actualizarInterfazUsuario();
 
-  cambiarVista("home");
+  cambiarVista(
+    "home"
+  );
 
-  mostrarToast("Sesión cerrada.");
+  mostrarToast(
+    "Sesión cerrada."
+  );
 
 }
-async function iniciarSesion() {
 
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value;
 
-  if (!email || !password) {
-    mostrarToast("Completa correo y contraseña.");
+/* =====================================================
+   PERFIL
+===================================================== */
+
+function abrirMenuUsuario() {
+
+  cambiarVista(
+    "profile"
+  );
+
+}
+
+
+function editarPerfil() {
+
+  if (!ReservaYa.usuario) {
+
+    mostrarToast(
+      t("loginRequired")
+    );
+
     return;
+
   }
 
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email: email,
-    password: password
-  });
+  const nombreActual =
+    ReservaYa.usuario
+      .user_metadata
+      ?.nombre ||
+    "";
+
+  abrirModal(`
+
+    <div>
+
+      <h2>
+        👤 Mi perfil
+      </h2>
+
+      <p style="
+        color:#727887;
+      ">
+        Información básica de tu cuenta.
+      </p>
+
+      <label style="
+        display:block;
+        margin-top:18px;
+        font-weight:700;
+      ">
+        Nombre
+      </label>
+
+      <input
+        id="profileEditName"
+        value="${escaparHTML(
+          nombreActual
+        )}"
+        style="
+          width:100%;
+          margin-top:6px;
+          padding:12px;
+          border:1px solid #ddd;
+          border-radius:10px;
+        "
+      >
+
+      <button
+        class="primary-button"
+        style="
+          width:100%;
+          margin-top:16px;
+        "
+        onclick="
+          guardarPerfil()
+        "
+      >
+        Guardar
+      </button>
+
+    </div>
+
+  `);
+
+}
+
+
+async function guardarPerfil() {
+
+  const nombre =
+    document.getElementById(
+      "profileEditName"
+    )?.value.trim();
+
+  if (!nombre) {
+
+    mostrarToast(
+      "Escribe tu nombre."
+    );
+
+    return;
+
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.auth
+      .updateUser({
+
+        data: {
+          nombre
+        }
+
+      });
 
   if (error) {
-    console.error("Error iniciando sesión:", error);
-    mostrarToast("No se pudo iniciar sesión.");
+
+    console.error(
+      error
+    );
+
+    mostrarToast(
+      "No se pudo actualizar el perfil."
+    );
+
     return;
+
   }
 
-  ReservaYa.usuario = data.user;
-   
-  await cargarFavoritos();
-   
+  ReservaYa.usuario =
+    data.user;
+
+  cerrarModal();
+
   actualizarInterfazUsuario();
-   
-  mostrarToast("Sesión iniciada.");
 
-  document.getElementById("loginBox").style.display = "none";
+  mostrarToast(
+    "Perfil actualizado."
+  );
 
-  cambiarVista("home");
 }
-async function registrarse() {
 
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value;
 
-  if (!email || !password) {
-    mostrarToast("Completa correo y contraseña.");
+/* =====================================================
+   CONFIGURACIÓN
+===================================================== */
+
+function abrirConfiguracion() {
+
+  abrirModal(`
+
+    <div>
+
+      <h2>
+        ⚙️ Configuración
+      </h2>
+
+      <div style="
+        display:grid;
+        gap:10px;
+        margin-top:20px;
+      ">
+
+        <div style="
+          padding:15px;
+          border:1px solid #eee;
+          border-radius:14px;
+        ">
+
+          <strong>
+            🌐 Idioma
+          </strong>
+
+          <select
+            id="languageSelector"
+            onchange="
+              cambiarIdioma(
+                this.value
+              )
+            "
+            style="
+              display:block;
+              width:100%;
+              margin-top:8px;
+              padding:10px;
+              border:1px solid #ddd;
+              border-radius:9px;
+            "
+          >
+
+            ${Object.entries(
+              IDIOMAS
+            )
+              .map(
+                ([
+                  id,
+                  idioma
+                ]) => `
+
+                  <option
+                    value="${id}"
+                    ${
+                      ReservaYa.idioma ===
+                      id
+                        ? "selected"
+                        : ""
+                    }
+                  >
+                    ${idioma.bandera}
+                    ${idioma.nombre}
+                  </option>
+
+                `
+              )
+              .join("")}
+
+          </select>
+
+        </div>
+
+        <div style="
+          padding:15px;
+          border:1px solid #eee;
+          border-radius:14px;
+        ">
+
+          <strong>
+            🔔 Notificaciones
+          </strong>
+
+          <label style="
+            display:flex;
+            align-items:center;
+            gap:8px;
+            margin-top:10px;
+          ">
+
+            <input
+              type="checkbox"
+              ${
+                ReservaYa.configuracion
+                  .notificacionesActivas
+                  ? "checked"
+                  : ""
+              }
+              onchange="
+                cambiarNotificaciones(
+                  this.checked
+                )
+              "
+            >
+
+            Activadas
+
+          </label>
+
+        </div>
+
+        <div style="
+          padding:15px;
+          border:1px solid #eee;
+          border-radius:14px;
+        ">
+
+          <strong>
+            📍 Ubicación
+          </strong>
+
+          <p style="
+            color:#727887;
+            margin-top:5px;
+            font-size:13px;
+          ">
+            La búsqueda cercana se podrá
+            activar cuando conectemos
+            geolocalización.
+          </p>
+
+          <button
+            class="secondary-button"
+            style="
+              width:100%;
+              margin-top:8px;
+            "
+            onclick="
+              buscarCercanos()
+            "
+          >
+            📍 Buscar cerca de mí
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  `);
+
+}
+
+
+function cambiarNotificaciones(
+  activadas
+) {
+
+  ReservaYa.configuracion
+    .notificacionesActivas =
+    Boolean(
+      activadas
+    );
+
+  localStorage.setItem(
+    "reservaya_notificaciones",
+    String(
+      Boolean(
+        activadas
+      )
+    )
+  );
+
+  mostrarToast(
+    activadas
+      ? "Notificaciones activadas."
+      : "Notificaciones desactivadas."
+  );
+
+}
+
+
+/* =====================================================
+   NOTIFICACIONES
+===================================================== */
+
+function abrirNotificaciones() {
+
+  abrirModal(`
+
+    <div>
+
+      <h2>
+        🔔 Notificaciones
+      </h2>
+
+      <div style="
+        padding:30px;
+        text-align:center;
+        color:#727887;
+      ">
+
+        <div style="
+          font-size:45px;
+        ">
+          🔔
+        </div>
+
+        <p style="
+          margin-top:10px;
+        ">
+          Tu centro de notificaciones
+          está preparado.
+        </p>
+
+        <small>
+          Las notificaciones automáticas
+          requerirán una futura integración.
+        </small>
+
+      </div>
+
+    </div>
+
+  `);
+
+}
+
+
+/* =====================================================
+   CATEGORÍAS
+===================================================== */
+
+function mostrarTodasCategorias() {
+
+  cambiarVista(
+    "search"
+  );
+
+  const select =
+    document.getElementById(
+      "categoryFilter"
+    );
+
+  if (select) {
+    select.value = "";
+  }
+
+  ReservaYa.categoriaActual =
+    "";
+
+  filtrarNegocios();
+
+}
+
+
+/* =====================================================
+   UBICACIÓN
+===================================================== */
+
+function buscarCercanos() {
+
+  if (
+    !navigator.geolocation
+  ) {
+
+    mostrarToast(
+      "Tu dispositivo no permite geolocalización."
+    );
+
     return;
+
   }
 
-  const { data, error } = await supabaseClient.auth.signUp({
-    email: email,
-    password: password
-  });
+  mostrarToast(
+    "Solicitando ubicación..."
+  );
 
-  if (error) {
-    console.error("Error registrando usuario:", error);
-    mostrarToast("No se pudo crear la cuenta.");
-    return;
+  navigator.geolocation.getCurrentPosition(
+
+    position => {
+
+      ReservaYa.configuracion
+        .ubicacionActiva =
+        true;
+
+      localStorage.setItem(
+        "reservaya_ubicacion",
+        JSON.stringify({
+
+          lat:
+            position.coords.latitude,
+
+          lng:
+            position.coords.longitude
+
+        })
+      );
+
+      mostrarToast(
+        "Ubicación activada."
+      );
+
+      /*
+         En V4 la ubicación queda preparada.
+         Para calcular distancias reales entre
+         negocios necesitamos coordenadas
+         lat/lng en la tabla negocios.
+      */
+
+    },
+
+    error => {
+
+      console.warn(
+        "Geolocalización:",
+        error
+      );
+
+      mostrarToast(
+        "No pudimos obtener tu ubicación."
+      );
+
+    },
+
+    {
+
+      enableHighAccuracy:
+        true,
+
+      timeout:
+        10000,
+
+      maximumAge:
+        300000
+
+    }
+
+  );
+
+}
+
+
+/* =====================================================
+   UTILIDADES
+===================================================== */
+
+function obtenerIconoCategoria(
+  categoria
+) {
+
+  return (
+
+    CATEGORIAS.find(
+      c =>
+        c.id ===
+        categoria
+    )?.icono ||
+    "📍"
+
+  );
+
+}
+
+
+function obtenerFechaHoy() {
+
+  const ahora =
+    new Date();
+
+  const año =
+    ahora.getFullYear();
+
+  const mes =
+    String(
+      ahora.getMonth() + 1
+    ).padStart(
+      2,
+      "0"
+    );
+
+  const dia =
+    String(
+      ahora.getDate()
+    ).padStart(
+      2,
+      "0"
+    );
+
+  return `${año}-${mes}-${dia}`;
+
+}
+
+
+function escaparHTML(
+  valor
+) {
+
+  return String(
+    valor ?? ""
+  )
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
+
+}
+
+
+function actualizarElemento(
+  id,
+  valor
+) {
+
+  const elemento =
+    document.getElementById(
+      id
+    );
+
+  if (elemento) {
+
+    elemento.textContent =
+      valor;
+
   }
 
-  if (data.user && !data.session) {
-    mostrarToast("Cuenta creada. Revisa tu correo para confirmarla.");
-  } else {
-    ReservaYa.usuario = data.user;
-    actualizarInterfazUsuario();
-    mostrarToast("Cuenta creada correctamente.");
-    cambiarVista("home");
+}
+
+
+/* =====================================================
+   FORMATO FECHA
+===================================================== */
+
+function formatearFecha(
+  fecha
+) {
+
+  if (!fecha) {
+    return "Fecha no disponible";
   }
+
+  const partes =
+    String(
+      fecha
+    ).split("-");
+
+  if (
+    partes.length !==
+    3
+  ) {
+
+    return fecha;
+
+  }
+
+  const [
+    año,
+    mes,
+    dia
+  ] = partes;
+
+  const date =
+    new Date(
+      Number(año),
+      Number(mes) - 1,
+      Number(dia)
+    );
+
+  try {
+
+    return new Intl.DateTimeFormat(
+      ReservaYa.idioma,
+      {
+
+        year:
+          "numeric",
+
+        month:
+          "long",
+
+        day:
+          "numeric"
+
+      }
+    ).format(
+      date
+    );
+
+  } catch {
+
+    return `${dia}/${mes}/${año}`;
+
+  }
+
+}
+
+
+/* =====================================================
+   FORMATO PRECIO
+===================================================== */
+
+function formatearPrecio(
+  valor
+) {
+
+  const numero =
+    Number(
+      valor
+    );
+
+  if (
+    !Number.isFinite(
+      numero
+    )
+  ) {
+
+    return "—";
+
+  }
+
+  /*
+     V4 utiliza la configuración
+     regional del navegador para
+     mostrar el número.
+
+     Cuando agreguemos moneda real
+     al negocio podremos sustituir
+     esto por moneda/país del negocio.
+  */
+
+  try {
+
+    return new Intl.NumberFormat(
+      obtenerLocale(),
+      {
+
+        maximumFractionDigits:
+          2
+
+      }
+    ).format(
+      numero
+    );
+
+  } catch {
+
+    return String(
+      numero
+    );
+
+  }
+
+}
+
+
+function obtenerLocale() {
+
+  const locales = {
+
+    es:
+      "es-CO",
+
+    en:
+      "en-US",
+
+    pt:
+      "pt-BR",
+
+    fr:
+      "fr-FR",
+
+    de:
+      "de-DE",
+
+    it:
+      "it-IT"
+
+  };
+
+  return (
+    locales[
+      ReservaYa.idioma
+    ] ||
+    "es-CO"
+  );
+
+}
+
+
+/* =====================================================
+   CONTADORES
+===================================================== */
+
+function actualizarContadores() {
+
+  const favoritos =
+    ReservaYa.favoritos.length;
+
+  const favoritosBadge =
+    document.getElementById(
+      "favoritesCount"
+    );
+
+  if (favoritosBadge) {
+
+    favoritosBadge.textContent =
+      favoritos;
+
+    favoritosBadge.style.display =
+      favoritos
+        ? "inline-flex"
+        : "none";
+
+  }
+
 }
 
 
@@ -3182,7 +7460,10 @@ async function registrarse() {
 
 let toastTimer = null;
 
-function mostrarToast(mensaje) {
+
+function mostrarToast(
+  mensaje
+) {
 
   const toast =
     document.getElementById(
@@ -3191,71 +7472,86 @@ function mostrarToast(mensaje) {
 
   if (!toast) return;
 
-  toast.textContent = mensaje;
+  toast.textContent =
+    mensaje;
 
   toast.classList.remove(
     "hidden"
   );
 
-  clearTimeout(toastTimer);
+  clearTimeout(
+    toastTimer
+  );
 
-  toastTimer = setTimeout(() => {
+  toastTimer =
+    setTimeout(
+      () => {
 
-    toast.classList.add(
-      "hidden"
+        toast.classList.add(
+          "hidden"
+        );
+
+      },
+      3000
     );
-
-  }, 3000);
 
 }
 
 
 /* =====================================================
-   UTILIDADES
+   INICIALIZACIÓN EXTRA
 ===================================================== */
 
-function obtenerIconoCategoria(categoria) {
+(function cargarConfiguracionLocal() {
 
-  return (
+  try {
 
-    CATEGORIAS.find(
-      c => c.id === categoria
-    )?.icono || "📍"
+    const notificaciones =
+      localStorage.getItem(
+        "reservaya_notificaciones"
+      );
 
-  );
+    if (
+      notificaciones !==
+      null
+    ) {
 
-}
+      ReservaYa.configuracion
+        .notificacionesActivas =
+        notificaciones ===
+        "true";
+
+    }
+
+    const ubicacion =
+      localStorage.getItem(
+        "reservaya_ubicacion"
+      );
+
+    if (ubicacion) {
+
+      ReservaYa.configuracion
+        .ubicacionActiva =
+        true;
+
+    }
+
+  } catch (error) {
+
+    console.warn(
+      "No se pudo cargar configuración local:",
+      error
+    );
+
+  }
+
+})();
 
 
-function obtenerFechaHoy() {
+/* =====================================================
+   FIN RESERVAYA V4
+===================================================== */
 
-  const ahora = new Date();
-
-  const año =
-    ahora.getFullYear();
-
-  const mes =
-    String(
-      ahora.getMonth() + 1
-    ).padStart(2, "0");
-
-  const dia =
-    String(
-      ahora.getDate()
-    ).padStart(2, "0");
-
-  return `${año}-${mes}-${dia}`;
-
-}
-
-
-function escaparHTML(valor) {
-
-  return String(valor ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-
-}
+console.log(
+  "🚀 ReservaYa V4 cargado correctamente."
+);
