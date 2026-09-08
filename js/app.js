@@ -3267,14 +3267,32 @@ async function mostrarReservas(
                 reserva.negocio_id
             );
 
-          const fechaHora =
-            new Date(
-              `${reserva.fecha}T${String(
-                reserva.hora ||
-                "00:00"
-              ).slice(0,5)}`
-            );
+          const horaReserva =
+  String(
+    reserva.hora ||
+    "00:00"
+  ).slice(0, 5);
 
+const [anio, mes, dia] =
+  String(reserva.fecha)
+    .split("-")
+    .map(Number);
+
+const [hora, minutos] =
+  horaReserva
+    .split(":")
+    .map(Number);
+
+const fechaHora =
+  new Date(
+    anio,
+    mes - 1,
+    dia,
+    hora || 0,
+    minutos || 0,
+    0,
+    0
+  );
           return {
 
             id:
