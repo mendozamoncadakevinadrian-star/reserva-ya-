@@ -1,1185 +1,1191 @@
-<!DOCTYPE html><html lang="es">
+<!DOCTYPE html>
+<html lang="es">
 <head>
-  <meta charset="UTF-8"><meta
-name="viewport"
-content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  <meta charset="UTF-8">
 
-«»
-
-  <title>ReservaYa — Reserva todo en un solo lugar</title><meta
-name="description"
-content="ReservaYa conecta personas con negocios, servicios y profesionales para descubrir, reservar y gestionar citas fácilmente."
-
-«»
-
-  <meta name="theme-color" content="#5b4bff">  <link rel="stylesheet" href="css/app.css">  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body>  <div id="app"><!-- =====================================================
-     TOP BAR
-====================================================== -->
-
-<header class="topbar">
-
-  <div
-    class="brand"
-    onclick="irInicio()"
-    role="button"
-    tabindex="0"
-    aria-label="Ir al inicio"
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
   >
 
-    <div class="brand-logo">
-      R
-    </div>
+  <title>ReservaYa — Reserva todo en un solo lugar</title>
 
-    <div>
-      <strong>ReservaYa</strong>
-      <span>Descubre · Reserva · Gestiona</span>
-    </div>
+  <meta
+    name="description"
+    content="ReservaYa conecta personas con negocios, servicios y profesionales para descubrir, reservar y gestionar citas fácilmente."
+  >
 
-  </div>
+  <meta name="theme-color" content="#5b4bff">
 
+  <link rel="stylesheet" href="css/app.css">
 
-  <div class="header-actions">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
 
-    <button
-      class="icon-button"
-      onclick="abrirNotificaciones()"
-      aria-label="Notificaciones"
-    >
-      🔔
+<body>
 
-      <span
-        id="notificationBadge"
-        class="notification-badge hidden"
+  <div id="app">
+
+    <!-- =====================================================
+         TOP BAR
+    ====================================================== -->
+
+    <header class="topbar">
+
+      <div
+        class="brand"
+        onclick="irInicio()"
+        role="button"
+        tabindex="0"
+        aria-label="Ir al inicio"
       >
-        0
-      </span>
-    </button>
 
-
-    <button
-      class="avatar-button"
-      onclick="abrirMenuUsuario()"
-      aria-label="Mi cuenta"
-    >
-      <span id="userAvatar">?</span>
-    </button>
-
-  </div>
-
-</header>
-
-
-<!-- =====================================================
-     MAIN APP
-====================================================== -->
-
-<main id="mainContent">
-
-
-  <!-- =================================================
-       HOME
-  ================================================== -->
-
-  <section
-    id="view-home"
-    class="view active"
-  >
-
-    <!-- HERO -->
-
-    <div class="hero">
-
-      <div class="hero-content">
-
-        <span class="hero-label">
-          ✨ ReservaYa · Tu mundo de reservas
-        </span>
-
-        <h1>
-          Encuentra lo que necesitas.
-          <span>Reserva al instante.</span>
-        </h1>
-
-        <p>
-          Descubre negocios, profesionales y servicios cerca de ti.
-          Compara opciones, guarda tus favoritos y gestiona tus reservas
-          desde un solo lugar.
-        </p>
-
-
-        <!-- BUSCADOR PRINCIPAL -->
-
-        <div class="main-search">
-
-          <span class="search-icon">
-            🔎
-          </span>
-
-          <input
-            id="globalSearch"
-            type="search"
-            placeholder="¿Qué necesitas reservar?"
-            autocomplete="off"
-            oninput="buscarGlobal(this.value)"
-            aria-label="Buscar negocios y servicios"
-          >
-
-          <button
-            onclick="ejecutarBusqueda()"
-          >
-            Buscar
-          </button>
-
+        <div class="brand-logo">
+          R
         </div>
 
-
-        <!-- SUGERENCIAS -->
-
-        <div
-          id="searchSuggestions"
-          class="search-suggestions hidden"
-        ></div>
-
-
-        <!-- ACCESOS RÁPIDOS -->
-
-        <div
-          style="
-            display:flex;
-            flex-wrap:wrap;
-            gap:10px;
-            margin-top:18px;
-          "
-        >
-
-          <button
-            class="secondary-button"
-            onclick="buscarCercanos()"
-          >
-            📍 Cerca de mí
-          </button>
-
-          <button
-            class="secondary-button"
-            onclick="cambiarVista('favorites')"
-          >
-            ♡ Mis favoritos
-          </button>
-
-          <button
-            class="secondary-button"
-            onclick="cambiarVista('reservations')"
-          >
-            📅 Mis reservas
-          </button>
-
+        <div>
+          <strong>ReservaYa</strong>
+          <span>Descubre · Reserva · Gestiona</span>
         </div>
 
       </div>
 
-    </div>
-
-
-    <!-- =================================================
-         EXPLORACIÓN
-    ================================================== -->
-
-    <section class="section">
-
-      <div class="section-heading">
-
-        <div>
-          <span class="eyebrow">
-            Explora
-          </span>
-
-          <h2>
-            ¿Qué estás buscando?
-          </h2>
-        </div>
+      <div class="header-actions">
 
         <button
-          class="text-button"
-          onclick="mostrarTodasCategorias()"
+          class="icon-button"
+          onclick="abrirNotificaciones()"
+          aria-label="Notificaciones"
         >
-          Ver todas
-        </button>
+          🔔
 
-      </div>
-
-
-      <div
-        id="categoryGrid"
-        class="category-grid"
-      ></div>
-
-    </section>
-
-
-    <!-- =================================================
-         NEGOCIOS CERCANOS
-    ================================================== -->
-
-    <section class="section">
-
-      <div class="section-heading">
-
-        <div>
-          <span class="eyebrow">
-            Cerca de ti
-          </span>
-
-          <h2>
-            Negocios que puedes descubrir
-          </h2>
-        </div>
-
-        <button
-          class="text-button"
-          onclick="buscarCercanos()"
-        >
-          Ver más
-        </button>
-
-      </div>
-
-
-      <div
-        id="nearbyBusinesses"
-        class="business-grid"
-      ></div>
-
-    </section>
-
-
-    <!-- =================================================
-         DESTACADOS
-    ================================================== -->
-
-    <section class="section">
-
-      <div class="section-heading">
-
-        <div>
-          <span class="eyebrow">
-            Selección ReservaYa
-          </span>
-
-          <h2>
-            Negocios destacados
-          </h2>
-        </div>
-
-      </div>
-
-
-      <div
-        id="featuredBusinesses"
-        class="business-grid"
-      ></div>
-
-    </section>
-
-
-    <!-- =================================================
-         EXPERIENCIA RESERVAYA
-    ================================================== -->
-
-    <section class="section">
-
-      <div class="section-heading">
-
-        <div>
-          <span class="eyebrow">
-            Una nueva forma
-          </span>
-
-          <h2>
-            Todo tu mundo de reservas
-          </h2>
-        </div>
-
-      </div>
-
-
-      <div
-        style="
-          display:grid;
-          grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-          gap:14px;
-        "
-      >
-
-        <div class="stat-card">
-
-          <span>🔎</span>
-
-          <strong
-            style="font-size:20px;"
+          <span
+            id="notificationBadge"
+            class="notification-badge hidden"
           >
-            Descubre
-          </strong>
-
-          <small>
-            Encuentra negocios y servicios que se adapten a lo que necesitas.
-          </small>
-
-        </div>
-
-
-        <div class="stat-card">
-
-          <span>📅</span>
-
-          <strong
-            style="font-size:20px;"
-          >
-            Reserva
-          </strong>
-
-          <small>
-            Elige servicio, fecha y hora y realiza tu reserva fácilmente.
-          </small>
-
-        </div>
-
-
-        <div class="stat-card">
-
-          <span>♡</span>
-
-          <strong
-            style="font-size:20px;"
-          >
-            Guarda
-          </strong>
-
-          <small>
-            Ten tus negocios favoritos siempre disponibles.
-          </small>
-
-        </div>
-
-
-        <div class="stat-card">
-
-          <span>⚡</span>
-
-          <strong
-            style="font-size:20px;"
-          >
-            Gestiona
-          </strong>
-
-          <small>
-            Consulta tus próximas citas y administra tu actividad.
-          </small>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- =================================================
-         BUSINESS / PREMIUM
-    ================================================== -->
-
-    <section class="premium-banner">
-
-      <div>
-
-        <span class="premium-icon">
-          🚀
-        </span>
-
-        <h2>
-          Lleva tu negocio al siguiente nivel
-        </h2>
-
-        <p>
-          ReservaYa Business está creando una nueva forma para que
-          los negocios gestionen reservas, servicios, horarios,
-          clientes, visibilidad y crecimiento desde un solo lugar.
-        </p>
-
-      </div>
-
-
-      <button
-        onclick="abrirPremium()"
-      >
-        Conocer Business
-      </button>
-
-    </section>
-
-  </section>
-
-
-  <!-- =================================================
-       SEARCH / DISCOVER
-  ================================================== -->
-
-  <section
-    id="view-search"
-    class="view"
-  >
-
-    <div class="page-header">
-
-      <span class="eyebrow">
-        Descubrir
-      </span>
-
-      <h1>
-        Encuentra tu próximo lugar
-      </h1>
-
-      <p>
-        Busca negocios, servicios y profesionales y encuentra
-        la opción que mejor se adapte a ti.
-      </p>
-
-    </div>
-
-
-    <div class="filters">
-
-      <input
-        id="searchInput"
-        type="search"
-        placeholder="Buscar negocio o servicio..."
-        oninput="filtrarNegocios()"
-      >
-
-
-      <select
-        id="categoryFilter"
-        onchange="filtrarNegocios()"
-      >
-        <option value="">
-          Todas las categorías
-        </option>
-      </select>
-
-
-      <button
-        onclick="buscarCercanos()"
-      >
-        📍 Cerca de mí
-      </button>
-
-    </div>
-
-
-    <div
-      id="searchResults"
-      class="business-grid"
-    ></div>
-
-  </section>
-
-
-  <!-- =================================================
-       RESERVATIONS
-  ================================================== -->
-
-  <section
-    id="view-reservations"
-    class="view"
-  >
-
-    <div class="page-header">
-
-      <span class="eyebrow">
-        Mi actividad
-      </span>
-
-      <h1>
-        Mis reservas
-      </h1>
-
-      <p>
-        Consulta tus próximas citas y revisa tu historial.
-      </p>
-
-    </div>
-
-
-    <div class="reservation-tabs">
-
-      <button
-        class="active"
-        onclick="mostrarReservas('proximas', this)"
-      >
-        📅 Próximas
-      </button>
-
-      <button
-        onclick="mostrarReservas('historial', this)"
-      >
-        🕘 Historial
-      </button>
-
-    </div>
-
-
-    <div
-      id="reservationsContainer"
-      class="reservation-list"
-    ></div>
-
-  </section>
-
-
-  <!-- =================================================
-       FAVORITES
-  ================================================== -->
-
-  <section
-    id="view-favorites"
-    class="view"
-  >
-
-    <div class="page-header">
-
-      <span class="eyebrow">
-        Guardados
-      </span>
-
-      <h1>
-        Mis favoritos
-      </h1>
-
-      <p>
-        Accede rápidamente a los negocios que más te interesan.
-      </p>
-
-    </div>
-
-
-    <div
-      id="favoritesContainer"
-      class="business-grid"
-    ></div>
-
-  </section>
-
-
-  <!-- =================================================
-       PROFILE
-  ================================================== -->
-
-  <section
-    id="view-profile"
-    class="view"
-  >
-
-    <div class="page-header">
-
-      <span class="eyebrow">
-        Mi cuenta
-      </span>
-
-      <h1>
-        Perfil
-      </h1>
-
-      <p>
-        Gestiona tu cuenta y accede a tus herramientas.
-      </p>
-
-    </div>
-
-
-    <!-- PERFIL -->
-
-    <div class="profile-card">
-
-      <div class="profile-avatar">
-        <span id="profileAvatar">
-          ?
-        </span>
-      </div>
-
-
-      <h1 id="profileName">
-        Usuario
-      </h1>
-
-
-      <p id="profileEmail">
-        -
-      </p>
-
-
-      <button
-        onclick="editarPerfil()"
-      >
-        Editar perfil
-      </button>
-
-    </div>
-
-
-    <!-- LOGIN -->
-
-    <div
-      id="loginBox"
-      class="profile-card"
-      style="display:none;"
-    >
-
-      <span class="eyebrow">
-        ReservaYa
-      </span>
-
-      <h2>
-        Bienvenido
-      </h2>
-
-      <p>
-        Inicia sesión para guardar favoritos,
-        reservar citas y administrar tu actividad.
-      </p>
-
-
-      <input
-        id="loginEmail"
-        type="email"
-        placeholder="Correo electrónico"
-        style="
-          width:100%;
-          margin-top:20px;
-          padding:13px;
-          border:1px solid var(--border);
-          border-radius:12px;
-        "
-      >
-
-
-      <input
-        id="loginPassword"
-        type="password"
-        placeholder="Contraseña"
-        style="
-          width:100%;
-          margin-top:10px;
-          padding:13px;
-          border:1px solid var(--border);
-          border-radius:12px;
-        "
-      >
-
-
-      <button
-        class="primary-button"
-        onclick="iniciarSesion()"
-        style="margin-top:14px;"
-      >
-        Iniciar sesión
-      </button>
-
-
-      <button
-        class="secondary-button"
-        onclick="registrarse()"
-        style="margin-top:8px;"
-      >
-        Crear cuenta
-      </button>
-
-    </div>
-
-
-    <!-- CUENTA -->
-
-    <div class="settings-list">
-
-      <button
-        onclick="abrirNotificaciones()"
-      >
-        <span>🔔</span>
-        <span>Notificaciones</span>
-        <span>›</span>
-      </button>
-
-
-      <button
-        id="businessProfileButton"
-        onclick="abrirPanelNegocio()"
-      >
-        <span>🏢</span>
-
-        <span id="businessProfileButtonText">
-          ReservaYa Business
-        </span>
-
-        <span>›</span>
-      </button>
-
-
-      <button
-        onclick="abrirConfiguracion()"
-      >
-        <span>⚙️</span>
-        <span>Configuración</span>
-        <span>›</span>
-      </button>
-
-
-      <button
-        class="danger-button"
-        onclick="cerrarSesion()"
-      >
-        <span>🚪</span>
-        <span>Cerrar sesión</span>
-        <span>›</span>
-      </button>
-
-    </div>
-
-  </section>
-
-
-  <!-- =================================================
-       BUSINESS DASHBOARD
-  ================================================== -->
-
-  <section
-    id="view-business"
-    class="view"
-  >
-
-    <div class="business-dashboard">
-
-
-      <!-- BUSINESS HEADER -->
-
-      <div class="page-header">
-
-        <span class="eyebrow">
-          ReservaYa Business
-        </span>
-
-        <h1>
-          Tu negocio. Desde un solo lugar.
-        </h1>
-
-        <p>
-          Gestiona reservas, servicios, horarios y crecimiento
-          de tu negocio desde tu panel.
-        </p>
-
-      </div>
-
-
-      <!-- BUSINESS STATS -->
-
-      <div class="stats-grid">
-
-
-        <div class="stat-card">
-
-          <span>📅</span>
-
-          <strong id="statReservations">
             0
-          </strong>
+          </span>
+        </button>
 
-          <small>
-            Reservas
-          </small>
-
-        </div>
-
-
-        <div class="stat-card">
-
-          <span>👀</span>
-
-          <strong id="statViews">
-            0
-          </strong>
-
-          <small>
-            Visitas
-          </small>
-
-        </div>
-
-
-        <div class="stat-card">
-
-          <span>⭐</span>
-
-          <strong id="statRating">
-            0.0
-          </strong>
-
-          <small>
-            Calificación
-          </small>
-
-        </div>
-
-
-        <div class="stat-card">
-
-          <span>👥</span>
-
-          <strong id="statClients">
-            0
-          </strong>
-
-          <small>
-            Clientes
-          </small>
-
-        </div>
+        <button
+          class="avatar-button"
+          onclick="abrirMenuUsuario()"
+          aria-label="Mi cuenta"
+        >
+          <span id="userAvatar">?</span>
+        </button>
 
       </div>
 
+    </header>
 
-      <!-- BUSINESS QUICK ACTIONS -->
 
-      <div
-        class="section-heading"
-        style="margin-top:30px;"
+    <!-- =====================================================
+         MAIN APP
+    ====================================================== -->
+
+    <main id="mainContent">
+
+
+      <!-- =====================================================
+           HOME
+      ====================================================== -->
+
+      <section
+        id="view-home"
+        class="view active"
       >
 
-        <div>
+        <!-- HERO -->
 
-          <span class="eyebrow">
-            Centro de control
-          </span>
+        <div class="hero">
 
-          <h2>
-            Gestiona tu negocio
-          </h2>
+          <div class="hero-content">
+
+            <span class="hero-label">
+              ✨ ReservaYa · Tu mundo de reservas
+            </span>
+
+            <h1>
+              Encuentra lo que necesitas.
+              <span>Reserva al instante.</span>
+            </h1>
+
+            <p>
+              Descubre negocios, profesionales y servicios cerca de ti.
+              Compara opciones, guarda tus favoritos y gestiona tus reservas
+              desde un solo lugar.
+            </p>
+
+
+            <!-- BUSCADOR PRINCIPAL -->
+
+            <div class="main-search">
+
+              <span class="search-icon">
+                🔎
+              </span>
+
+              <input
+                id="globalSearch"
+                type="search"
+                placeholder="¿Qué necesitas reservar?"
+                autocomplete="off"
+                oninput="buscarGlobal(this.value)"
+                aria-label="Buscar negocios y servicios"
+              >
+
+              <button
+                onclick="ejecutarBusqueda()"
+              >
+                Buscar
+              </button>
+
+            </div>
+
+
+            <!-- SUGERENCIAS -->
+
+            <div
+              id="searchSuggestions"
+              class="search-suggestions hidden"
+            ></div>
+
+
+            <!-- ACCESOS RÁPIDOS -->
+
+            <div
+              style="
+                display:flex;
+                flex-wrap:wrap;
+                gap:10px;
+                margin-top:18px;
+              "
+            >
+
+              <button
+                class="secondary-button"
+                onclick="buscarCercanos()"
+              >
+                📍 Cerca de mí
+              </button>
+
+              <button
+                class="secondary-button"
+                onclick="cambiarVista('favorites')"
+              >
+                ♡ Mis favoritos
+              </button>
+
+              <button
+                class="secondary-button"
+                onclick="cambiarVista('reservations')"
+              >
+                📅 Mis reservas
+              </button>
+
+            </div>
+
+          </div>
 
         </div>
 
-      </div>
+
+        <!-- =====================================================
+             EXPLORACIÓN
+        ====================================================== -->
+
+        <section class="section">
+
+          <div class="section-heading">
+
+            <div>
+              <span class="eyebrow">
+                Explora
+              </span>
+
+              <h2>
+                ¿Qué estás buscando?
+              </h2>
+            </div>
+
+            <button
+              class="text-button"
+              onclick="mostrarTodasCategorias()"
+            >
+              Ver todas
+            </button>
+
+          </div>
 
 
-      <div class="business-actions">
+          <div
+            id="categoryGrid"
+            class="category-grid"
+          ></div>
+
+        </section>
 
 
-        <button
-          onclick="administrarServicios()"
-        >
-          🛠️
-          <br>
-          Servicios
-        </button>
+        <!-- =====================================================
+             NEGOCIOS CERCANOS
+        ====================================================== -->
+
+        <section class="section">
+
+          <div class="section-heading">
+
+            <div>
+              <span class="eyebrow">
+                Cerca de ti
+              </span>
+
+              <h2>
+                Negocios que puedes descubrir
+              </h2>
+            </div>
+
+            <button
+              class="text-button"
+              onclick="buscarCercanos()"
+            >
+              Ver más
+            </button>
+
+          </div>
 
 
-        <button
-          onclick="administrarHorarios()"
-        >
-          🕐
-          <br>
-          Horarios
-        </button>
+          <div
+            id="nearbyBusinesses"
+            class="business-grid"
+          ></div>
+
+        </section>
 
 
-        <button
-          onclick="administrarEmpleados()"
-        >
-          👥
-          <br>
-          Empleados
-        </button>
+        <!-- =====================================================
+             DESTACADOS
+        ====================================================== -->
+
+        <section class="section">
+
+          <div class="section-heading">
+
+            <div>
+              <span class="eyebrow">
+                Selección ReservaYa
+              </span>
+
+              <h2>
+                Negocios destacados
+              </h2>
+            </div>
+
+          </div>
 
 
-        <button
-          onclick="abrirEstadisticas()"
-        >
-          📊
-          <br>
-          Estadísticas
-        </button>
+          <div
+            id="featuredBusinesses"
+            class="business-grid"
+          ></div>
 
-      </div>
+        </section>
 
 
-      <!-- BUSINESS VALUE -->
+        <!-- =====================================================
+             EXPERIENCIA RESERVAYA
+        ====================================================== -->
 
-      <div class="section-heading"
-           style="margin-top:35px;">
+        <section class="section">
 
-        <div>
+          <div class="section-heading">
 
-          <span class="eyebrow">
-            Tu presencia
-          </span>
+            <div>
+              <span class="eyebrow">
+                Una nueva forma
+              </span>
 
-          <h2>
-            Haz que más clientes te encuentren
-          </h2>
+              <h2>
+                Todo tu mundo de reservas
+              </h2>
+            </div>
 
-        </div>
-
-      </div>
+          </div>
 
 
-      <div
-        style="
-          display:grid;
-          grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-          gap:14px;
-        "
+          <div
+            style="
+              display:grid;
+              grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+              gap:14px;
+            "
+          >
+
+            <div class="stat-card">
+
+              <span>🔎</span>
+
+              <strong style="font-size:20px;">
+                Descubre
+              </strong>
+
+              <small>
+                Encuentra negocios y servicios que se adapten a lo que necesitas.
+              </small>
+
+            </div>
+
+
+            <div class="stat-card">
+
+              <span>📅</span>
+
+              <strong style="font-size:20px;">
+                Reserva
+              </strong>
+
+              <small>
+                Elige servicio, fecha y hora y realiza tu reserva fácilmente.
+              </small>
+
+            </div>
+
+
+            <div class="stat-card">
+
+              <span>♡</span>
+
+              <strong style="font-size:20px;">
+                Guarda
+              </strong>
+
+              <small>
+                Ten tus negocios favoritos siempre disponibles.
+              </small>
+
+            </div>
+
+
+            <div class="stat-card">
+
+              <span>⚡</span>
+
+              <strong style="font-size:20px;">
+                Gestiona
+              </strong>
+
+              <small>
+                Consulta tus próximas citas y administra tu actividad.
+              </small>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             BUSINESS / PREMIUM
+        ====================================================== -->
+
+        <section class="premium-banner">
+
+          <div>
+
+            <span class="premium-icon">
+              🚀
+            </span>
+
+            <h2>
+              Lleva tu negocio al siguiente nivel
+            </h2>
+
+            <p>
+              ReservaYa Business está creando una nueva forma para que
+              los negocios gestionen reservas, servicios, horarios,
+              clientes, visibilidad y crecimiento desde un solo lugar.
+            </p>
+
+          </div>
+
+
+          <button
+            onclick="abrirPremium()"
+          >
+            Conocer Business
+          </button>
+
+        </section>
+
+      </section>
+
+
+      <!-- =====================================================
+           SEARCH / DISCOVER
+      ====================================================== -->
+
+      <section
+        id="view-search"
+        class="view"
       >
 
-        <div class="stat-card">
+        <div class="page-header">
 
-          <span>🌎</span>
+          <span class="eyebrow">
+            Descubrir
+          </span>
 
-          <strong style="font-size:19px;">
-            Descubrimiento
-          </strong>
-
-          <small>
-            Forma parte del ecosistema de negocios
-            que las personas pueden descubrir en ReservaYa.
-          </small>
-
-        </div>
-
-
-        <div class="stat-card">
-
-          <span>📅</span>
-
-          <strong style="font-size:19px;">
-            Reservas
-          </strong>
-
-          <small>
-            Centraliza las citas de tus clientes
-            y mantén organizada tu agenda.
-          </small>
-
-        </div>
-
-
-        <div class="stat-card">
-
-          <span>⚡</span>
-
-          <strong style="font-size:19px;">
-            Operación
-          </strong>
-
-          <small>
-            Administra servicios y horarios
-            desde una misma plataforma.
-          </small>
-
-        </div>
-
-
-        <div class="stat-card">
-
-          <span>📈</span>
-
-          <strong style="font-size:19px;">
-            Crecimiento
-          </strong>
-
-          <small>
-            Próximamente podrás acceder a nuevas
-            herramientas para impulsar tu negocio.
-          </small>
-
-        </div>
-
-      </div>
-
-
-      <!-- PREMIUM / FUTURE BUSINESS -->
-
-      <div class="coming-soon-card">
-
-        <span>
-          🚀
-        </span>
-
-
-        <div>
-
-          <strong>
-            ReservaYa Business Pro
-          </strong>
+          <h1>
+            Encuentra tu próximo lugar
+          </h1>
 
           <p>
-            Mayor visibilidad, promociones, estadísticas,
-            herramientas para equipos, sucursales y nuevas
-            funciones empresariales.
+            Busca negocios, servicios y profesionales y encuentra
+            la opción que mejor se adapte a ti.
           </p>
 
         </div>
 
 
-        <button
-          onclick="abrirPremium()"
-        >
-          Explorar
-        </button>
+        <div class="filters">
 
-      </div>
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="Buscar negocio o servicio..."
+            oninput="filtrarNegocios()"
+          >
 
 
-      <!-- FUTURE PLATFORM -->
+          <select
+            id="categoryFilter"
+            onchange="filtrarNegocios()"
+          >
+            <option value="">
+              Todas las categorías
+            </option>
+          </select>
 
-      <div
-        style="
-          margin-top:20px;
-          padding:22px;
-          border:1px dashed var(--border);
-          border-radius:18px;
-          background:var(--surface-soft);
-        "
+
+          <button
+            onclick="buscarCercanos()"
+          >
+            📍 Cerca de mí
+          </button>
+
+        </div>
+
+
+        <div
+          id="searchResults"
+          class="business-grid"
+        ></div>
+
+      </section>
+
+
+      <!-- =====================================================
+           RESERVATIONS
+      ====================================================== -->
+
+      <section
+        id="view-reservations"
+        class="view"
       >
 
-        <span class="eyebrow">
-          Próximamente
-        </span>
+        <div class="page-header">
 
-        <h2
-          style="
-            margin-top:6px;
-            font-size:22px;
-          "
+          <span class="eyebrow">
+            Mi actividad
+          </span>
+
+          <h1>
+            Mis reservas
+          </h1>
+
+          <p>
+            Consulta tus próximas citas y revisa tu historial.
+          </p>
+
+        </div>
+
+
+        <div class="reservation-tabs">
+
+          <button
+            class="active"
+            onclick="mostrarReservas('proximas', this)"
+          >
+            📅 Próximas
+          </button>
+
+          <button
+            onclick="mostrarReservas('historial', this)"
+          >
+            🕘 Historial
+          </button>
+
+        </div>
+
+
+        <div
+          id="reservationsContainer"
+          class="reservation-list"
+        ></div>
+
+      </section>
+
+
+      <!-- =====================================================
+           FAVORITES
+      ====================================================== -->
+
+      <section
+        id="view-favorites"
+        class="view"
+      >
+
+        <div class="page-header">
+
+          <span class="eyebrow">
+            Guardados
+          </span>
+
+          <h1>
+            Mis favoritos
+          </h1>
+
+          <p>
+            Accede rápidamente a los negocios que más te interesan.
+          </p>
+
+        </div>
+
+
+        <div
+          id="favoritesContainer"
+          class="business-grid"
+        ></div>
+
+      </section>
+
+
+      <!-- =====================================================
+           PROFILE
+      ====================================================== -->
+
+      <section
+        id="view-profile"
+        class="view"
+      >
+
+        <div class="page-header">
+
+          <span class="eyebrow">
+            Mi cuenta
+          </span>
+
+          <h1>
+            Perfil
+          </h1>
+
+          <p>
+            Gestiona tu cuenta y accede a tus herramientas.
+          </p>
+
+        </div>
+
+
+        <!-- PERFIL -->
+
+        <div class="profile-card">
+
+          <div class="profile-avatar">
+
+            <span id="profileAvatar">
+              ?
+            </span>
+
+          </div>
+
+
+          <h1 id="profileName">
+            Usuario
+          </h1>
+
+
+          <p id="profileEmail">
+            -
+          </p>
+
+
+          <button
+            onclick="editarPerfil()"
+          >
+            Editar perfil
+          </button>
+
+        </div>
+
+
+        <!-- LOGIN -->
+
+        <div
+          id="loginBox"
+          class="profile-card"
+          style="display:none;"
         >
-          Más herramientas para hacer crecer tu negocio
-        </h2>
 
-        <p
-          style="
-            margin-top:8px;
-            color:var(--muted);
-            line-height:1.6;
-          "
-        >
-          ReservaYa está preparado para evolucionar hacia una
-          plataforma empresarial con nuevas herramientas de
-          visibilidad, análisis, equipos, promociones y gestión.
-        </p>
+          <span class="eyebrow">
+            ReservaYa
+          </span>
 
-      </div>
+          <h2>
+            Bienvenido
+          </h2>
+
+          <p>
+            Inicia sesión para guardar favoritos,
+            reservar citas y administrar tu actividad.
+          </p>
+
+
+          <input
+            id="loginEmail"
+            type="email"
+            placeholder="Correo electrónico"
+            style="
+              width:100%;
+              margin-top:20px;
+              padding:13px;
+              border:1px solid var(--border);
+              border-radius:12px;
+            "
+          >
+
+
+          <input
+            id="loginPassword"
+            type="password"
+            placeholder="Contraseña"
+            style="
+              width:100%;
+              margin-top:10px;
+              padding:13px;
+              border:1px solid var(--border);
+              border-radius:12px;
+            "
+          >
+
+
+          <button
+            class="primary-button"
+            onclick="iniciarSesion()"
+            style="margin-top:14px;"
+          >
+            Iniciar sesión
+          </button>
+
+
+          <button
+            class="secondary-button"
+            onclick="registrarse()"
+            style="margin-top:8px;"
+          >
+            Crear cuenta
+          </button>
+
+        </div>
+
+
+        <!-- CUENTA -->
+
+        <div class="settings-list">
+
+          <button
+            onclick="abrirNotificaciones()"
+          >
+            <span>🔔</span>
+            <span>Notificaciones</span>
+            <span>›</span>
+          </button>
+
+
+          <button
+            id="businessProfileButton"
+            onclick="abrirPanelNegocio()"
+          >
+            <span>🏢</span>
+
+            <span id="businessProfileButtonText">
+              ReservaYa Business
+            </span>
+
+            <span>›</span>
+          </button>
+
+
+          <button
+            onclick="abrirConfiguracion()"
+          >
+            <span>⚙️</span>
+            <span>Configuración</span>
+            <span>›</span>
+          </button>
+
+
+          <button
+            class="danger-button"
+            onclick="cerrarSesion()"
+          >
+            <span>🚪</span>
+            <span>Cerrar sesión</span>
+            <span>›</span>
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+           BUSINESS DASHBOARD
+      ====================================================== -->
+
+      <section
+        id="view-business"
+        class="view"
+      >
+
+        <div class="business-dashboard">
+
+
+          <!-- BUSINESS HEADER -->
+
+          <div class="page-header">
+
+            <span class="eyebrow">
+              ReservaYa Business
+            </span>
+
+            <h1>
+              Tu negocio. Desde un solo lugar.
+            </h1>
+
+            <p>
+              Gestiona reservas, servicios, horarios y crecimiento
+              de tu negocio desde tu panel.
+            </p>
+
+          </div>
+
+
+          <!-- BUSINESS STATS -->
+
+          <div class="stats-grid">
+
+            <div class="stat-card">
+
+              <span>📅</span>
+
+              <strong id="statReservations">
+                0
+              </strong>
+
+              <small>
+                Reservas
+              </small>
+
+            </div>
+
+
+            <div class="stat-card">
+
+              <span>👀</span>
+
+              <strong id="statViews">
+                0
+              </strong>
+
+              <small>
+                Visitas
+              </small>
+
+            </div>
+
+
+            <div class="stat-card">
+
+              <span>⭐</span>
+
+              <strong id="statRating">
+                0.0
+              </strong>
+
+              <small>
+                Calificación
+              </small>
+
+            </div>
+
+
+            <div class="stat-card">
+
+              <span>👥</span>
+
+              <strong id="statClients">
+                0
+              </strong>
+
+              <small>
+                Clientes
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <!-- BUSINESS QUICK ACTIONS -->
+
+          <div
+            class="section-heading"
+            style="margin-top:30px;"
+          >
+
+            <div>
+
+              <span class="eyebrow">
+                Centro de control
+              </span>
+
+              <h2>
+                Gestiona tu negocio
+              </h2>
+
+            </div>
+
+          </div>
+
+
+          <div class="business-actions">
+
+            <button
+              onclick="administrarServicios()"
+            >
+              🛠️
+              <br>
+              Servicios
+            </button>
+
+
+            <button
+              onclick="administrarHorarios()"
+            >
+              🕐
+              <br>
+              Horarios
+            </button>
+
+
+            <button
+              onclick="administrarEmpleados()"
+            >
+              👥
+              <br>
+              Empleados
+            </button>
+
+
+            <button
+              onclick="abrirEstadisticas()"
+            >
+              📊
+              <br>
+              Estadísticas
+            </button>
+
+          </div>
+
+
+          <!-- BUSINESS VALUE -->
+
+          <div
+            class="section-heading"
+            style="margin-top:35px;"
+          >
+
+            <div>
+
+              <span class="eyebrow">
+                Tu presencia
+              </span>
+
+              <h2>
+                Haz que más clientes te encuentren
+              </h2>
+
+            </div>
+
+          </div>
+
+
+          <div
+            style="
+              display:grid;
+              grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+              gap:14px;
+            "
+          >
+
+            <div class="stat-card">
+
+              <span>🌎</span>
+
+              <strong style="font-size:19px;">
+                Descubrimiento
+              </strong>
+
+              <small>
+                Forma parte del ecosistema de negocios
+                que las personas pueden descubrir en ReservaYa.
+              </small>
+
+            </div>
+
+
+            <div class="stat-card">
+
+              <span>📅</span>
+
+              <strong style="font-size:19px;">
+                Reservas
+              </strong>
+
+              <small>
+                Centraliza las citas de tus clientes
+                y mantén organizada tu agenda.
+              </small>
+
+            </div>
+
+
+            <div class="stat-card">
+
+              <span>⚡</span>
+
+              <strong style="font-size:19px;">
+                Operación
+              </strong>
+
+              <small>
+                Administra servicios y horarios
+                desde una misma plataforma.
+              </small>
+
+            </div>
+
+
+            <div class="stat-card">
+
+              <span>📈</span>
+
+              <strong style="font-size:19px;">
+                Crecimiento
+              </strong>
+
+              <small>
+                Próximamente podrás acceder a nuevas
+                herramientas para impulsar tu negocio.
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <!-- PREMIUM / FUTURE BUSINESS -->
+
+          <div class="coming-soon-card">
+
+            <span>
+              🚀
+            </span>
+
+
+            <div>
+
+              <strong>
+                ReservaYa Business Pro
+              </strong>
+
+              <p>
+                Mayor visibilidad, promociones, estadísticas,
+                herramientas para equipos, sucursales y nuevas
+                funciones empresariales.
+              </p>
+
+            </div>
+
+
+            <button
+              onclick="abrirPremium()"
+            >
+              Explorar
+            </button>
+
+          </div>
+
+
+          <!-- FUTURE PLATFORM -->
+
+          <div
+            style="
+              margin-top:20px;
+              padding:22px;
+              border:1px dashed var(--border);
+              border-radius:18px;
+              background:var(--surface-soft);
+            "
+          >
+
+            <span class="eyebrow">
+              Próximamente
+            </span>
+
+            <h2
+              style="
+                margin-top:6px;
+                font-size:22px;
+              "
+            >
+              Más herramientas para hacer crecer tu negocio
+            </h2>
+
+            <p
+              style="
+                margin-top:8px;
+                color:var(--muted);
+                line-height:1.6;
+              "
+            >
+              ReservaYa está preparado para evolucionar hacia una
+              plataforma empresarial con nuevas herramientas de
+              visibilidad, análisis, equipos, promociones y gestión.
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+
+    <!-- =====================================================
+         BOTTOM NAVIGATION
+    ====================================================== -->
+
+    <nav class="bottom-nav">
+
+      <button
+        class="active"
+        data-view="home"
+        onclick="cambiarVista('home', this)"
+        aria-label="Inicio"
+      >
+
+        <span>⌂</span>
+
+        <small>
+          Inicio
+        </small>
+
+      </button>
+
+
+      <button
+        data-view="search"
+        onclick="cambiarVista('search', this)"
+        aria-label="Buscar"
+      >
+
+        <span>⌕</span>
+
+        <small>
+          Explorar
+        </small>
+
+      </button>
+
+
+      <button
+        data-view="reservations"
+        onclick="cambiarVista('reservations', this)"
+        aria-label="Reservas"
+      >
+
+        <span>▣</span>
+
+        <small>
+          Reservas
+        </small>
+
+      </button>
+
+
+      <button
+        data-view="favorites"
+        onclick="cambiarVista('favorites', this)"
+        aria-label="Favoritos"
+      >
+
+        <span>♡</span>
+
+        <small>
+          Favoritos
+        </small>
+
+      </button>
+
+
+      <button
+        data-view="profile"
+        onclick="cambiarVista('profile', this)"
+        aria-label="Perfil"
+      >
+
+        <span>◯</span>
+
+        <small>
+          Perfil
+        </small>
+
+      </button>
+
+    </nav>
+
+
+    <!-- =====================================================
+         MODAL SYSTEM
+    ====================================================== -->
+
+    <div
+      id="modalOverlay"
+      class="modal-overlay hidden"
+      onclick="cerrarModal(event)"
+    >
+
+      <div
+        id="modalContent"
+        class="modal"
+        onclick="event.stopPropagation()"
+      ></div>
 
     </div>
-
-  </section>
-
-</main>
-
-
-<!-- =====================================================
-     BOTTOM NAVIGATION
-====================================================== -->
-
-<nav class="bottom-nav">
-
-  <button
-    class="active"
-    data-view="home"
-    onclick="cambiarVista('home', this)"
-    aria-label="Inicio"
-  >
-
-    <span>⌂</span>
-
-    <small>
-      Inicio
-    </small>
-
-  </button>
-
-
-  <button
-    data-view="search"
-    onclick="cambiarVista('search', this)"
-    aria-label="Buscar"
-  >
-
-    <span>⌕</span>
-
-    <small>
-      Explorar
-    </small>
-
-  </button>
-
-
-  <button
-    data-view="reservations"
-    onclick="cambiarVista('reservations', this)"
-    aria-label="Reservas"
-  >
-
-    <span>▣</span>
-
-    <small>
-      Reservas
-    </small>
-
-  </button>
-
-
-  <button
-    data-view="favorites"
-    onclick="cambiarVista('favorites', this)"
-    aria-label="Favoritos"
-  >
-
-    <span>♡</span>
-
-    <small>
-      Favoritos
-    </small>
-
-  </button>
-
-
-  <button
-    data-view="profile"
-    onclick="cambiarVista('profile', this)"
-    aria-label="Perfil"
-  >
-
-    <span>◯</span>
-
-    <small>
-      Perfil
-    </small>
-
-  </button>
-
-</nav>
-
-
-<!-- =====================================================
-     MODAL SYSTEM
-====================================================== -->
-
-<div
-  id="modalOverlay"
-  class="modal-overlay hidden"
-  onclick="cerrarModal(event)"
->
-
-  <div
-    id="modalContent"
-    class="modal"
-    onclick="event.stopPropagation()"
-  ></div>
-
-</div>
 
 
     <!-- =====================================================
