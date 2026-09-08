@@ -1442,3 +1442,24 @@ a:hover {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* =========================================================
+   FIX V5.1 — MODAL OVERLAY OCULTO POR DEFECTO
+   ========================================================= */
+
+.modal-overlay {
+  display: none !important;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Cuando JavaScript lo abre */
+.modal-overlay.active,
+.modal-overlay.show,
+.modal-overlay.visible {
+  display: flex !important;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
