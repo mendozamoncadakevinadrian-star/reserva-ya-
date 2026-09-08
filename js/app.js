@@ -4129,14 +4129,15 @@ function abrirModal(
     <button
       onclick="${accionX}"
       style="
-        float:right;
-        width:35px;
-        height:35px;
-        border-radius:50%;
-        background:#f0f2f7;
-        border:none;
-        cursor:pointer;
-      "
+       float:right;
+       width:35px;
+       height:35px;
+       border-radius:50%;
+       background:#1d2331;
+       color:white;
+       border:1px solid rgba(255,255,255,0.1);
+       cursor:pointer;
+     "
       aria-label="Cerrar"
     >
       ✕
