@@ -3083,27 +3083,17 @@ function renderizarFavoritos() {
    RESERVAS
 ===================================================== */
 
-async function mostrarReservas(
-  tipo = "proximas",
-  boton = null
-) {
+async function mostrarReservas(tipo = "proximas", boton = null) {
 
   document
-    .querySelectorAll(
-      ".reservation-tabs button"
-    )
-    .forEach(
-      btn =>
-        btn.classList.remove(
-          "active"
-        )
+    .querySelectorAll(".reservation-tabs button")
+    .forEach(btn =>
+      btn.classList.remove("active")
     );
 
   if (boton) {
 
-    boton.classList.add(
-      "active"
-    );
+    boton.classList.add("active");
 
   } else {
 
@@ -3112,29 +3102,22 @@ async function mostrarReservas(
         ".reservation-tabs button"
       );
 
-    if (
-      botones.length
-    ) {
+    if (botones.length) {
 
-      if (
-        tipo === "proximas"
-      ) {
+      if (tipo === "proximas") {
 
-        botones[0].classList.add(
-          "active"
-        );
+        botones[0].classList.add("active");
 
       } else {
 
-        botones[1]?.classList.add(
-          "active"
-        );
+        botones[1]?.classList.add("active");
 
       }
 
     }
 
   }
+
 
   const contenedor =
     document.getElementById(
@@ -3143,18 +3126,12 @@ async function mostrarReservas(
 
   if (!contenedor) return;
 
+
   if (!ReservaYa.usuario) {
 
     contenedor.innerHTML = `
-
-      <div style="
-        text-align:center;
-        padding:50px 20px;
-      ">
-
-        <div style="
-          font-size:45px
-        ">
+      <div class="empty-state">
+        <div class="empty-state-icon">
           🔐
         </div>
 
@@ -3162,103 +3139,93 @@ async function mostrarReservas(
           Inicia sesión
         </h3>
 
-        <p style="
-          color:#727887;
-          margin-top:8px
-        ">
-          Necesitas una cuenta para ver tus reservas.
+        <p>
+          Inicia sesión para consultar tus reservas.
         </p>
-
       </div>
-
     `;
 
     return;
 
   }
+
 
   contenedor.innerHTML = `
-
-    <div style="
-      text-align:center;
-      padding:35px;
-      color:#727887;
-    ">
-      ⏳ ${t("loading")}
+    <div class="loading-state">
+      Cargando reservas...
     </div>
-
   `;
 
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("Citas")
-      .select(`
-        *,
-        servicios (
-          nombre,
-          precio,
-          duracion
+
+  try {
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("Citas")
+        .select(`
+          *,
+          servicios (
+            nombre,
+            precio,
+            duracion
+          )
+        `)
+        .eq(
+          "usuario",
+          ReservaYa.usuario.id
         )
-      `)
-      .eq(
-        "usuario",
-        ReservaYa.usuario.id
-      )
-      .order(
-        "fecha",
-        {
-          ascending: true
-        }
-      )
-      .order(
-        "hora",
-        {
-          ascending: true
-        }
+        .order(
+          "fecha",
+          {
+            ascending: true
+          }
+        )
+        .order(
+          "hora",
+          {
+            ascending: true
+          }
+        );
+
+
+    if (error) {
+
+      console.error(
+        "Error cargando reservas:",
+        error
       );
 
-  if (error) {
+      contenedor.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            ⚠️
+          </div>
 
-    console.error(
-      "Error cargando reservas:",
-      error
-    );
+          <h3>
+            No pudimos cargar tus reservas
+          </h3>
 
-    contenedor.innerHTML = `
-
-      <div style="
-        text-align:center;
-        padding:40px;
-      ">
-
-        <div style="
-          font-size:40px
-        ">
-          ⚠️
+          <p>
+            Inténtalo nuevamente.
+          </p>
         </div>
+      `;
 
-        <h3>
-          No se pudieron cargar las reservas
-        </h3>
+      return;
 
-      </div>
+    }
 
-    `;
 
-    return;
+    const ahora =
+      new Date();
 
-  }
 
-  const ahora =
-    new Date();
-
-  const reservas =
-    (data || [])
-      .map(
-        reserva => {
+    const reservas =
+      (data || [])
+        .map(reserva => {
 
           const negocio =
             ReservaYa.negocios.find(
@@ -3267,32 +3234,50 @@ async function mostrarReservas(
                 reserva.negocio_id
             );
 
+
           const horaReserva =
-  String(
-    reserva.hora ||
-    "00:00"
-  ).slice(0, 5);
+            String(
+              reserva.hora ||
+              "00:00"
+            ).slice(
+              0,
+              5
+            );
 
-const [anio, mes, dia] =
-  String(reserva.fecha)
-    .split("-")
-    .map(Number);
 
-const [hora, minutos] =
-  horaReserva
-    .split(":")
-    .map(Number);
+          const [
+            anio,
+            mes,
+            dia
+          ] =
+            String(
+              reserva.fecha
+            )
+              .split("-")
+              .map(Number);
 
-const fechaHora =
-  new Date(
-    anio,
-    mes - 1,
-    dia,
-    hora || 0,
-    minutos || 0,
-    0,
-    0
-  );
+
+          const [
+            hora,
+            minutos
+          ] =
+            horaReserva
+              .split(":")
+              .map(Number);
+
+
+          const fechaHora =
+            new Date(
+              anio,
+              mes - 1,
+              dia,
+              hora || 0,
+              minutos || 0,
+              0,
+              0
+            );
+
+
           return {
 
             id:
@@ -3344,110 +3329,151 @@ const fechaHora =
 
           };
 
+        });
+
+
+    ReservaYa.reservas =
+      reservas;
+
+
+    /*
+      IDs que el usuario decidió
+      quitar de su historial.
+    */
+
+    const historialOculto =
+      JSON.parse(
+        localStorage.getItem(
+          "reservaya_historial_oculto"
+        ) ||
+        "[]"
+      );
+
+
+    const filtradas =
+      reservas.filter(
+        reserva => {
+
+          const estado =
+            String(
+              reserva.estado
+            ).toLowerCase();
+
+
+          const finalizada =
+            [
+              "cancelada",
+              "completada",
+              "completed",
+              "cancelled"
+            ].includes(
+              estado
+            );
+
+
+          if (
+            tipo ===
+            "proximas"
+          ) {
+
+            return (
+              reserva.fechaHora >=
+                ahora &&
+              !finalizada
+            );
+
+          }
+
+
+          return (
+            (
+              reserva.fechaHora <
+                ahora ||
+              finalizada
+            ) &&
+            !historialOculto.includes(
+              reserva.id
+            )
+          );
+
         }
       );
 
-  ReservaYa.reservas =
-    reservas;
 
-  const filtradas =
-    reservas.filter(
-      reserva => {
+    if (!filtradas.length) {
 
-        const estado =
-          String(
-            reserva.estado
-          ).toLowerCase();
+      contenedor.innerHTML = `
+        <div class="empty-state">
 
-        const finalizada =
-          [
-            "cancelada",
-            "completada",
-            "completed",
-            "cancelled"
-          ].includes(
-            estado
-          );
+          <div class="empty-state-icon">
+            ${
+              tipo === "proximas"
+                ? "📅"
+                : "🕘"
+            }
+          </div>
 
-        if (
-          tipo ===
-          "proximas"
-        ) {
+          <h3>
+            ${
+              tipo === "proximas"
+                ? "No tienes reservas próximas"
+                : "Tu historial está vacío"
+            }
+          </h3>
 
-          return (
-            reserva.fechaHora >=
-              ahora &&
-            !finalizada
-          );
+          <p>
+            ${
+              tipo === "proximas"
+                ? "Cuando hagas una reserva aparecerá aquí."
+                : "Las reservas que retires del historial dejarán de aparecer aquí."
+            }
+          </p>
 
-        }
+        </div>
+      `;
 
-        return (
-          reserva.fechaHora <
-            ahora ||
-          finalizada
-        );
+      return;
 
-      }
+    }
+
+
+    contenedor.innerHTML =
+      filtradas
+        .map(
+          crearTarjetaReserva
+        )
+        .join("");
+
+
+  } catch (error) {
+
+    console.error(
+      "Error inesperado cargando reservas:",
+      error
     );
 
-  if (!filtradas.length) {
-
     contenedor.innerHTML = `
+      <div class="empty-state">
 
-      <div style="
-        text-align:center;
-        padding:50px 20px;
-      ">
-
-        <div style="
-          font-size:48px
-        ">
-          ${
-            tipo ===
-            "proximas"
-              ? "📅"
-              : "🗂️"
-          }
+        <div class="empty-state-icon">
+          ⚠️
         </div>
 
         <h3>
-          ${
-            tipo ===
-            "proximas"
-              ? "No tienes próximas reservas"
-              : "No tienes historial todavía"
-          }
+          Ocurrió un error
         </h3>
 
-        <p style="
-          color:#727887;
-          margin-top:8px
-        ">
-          ${
-            tipo ===
-            "proximas"
-              ? "Cuando reserves una cita aparecerá aquí."
-              : "Tus reservas anteriores aparecerán aquí."
-          }
+        <p>
+          Inténtalo nuevamente.
         </p>
 
       </div>
-
     `;
-
-    return;
 
   }
 
-  contenedor.innerHTML =
-    filtradas
-      .map(
-        crearTarjetaReserva
-      )
-      .join("");
-
 }
+
 
 
 /* =====================================================
