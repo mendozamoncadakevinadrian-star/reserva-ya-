@@ -953,8 +953,7 @@ function crearTarjetaNegocio(
   return `
 
     <article class="business-card">
-
-      <div class="business-cover">
+ <div class="business-cover">
 
   ${
     negocio.foto_portada
@@ -1006,30 +1005,7 @@ function crearTarjetaNegocio(
 
 </div>
 
-        ${
-          negocio.destacado
-            ? `
-              <span style="
-                position:absolute;
-                top:10px;
-                right:10px;
-                background:#111827;
-                color:white;
-                padding:5px 9px;
-                border-radius:20px;
-                font-size:11px;
-                font-weight:700;
-              ">
-                ✨ DESTACADO
-              </span>
-            `
-            : ""
-        }
-
-      </div>
-
-      <div class="business-info">
-
+<div class="business-info">
         <h3>
           ${escaparHTML(
             negocio.nombre
