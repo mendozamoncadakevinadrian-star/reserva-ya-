@@ -3437,12 +3437,16 @@ async function mostrarReservas(tipo = "proximas", boton = null) {
     }
 
 
-    contenedor.innerHTML =
-      filtradas
-        .map(
-          crearTarjetaReserva
+   contenedor.innerHTML =
+  filtradas
+    .map(
+      reserva =>
+        crearTarjetaReserva(
+          reserva,
+          tipo
         )
-        .join("");
+    )
+    .join("");
 
 
   } catch (error) {
@@ -3474,13 +3478,78 @@ async function mostrarReservas(tipo = "proximas", boton = null) {
 
 }
 
+/* =========================================================
+   RESERVAYA — QUITAR RESERVA DEL HISTORIAL
+   ========================================================= */
 
+function eliminarDelHistorial(id) {
+
+  if (!id) return;
+
+  const confirmar =
+    confirm(
+      "¿Quieres quitar esta reserva de tu historial?\n\n" +
+      "La reserva no se borrará de ReservaYa ni de los registros del negocio."
+    );
+
+  if (!confirmar) return;
+
+
+  let historialOculto = [];
+
+  try {
+
+    historialOculto =
+      JSON.parse(
+        localStorage.getItem(
+          "reservaya_historial_oculto"
+        ) ||
+        "[]"
+      );
+
+  } catch (error) {
+
+    historialOculto = [];
+
+  }
+
+
+  if (
+    !historialOculto.includes(id)
+  ) {
+
+    historialOculto.push(id);
+
+  }
+
+
+  localStorage.setItem(
+    "reservaya_historial_oculto",
+    JSON.stringify(
+      historialOculto
+    )
+  );
+
+
+  mostrarToast(
+    "Reserva retirada del historial."
+  );
+
+
+  mostrarReservas(
+    "historial"
+  );
+
+}
 
 /* =====================================================
    TARJETA RESERVA
 ===================================================== */
 
-function crearTarjetaReserva(reserva) {
+function crearTarjetaReserva(
+  reserva,
+  tipo = "proximas"
+) {
 
   const estado =
     String(
