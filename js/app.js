@@ -955,33 +955,7 @@ function crearTarjetaNegocio(
     <article class="business-card">
  <div class="business-cover">
 
-  ${
-    negocio.foto_portada
-      ? `
-        <img
-          src="${escaparHTML(negocio.foto_portada)}"
-          alt="Portada de ${escaparHTML(negocio.nombre)}"
-          class="business-cover-image"
-        >
-      `
-      : `
-        <div class="business-cover-placeholder">
-
-          <div class="business-cover-placeholder-icon">
-            📸
-          </div>
-
-          <div class="business-cover-placeholder-title">
-            Portada del negocio
-          </div>
-
-          <div class="business-cover-placeholder-text">
-            Este negocio aún no tiene una foto
-          </div>
-
-        </div>
-      `
-  }
+  ${icono}
 
   ${
     negocio.destacado
@@ -1004,8 +978,6 @@ function crearTarjetaNegocio(
   }
 
 </div>
-
-<div class="business-info">
         <h3>
           ${escaparHTML(
             negocio.nombre
