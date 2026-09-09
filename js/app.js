@@ -2371,59 +2371,80 @@ async function actualizarHorarioSeleccionado(
     return;
   }
 
-  hoursContainer.innerHTML =
-    horas
-      .map(
-        item => {
 
-          if (item.ocupada) {
+hoursContainer.innerHTML =
+  horas
+    .map(
+      item => {
 
-            return `
-
-              <button
-                type="button"
-                disabled
-                style="
-                  padding:9px 5px;
-                  border-radius:9px;
-                  border:1px solid #eee;
-                  background:#f1f1f1;
-                  color:#aaa;
-                  text-decoration:line-through;
-                "
-              >
-                ${item.hora}
-              </button>
-
-            `;
-
-          }
+        if (item.ocupada) {
 
           return `
-
             <button
               type="button"
-              onclick="
-                seleccionarHora(
-                  '${item.hora}'
-                )
-              "
+              data-hora="${item.hora}"
+              disabled
               style="
                 padding:9px 5px;
                 border-radius:9px;
-                border:1px solid #e7e9ef;
-                background:white;
-                color:#222;
+                border:1px solid #eee;
+                background:#f1f1f1;
+                color:#aaa;
+                text-decoration:line-through;
               "
             >
-              ${item.hora}
+              ${formatearHoraAMPM(item.hora)}
             </button>
-
           `;
 
         }
-      )
-      .join("");
+
+        return `
+          <button
+            type="button"
+            data-hora="${item.hora}"
+            onclick="
+              seleccionarHora(
+                '${item.hora}'
+              )
+            "
+            style="
+              padding:9px 5px;
+              border-radius:9px;
+              border:1px solid #e7e9ef;
+              background:white;
+              color:#222;
+            "
+          >
+            ${formatearHoraAMPM(item.hora)}
+          </button>
+        `;
+
+      }
+    )
+    .join("");
+
+}
+
+function formatearHoraAMPM(hora) {
+
+  if (!hora) return "";
+
+  const [horas, minutos] =
+    String(hora)
+      .slice(0, 5)
+      .split(":")
+      .map(Number);
+
+  const periodo =
+    horas >= 12
+      ? "PM"
+      : "AM";
+
+  const hora12 =
+    horas % 12 || 12;
+
+  return `${hora12}:${String(minutos).padStart(2, "0")} ${periodo}`;
 
 }
 
@@ -2470,10 +2491,9 @@ function seleccionarHora(
     boton => {
 
       if (
-        boton.textContent.trim() ===
-        hora
-      ) {
-
+      boton.dataset.hora ===
+      hora
+    ) {
         boton.style.background =
           "#111827";
 
