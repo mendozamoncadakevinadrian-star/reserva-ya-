@@ -3731,16 +3731,33 @@ function crearTarjetaReserva(
 
       <div class="reservation-actions">
 
+  <button
+    class="secondary-button"
+    onclick="
+      verDetallesReserva(
+        '${reserva.id}'
+      )
+    "
+  >
+    👁️ Ver detalles
+  </button>
+
+  ${
+    tipo === "historial"
+      ? `
         <button
-          class="secondary-button"
+          class="secondary-button reservation-delete-button"
           onclick="
-            verDetallesReserva(
+            eliminarDelHistorial(
               '${reserva.id}'
             )
           "
         >
-          👁️ Ver detalles
+          🗑️ Quitar
         </button>
+      `
+      : ""
+  }
 
         ${
           !cancelada &&
