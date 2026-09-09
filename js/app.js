@@ -660,6 +660,10 @@ async function cargarDatosDemo() {
         usuario_id:
           negocio.usuario_id ||
           null
+           
+        foto_portada:
+          negocio.foto_portada ||
+          ""
 
       };
 
@@ -952,7 +956,55 @@ function crearTarjetaNegocio(
 
       <div class="business-cover">
 
-        ${icono}
+  ${
+    negocio.foto_portada
+      ? `
+        <img
+          src="${escaparHTML(negocio.foto_portada)}"
+          alt="Portada de ${escaparHTML(negocio.nombre)}"
+          class="business-cover-image"
+        >
+      `
+      : `
+        <div class="business-cover-placeholder">
+
+          <div class="business-cover-placeholder-icon">
+            📸
+          </div>
+
+          <div class="business-cover-placeholder-title">
+            Portada del negocio
+          </div>
+
+          <div class="business-cover-placeholder-text">
+            Este negocio aún no tiene una foto
+          </div>
+
+        </div>
+      `
+  }
+
+  ${
+    negocio.destacado
+      ? `
+        <span style="
+          position:absolute;
+          top:10px;
+          right:10px;
+          background:#111827;
+          color:white;
+          padding:5px 9px;
+          border-radius:20px;
+          font-size:11px;
+          font-weight:700;
+        ">
+          ✨ DESTACADO
+        </span>
+      `
+      : ""
+  }
+
+</div>
 
         ${
           negocio.destacado
