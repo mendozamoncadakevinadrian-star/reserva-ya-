@@ -659,7 +659,10 @@ async function cargarDatosDemo() {
 
         usuario_id:
           negocio.usuario_id ||
-          null
+          null,
+        foto_portada:
+          negocio.foto_portada ||
+          ""
 
       };
 
@@ -952,7 +955,23 @@ function crearTarjetaNegocio(
 
       <div class="business-cover">
 
-        ${icono}
+${
+  negocio.foto_portada
+    ? `
+      <img
+        src="${escaparHTML(negocio.foto_portada)}"
+        alt="Portada de ${escaparHTML(negocio.nombre)}"
+        class="business-cover-image"
+      >
+    `
+    : `
+      <div class="business-cover-placeholder">
+        <span class="business-cover-placeholder-icon">📷</span>
+        <strong>Portada del negocio</strong>
+        <span>Este negocio aún no tiene una foto</span>
+      </div>
+    `
+}
 
         ${
           negocio.destacado
