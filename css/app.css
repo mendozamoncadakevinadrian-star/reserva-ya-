@@ -1980,3 +1980,11 @@ body {
 
 }
 
+/* =========================================================
+   RESERVAYA — FIX TOAST
+   Ocultar elementos con la clase hidden
+   ========================================================= */
+
+.hidden {
+  display: none !important;
+}
