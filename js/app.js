@@ -3454,9 +3454,7 @@ const fechaHora =
    TARJETA RESERVA
 ===================================================== */
 
-function crearTarjetaReserva(
-  reserva
-) {
+function crearTarjetaReserva(reserva) {
 
   const estado =
     String(
@@ -3482,62 +3480,42 @@ function crearTarjetaReserva(
 
   return `
 
-    <article
-      class="reservation-card"
-      style="
-        padding:18px;
-        border-radius:18px;
-        border:1px solid #eceef3;
-        margin-bottom:14px;
-        background:white;
-      "
-    >
+    <article class="reservation-card">
 
-      <div style="
-        display:flex;
-        justify-content:space-between;
-        gap:12px;
-      ">
+      <div class="reservation-card-header">
 
-        <div>
+        <div class="reservation-business">
 
-          <strong style="
-            font-size:17px;
-          ">
-            ${escaparHTML(
-              reserva.negocio
-            )}
-          </strong>
+          <div class="reservation-business-icon">
+            🏪
+          </div>
 
-          <div style="
-            margin-top:6px;
-            color:#727887;
-          ">
-            🛠️
-            ${escaparHTML(
-              reserva.servicio
-            )}
+          <div>
+            <div class="reservation-business-label">
+              NEGOCIO
+            </div>
+
+            <h3>
+              ${escaparHTML(
+                reserva.negocio
+              )}
+            </h3>
+
+            <div class="reservation-service">
+              🛠️
+              ${escaparHTML(
+                reserva.servicio
+              )}
+            </div>
           </div>
 
         </div>
 
-        <span style="
-          align-self:flex-start;
-          padding:5px 9px;
-          border-radius:20px;
-          background:${
-            cancelada
-              ? "#fbeaea"
-              : "#eef8f1"
-          };
-          color:${
-            cancelada
-              ? "#c94b4b"
-              : "#198754"
-          };
-          font-size:11px;
-          font-weight:700;
-        ">
+        <span class="reservation-status ${
+          cancelada
+            ? "cancelled"
+            : "pending"
+        }">
           ${escaparHTML(
             estado
           )}
@@ -3545,62 +3523,85 @@ function crearTarjetaReserva(
 
       </div>
 
-      <div style="
-        margin-top:16px;
-        display:grid;
-        gap:7px;
-        color:#444;
-      ">
 
-        <div>
-          📅
-          ${fechaBonita}
+      <div class="reservation-details">
+
+        <div class="reservation-detail">
+
+          <span class="reservation-detail-icon">
+            📅
+          </span>
+
+          <div>
+            <small>Fecha</small>
+            <strong>
+              ${fechaBonita}
+            </strong>
+          </div>
+
         </div>
 
-        <div>
-          🕐
-          ${escaparHTML(
-            reserva.hora
-          )}
+
+        <div class="reservation-detail">
+
+          <span class="reservation-detail-icon">
+            🕐
+          </span>
+
+          <div>
+            <small>Hora</small>
+            <strong>
+              ${escaparHTML(
+                reserva.hora
+              )}
+            </strong>
+          </div>
+
         </div>
+
 
         ${
           reserva.duracion
             ? `
-              <div>
-                ⏱️
-                ${Number(
-                  reserva.duracion
-                )} min
+              <div class="reservation-detail">
+
+                <span class="reservation-detail-icon">
+                  ⏱️
+                </span>
+
+                <div>
+                  <small>Duración</small>
+                  <strong>
+                    ${Number(
+                      reserva.duracion
+                    )} min
+                  </strong>
+                </div>
+
               </div>
             `
             : ""
         }
+
 
         ${
           reserva.precio !== null
             ? `
-              <div>
-                💰
-                ${formatearPrecio(
-                  reserva.precio
-                )}
-              </div>
-            `
-            : ""
-        }
+              <div class="reservation-detail">
 
-        ${
-          reserva.comentario
-            ? `
-              <div style="
-                color:#727887;
-                margin-top:4px;
-              ">
-                💬
-                ${escaparHTML(
-                  reserva.comentario
-                )}
+                <span class="reservation-detail-icon">
+                  💰
+                </span>
+
+                <div>
+                  <small>Precio</small>
+                  <strong>
+                    ${formatearPrecio(
+                      reserva.precio
+                    )}
+                  </strong>
+                </div>
+
               </div>
             `
             : ""
@@ -3608,11 +3609,32 @@ function crearTarjetaReserva(
 
       </div>
 
-      <div style="
-        display:flex;
-        gap:8px;
-        margin-top:16px;
-      ">
+
+      ${
+        reserva.comentario
+          ? `
+            <div class="reservation-comment">
+
+              <span>
+                💬
+              </span>
+
+              <div>
+                <small>Comentario</small>
+                <p>
+                  ${escaparHTML(
+                    reserva.comentario
+                  )}
+                </p>
+              </div>
+
+            </div>
+          `
+          : ""
+      }
+
+
+      <div class="reservation-actions">
 
         <button
           class="secondary-button"
@@ -3622,16 +3644,15 @@ function crearTarjetaReserva(
             )
           "
         >
-          Ver detalles
+          👁️ Ver detalles
         </button>
 
         ${
           !cancelada &&
-          reserva.fechaHora >=
-            new Date()
+          reserva.fechaHora >= new Date()
             ? `
               <button
-                class="secondary-button"
+                class="secondary-button reservation-cancel-button"
                 onclick="
                   cancelarReserva(
                     '${reserva.id}'
@@ -3651,7 +3672,6 @@ function crearTarjetaReserva(
   `;
 
 }
-
 
 /* =====================================================
    DETALLES RESERVA
