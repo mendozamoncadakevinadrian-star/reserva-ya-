@@ -761,7 +761,63 @@
 
         <div class="business-dashboard">
 
+<!-- BUSINESS COVER -->
 
+<div class="business-cover-manager">
+
+  <div class="business-cover-manager-header">
+
+    <div>
+      <span class="eyebrow">
+        PORTADA DEL NEGOCIO
+      </span>
+
+      <h2>
+        Haz que tu negocio destaque
+      </h2>
+
+      <p>
+        Añade una foto para mostrar tu negocio a tus clientes.
+      </p>
+    </div>
+
+  </div>
+
+  <div
+    id="businessCoverPreview"
+    class="business-cover-manager-preview"
+  >
+  </div>
+
+  <div class="business-cover-manager-actions">
+
+    <button
+      type="button"
+      class="primary-button"
+      onclick="seleccionarFotoPortada()"
+    >
+      📷 Añadir foto de portada
+    </button>
+
+    <button
+      type="button"
+      class="secondary-button hidden"
+      id="businessCoverRemoveButton"
+      onclick="eliminarFotoPortada()"
+    >
+      🗑️ Eliminar foto
+    </button>
+
+  </div>
+
+  <input
+    type="file"
+    id="businessCoverInput"
+    accept="image/jpeg,image/png,image/webp"
+    hidden
+  >
+
+</div>
           <!-- BUSINESS HEADER -->
 
           <div class="page-header">
