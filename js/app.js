@@ -1009,10 +1009,6 @@ function crearTarjetaNegocio(
         c.id === negocio.categoria
     );
 
-  const icono =
-    categoria?.icono ||
-    "📍";
-
   const favorito =
     ReservaYa.favoritos.includes(
       negocio.id
@@ -1020,15 +1016,17 @@ function crearTarjetaNegocio(
 
 
   /* =====================================================
-     FOTOS DEL NEGOCIO
+     FOTOS
   ===================================================== */
 
   const fotos = [];
 
   if (negocio.foto_portada) {
+
     fotos.push(
       negocio.foto_portada
     );
+
   }
 
   if (
@@ -1059,90 +1057,15 @@ function crearTarjetaNegocio(
 
 
   /* =====================================================
-     GALERÍA
+     PORTADA / CARRUSEL
   ===================================================== */
 
   let portadaHTML = "";
 
 
   if (
-    fotosFinales.length > 0
+    fotosFinales.length === 0
   ) {
-
-    portadaHTML = `
-
-      <div
-        class="business-gallery"
-        ontouchstart="iniciarSwipeNegocio(event)"
-        ontouchend="finalizarSwipeNegocio(event)"
-      >
-
-        <div
-          class="business-gallery-track"
-          id="businessGallery-${negocio.id}"
-        >
-
-          ${fotosFinales
-            .map(
-              (foto, indice) => `
-                <div
-                  class="business-gallery-slide"
-                >
-
-                  <img
-                    src="${escaparHTML(
-                      foto
-                    )}"
-                    alt="Foto ${indice + 1} de ${escaparHTML(
-                      negocio.nombre
-                    )}"
-                    class="business-cover-image"
-                    onclick="abrirFotoPortada('${escaparHTML(
-                      foto
-                    )}')"
-                  >
-
-                </div>
-              `
-            )
-            .join("")}
-
-        </div>
-
-
-        ${
-          fotosFinales.length > 1
-            ? `
-
-              <div
-                class="business-gallery-dots"
-              >
-
-                ${fotosFinales
-                  .map(
-                    (foto, indice) => `
-                      <span
-                        class="business-gallery-dot ${
-                          indice === 0
-                            ? "active"
-                            : ""
-                        }"
-                      ></span>
-                    `
-                  )
-                  .join("")}
-
-              </div>
-
-            `
-            : ""
-        }
-
-      </div>
-
-    `;
-
-  } else {
 
     portadaHTML = `
 
@@ -1161,6 +1084,105 @@ function crearTarjetaNegocio(
         <span>
           Este negocio aún no tiene una foto
         </span>
+
+      </div>
+
+    `;
+
+  } else {
+
+    portadaHTML = `
+
+      <div
+        class="business-gallery"
+        ontouchstart="
+          iniciarSwipeNegocio(event)
+        "
+        ontouchend="
+          finalizarSwipeNegocio(event)
+        "
+      >
+
+        <div
+          class="business-gallery-track"
+          data-indice="0"
+        >
+
+          ${
+            fotosFinales
+              .map(
+                (foto, indice) => `
+
+                  <div
+                    class="business-gallery-slide"
+                  >
+
+                    <img
+                      src="${escaparHTML(
+                        foto
+                      )}"
+                      alt="Foto ${
+                        indice + 1
+                      } de ${escaparHTML(
+                        negocio.nombre
+                      )}"
+                      class="business-cover-image"
+                      onclick="
+                        abrirFotoPortada(
+                          '${escaparHTML(
+                            foto
+                          )}'
+                        )
+                      "
+                    >
+
+                  </div>
+
+                `
+              )
+              .join("")
+          }
+
+        </div>
+
+
+        ${
+          fotosFinales.length > 1
+            ? `
+
+              <div
+                class="business-gallery-dots"
+              >
+
+                ${
+                  fotosFinales
+                    .map(
+                      (
+                        foto,
+                        indice
+                      ) => `
+
+                        <span
+                          class="
+                            business-gallery-dot
+                            ${
+                              indice === 0
+                                ? "active"
+                                : ""
+                            }
+                          "
+                        ></span>
+
+                      `
+                    )
+                    .join("")
+                }
+
+              </div>
+
+            `
+            : ""
+        }
 
       </div>
 
@@ -1191,7 +1213,7 @@ function crearTarjetaNegocio(
                 border-radius:20px;
                 font-size:11px;
                 font-weight:700;
-                z-index:3;
+                z-index:5;
               ">
                 ✨ DESTACADO
               </span>
@@ -1290,6 +1312,10 @@ function crearTarjetaNegocio(
   `;
 
 }
+
+          
+
+
 
   
 /* =====================================================
