@@ -615,8 +615,64 @@ async function cargarDatosDemo() {
 
   }
 
+
+  /* =====================================================
+     CARGAR FOTOS ADICIONALES DE LOS NEGOCIOS
+  ===================================================== */
+
+  const {
+    data: fotos,
+    error: errorFotos
+  } = await supabaseClient
+    .from("negocio_fotos")
+    .select("*")
+    .order("orden", {
+      ascending: true
+    });
+
+  if (errorFotos) {
+
+    console.error(
+      "Error cargando fotos de negocios:",
+      errorFotos
+    );
+
+  }
+
+
+  const fotosNegocios =
+    fotos || [];
+
+
+  /* =====================================================
+     CONSTRUIR NEGOCIOS
+  ===================================================== */
+
   ReservaYa.negocios =
     (data || []).map(negocio => {
+
+      const fotosAdicionales =
+        fotosNegocios
+          .filter(
+            foto =>
+              String(
+                foto.negocio_id
+              ) ===
+              String(
+                negocio.id
+              )
+          )
+          .sort(
+            (a, b) =>
+              Number(
+                a.orden
+              ) -
+              Number(
+                b.orden
+              )
+          )
+          .slice(0, 4);
+
 
       return {
 
@@ -643,7 +699,10 @@ async function cargarDatosDemo() {
           "",
 
         rating:
-          Number(negocio.rating || 0),
+          Number(
+            negocio.rating ||
+            0
+          ),
 
         reseñas:
           Number(
@@ -660,13 +719,25 @@ async function cargarDatosDemo() {
         usuario_id:
           negocio.usuario_id ||
           null,
+
         foto_portada:
           negocio.foto_portada ||
-          ""
+          "",
+
+        fotos:
+          fotosAdicionales.map(
+            foto =>
+              foto.url
+          )
 
       };
 
     });
+
+
+  /* =====================================================
+     RENDERIZAR
+  ===================================================== */
 
   renderizarNegociosCercanos();
 
@@ -677,8 +748,6 @@ async function cargarDatosDemo() {
   actualizarContadores();
 
 }
-
-
 /* =====================================================
    CATEGORÍAS
 ===================================================== */
