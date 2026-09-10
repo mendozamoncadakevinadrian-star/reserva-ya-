@@ -4502,7 +4502,7 @@ if (ReservaYa.negocioActual) {
 
   return;
 }
-  }
+}
 
   mostrarToast(
     "Todavía no tienes un negocio registrado."
