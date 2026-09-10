@@ -8058,13 +8058,15 @@ function mostrarVistaPortadaNegocio() {
 
     preview.innerHTML = `
       <img
-        src="${escaparHTML(foto)}"
-        alt="Portada de ${escaparHTML(
-          ReservaYa.negocioActual?.nombre ||
-          "negocio"
-        )}"
-      >
-    `;
+       src="${escaparHTML(foto)}"
+       alt="Portada de ${escaparHTML(
+       ReservaYa.negocioActual?.nombre ||
+       "negocio"
+     )}"
+      onclick="abrirFotoPortada('${escaparHTML(foto)}')"
+      style="cursor:pointer;"
+   >
+`;
 
     if (removeButton) {
       removeButton.classList.remove(
