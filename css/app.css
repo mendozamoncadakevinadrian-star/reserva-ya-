@@ -2473,3 +2473,121 @@ body {
   }
 
 }
+
+/* =====================================================
+   VISTA GRANDE DE FOTO DEL NEGOCIO
+===================================================== */
+
+.business-photo-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(4, 6, 12, 0.94);
+  backdrop-filter: blur(12px);
+
+  opacity: 1;
+  visibility: visible;
+}
+
+.business-photo-modal.hidden {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.business-photo-viewer {
+  width: min(100%, 900px);
+  max-height: 90vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.business-photo-viewer img {
+  display: block;
+
+  max-width: 100%;
+  max-height: 88vh;
+
+  width: auto;
+  height: auto;
+
+  object-fit: contain;
+
+  border-radius: 16px;
+
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.55);
+
+  user-select: none;
+}
+
+.business-photo-close {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.12);
+
+  background: rgba(24, 29, 41, .92);
+  color: #fff;
+
+  font-size: 18px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  z-index: 2;
+}
+
+.business-photo-close:hover {
+  background: rgba(124,108,255,.9);
+}
+
+@media (max-width: 640px) {
+
+  .business-photo-modal {
+    padding: 12px;
+  }
+
+  .business-photo-viewer {
+    width: 100%;
+    max-height: 88vh;
+  }
+
+  .business-photo-viewer img {
+    max-width: 100%;
+    max-height: 82vh;
+    border-radius: 13px;
+  }
+
+  .business-photo-close {
+    top: 12px;
+    right: 12px;
+
+    width: 38px;
+    height: 38px;
+
+    font-size: 16px;
+  }
+
+}
