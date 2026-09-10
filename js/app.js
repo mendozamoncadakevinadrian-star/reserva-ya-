@@ -4498,10 +4498,9 @@ if (ReservaYa.negocioActual) {
 
   await cargarDatosPanelNegocio();
 
-  mostrarVistaPortadaNegocio();
-
   return;
 }
+   
 }
 
   mostrarToast(
