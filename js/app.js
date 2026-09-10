@@ -1018,30 +1018,165 @@ function crearTarjetaNegocio(
       negocio.id
     );
 
+
+  /* =====================================================
+     FOTOS DEL NEGOCIO
+  ===================================================== */
+
+  const fotos = [];
+
+  if (negocio.foto_portada) {
+    fotos.push(
+      negocio.foto_portada
+    );
+  }
+
+  if (
+    Array.isArray(
+      negocio.fotos
+    )
+  ) {
+
+    negocio.fotos.forEach(
+      foto => {
+
+        if (
+          foto &&
+          !fotos.includes(foto)
+        ) {
+
+          fotos.push(foto);
+
+        }
+
+      }
+    );
+
+  }
+
+  const fotosFinales =
+    fotos.slice(0, 5);
+
+
+  /* =====================================================
+     GALERÍA
+  ===================================================== */
+
+  let portadaHTML = "";
+
+
+  if (
+    fotosFinales.length > 0
+  ) {
+
+    portadaHTML = `
+
+      <div
+        class="business-gallery"
+        ontouchstart="iniciarSwipeNegocio(event)"
+        ontouchend="finalizarSwipeNegocio(event)"
+      >
+
+        <div
+          class="business-gallery-track"
+          id="businessGallery-${negocio.id}"
+        >
+
+          ${fotosFinales
+            .map(
+              (foto, indice) => `
+                <div
+                  class="business-gallery-slide"
+                >
+
+                  <img
+                    src="${escaparHTML(
+                      foto
+                    )}"
+                    alt="Foto ${indice + 1} de ${escaparHTML(
+                      negocio.nombre
+                    )}"
+                    class="business-cover-image"
+                    onclick="abrirFotoPortada('${escaparHTML(
+                      foto
+                    )}')"
+                  >
+
+                </div>
+              `
+            )
+            .join("")}
+
+        </div>
+
+
+        ${
+          fotosFinales.length > 1
+            ? `
+
+              <div
+                class="business-gallery-dots"
+              >
+
+                ${fotosFinales
+                  .map(
+                    (foto, indice) => `
+                      <span
+                        class="business-gallery-dot ${
+                          indice === 0
+                            ? "active"
+                            : ""
+                        }"
+                      ></span>
+                    `
+                  )
+                  .join("")}
+
+              </div>
+
+            `
+            : ""
+        }
+
+      </div>
+
+    `;
+
+  } else {
+
+    portadaHTML = `
+
+      <div class="business-cover-placeholder">
+
+        <span
+          class="business-cover-placeholder-icon"
+        >
+          📷
+        </span>
+
+        <strong>
+          Portada del negocio
+        </strong>
+
+        <span>
+          Este negocio aún no tiene una foto
+        </span>
+
+      </div>
+
+    `;
+
+  }
+
+
   return `
 
     <article class="business-card">
 
       <div class="business-cover">
 
-${
-  negocio.foto_portada
-    ? `
-      <img
-       src="${escaparHTML(negocio.foto_portada)}"
-       alt="Portada de ${escaparHTML(negocio.nombre)}"
-       class="business-cover-image"
-       onclick="abrirFotoPortada('${escaparHTML(negocio.foto_portada)}')"
-     >
-    `
-    : `
-      <div class="business-cover-placeholder">
-        <span class="business-cover-placeholder-icon">📷</span>
-        <strong>Portada del negocio</strong>
-        <span>Este negocio aún no tiene una foto</span>
-      </div>
-    `
-}
+        ${portadaHTML}
+
 
         ${
           negocio.destacado
@@ -1056,6 +1191,7 @@ ${
                 border-radius:20px;
                 font-size:11px;
                 font-weight:700;
+                z-index:3;
               ">
                 ✨ DESTACADO
               </span>
@@ -1065,6 +1201,7 @@ ${
 
       </div>
 
+
       <div class="business-info">
 
         <h3>
@@ -1072,6 +1209,7 @@ ${
             negocio.nombre
           )}
         </h3>
+
 
         <div class="business-category">
 
@@ -1082,9 +1220,11 @@ ${
 
         </div>
 
+
         <div class="business-location">
 
           📍
+
           ${escaparHTML(
             negocio.ubicacion ||
             negocio.ciudad
@@ -1092,9 +1232,11 @@ ${
 
         </div>
 
+
         <div class="business-rating">
 
           ⭐
+
           ${Number(
             negocio.rating || 0
           ).toFixed(1)}
@@ -1108,6 +1250,7 @@ ${
           reseñas
 
         </div>
+
 
         <div class="business-footer">
 
@@ -1125,6 +1268,7 @@ ${
                 : "♡ Guardar"
             }
           </button>
+
 
           <button
             class="primary-button"
@@ -1147,7 +1291,7 @@ ${
 
 }
 
-
+  
 /* =====================================================
    BUSCAR
 ===================================================== */
