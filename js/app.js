@@ -8387,3 +8387,131 @@ function cerrarFotoPortada(event) {
   }
 
 }
+
+/* =====================================================
+   SWIPE — GALERÍA DE NEGOCIOS
+===================================================== */
+
+const negocioGalleryTouches = new WeakMap();
+
+
+function iniciarSwipeNegocio(event) {
+
+  const galeria =
+    event.currentTarget;
+
+  if (!galeria) return;
+
+  const toque =
+    event.touches?.[0];
+
+  if (!toque) return;
+
+  negocioGalleryTouches.set(
+    galeria,
+    {
+      inicioX: toque.clientX
+    }
+  );
+
+}
+
+
+function finalizarSwipeNegocio(event) {
+
+  const galeria =
+    event.currentTarget;
+
+  if (!galeria) return;
+
+  const datos =
+    negocioGalleryTouches.get(
+      galeria
+    );
+
+  if (!datos) return;
+
+  const toque =
+    event.changedTouches?.[0];
+
+  if (!toque) return;
+
+  const diferencia =
+    toque.clientX -
+    datos.inicioX;
+
+  negocioGalleryTouches.delete(
+    galeria
+  );
+
+  if (
+    Math.abs(diferencia) < 40
+  ) {
+    return;
+  }
+
+  const track =
+    galeria.querySelector(
+      ".business-gallery-track"
+    );
+
+  if (!track) return;
+
+  const slides =
+    galeria.querySelectorAll(
+      ".business-gallery-slide"
+    );
+
+  const total =
+    slides.length;
+
+  if (total <= 1) return;
+
+  let actual =
+    Number(
+      track.dataset.indice || 0
+    );
+
+  if (diferencia < 0) {
+
+    actual++;
+
+  } else {
+
+    actual--;
+
+  }
+
+  actual =
+    Math.max(
+      0,
+      Math.min(
+        actual,
+        total - 1
+      )
+    );
+
+  track.dataset.indice =
+    String(actual);
+
+  track.style.transform =
+    `translateX(-${actual * 100}%)`;
+
+
+  const puntos =
+    galeria.querySelectorAll(
+      ".business-gallery-dot"
+    );
+
+  puntos.forEach(
+    (punto, indice) => {
+
+      punto.classList.toggle(
+        "active",
+        indice === actual
+      );
+
+    }
+  );
+
+}
