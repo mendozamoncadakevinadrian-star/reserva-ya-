@@ -7745,3 +7745,386 @@ function mostrarToast(
 console.log(
   "🚀 ReservaYa V4 cargado correctamente."
 );
+
+/* =====================================================
+   PORTADA DEL NEGOCIO
+===================================================== */
+
+function seleccionarFotoPortada() {
+
+  const input =
+    document.getElementById(
+      "businessCoverInput"
+    );
+
+  if (!input) return;
+
+  input.click();
+
+}
+
+async function subirFotoPortada(archivo) {
+
+  if (!archivo) return;
+
+  if (!ReservaYa.usuario) {
+
+    mostrarToast(
+      "Debes iniciar sesión."
+    );
+
+    return;
+
+  }
+
+  if (!ReservaYa.negocioActual) {
+
+    await detectarNegocioUsuario();
+
+  }
+
+  if (!ReservaYa.negocioActual) {
+
+    mostrarToast(
+      "No se encontró tu negocio."
+    );
+
+    return;
+
+  }
+
+  const tiposPermitidos = [
+    "image/jpeg",
+    "image/png",
+    "image/webp"
+  ];
+
+  if (
+    !tiposPermitidos.includes(
+      archivo.type
+    )
+  ) {
+
+    mostrarToast(
+      "Solo puedes subir JPG, PNG o WEBP."
+    );
+
+    return;
+
+  }
+
+  if (
+    archivo.size >
+    5 * 1024 * 1024
+  ) {
+
+    mostrarToast(
+      "La imagen no puede superar 5 MB."
+    );
+
+    return;
+
+  }
+
+  mostrarToast(
+    "Subiendo portada..."
+  );
+
+  const usuarioId =
+    ReservaYa.usuario.id;
+
+  const negocioId =
+    ReservaYa.negocioActual.id;
+
+  const extension =
+    archivo.name
+      .split(".")
+      .pop()
+      .toLowerCase();
+
+  const nombreArchivo =
+    `${negocioId}-${Date.now()}.${extension}`;
+
+  const ruta =
+    `${usuarioId}/${nombreArchivo}`;
+
+  const {
+    data: uploadData,
+    error: uploadError
+  } =
+    await supabaseClient.storage
+      .from("negocios-portadas")
+      .upload(
+        ruta,
+        archivo,
+        {
+          cacheControl: "3600",
+          upsert: true,
+          contentType: archivo.type
+        }
+      );
+
+  if (uploadError) {
+
+    console.error(
+      "Error subiendo portada:",
+      uploadError
+    );
+
+    mostrarToast(
+      "No se pudo subir la portada."
+    );
+
+    return;
+
+  }
+
+  const {
+    data: publicUrlData
+  } =
+    supabaseClient.storage
+      .from("negocios-portadas")
+      .getPublicUrl(
+        uploadData.path
+      );
+
+  const fotoPortada =
+    publicUrlData.publicUrl;
+
+  const {
+    error: updateError
+  } =
+    await supabaseClient
+      .from("negocios")
+      .update({
+        foto_portada:
+          fotoPortada
+      })
+      .eq(
+        "id",
+        negocioId
+      )
+      .eq(
+        "usuario_id",
+        usuarioId
+      );
+
+  if (updateError) {
+
+    console.error(
+      "Error guardando foto_portada:",
+      updateError
+    );
+
+    mostrarToast(
+      "La imagen se subió, pero no se pudo guardar."
+    );
+
+    return;
+
+  }
+
+  ReservaYa.negocioActual.foto_portada =
+    fotoPortada;
+
+  mostrarVistaPortadaNegocio();
+
+  mostrarToast(
+    "Portada actualizada correctamente."
+  );
+
+  await cargarDatosDemo();
+
+}
+
+async function eliminarFotoPortada() {
+
+  if (!ReservaYa.usuario) {
+
+    mostrarToast(
+      "Debes iniciar sesión."
+    );
+
+    return;
+
+  }
+
+  if (!ReservaYa.negocioActual) {
+
+    await detectarNegocioUsuario();
+
+  }
+
+  if (!ReservaYa.negocioActual) {
+
+    mostrarToast(
+      "No se encontró tu negocio."
+    );
+
+    return;
+
+  }
+
+  const fotoActual =
+    ReservaYa.negocioActual
+      .foto_portada;
+
+  if (!fotoActual) {
+
+    mostrarToast(
+      "No tienes una portada."
+    );
+
+    return;
+
+  }
+
+  const confirmar =
+    confirm(
+      "¿Quieres eliminar la foto de portada?"
+    );
+
+  if (!confirmar) return;
+
+  const usuarioId =
+    ReservaYa.usuario.id;
+
+  const negocioId =
+    ReservaYa.negocioActual.id;
+
+  const {
+    error: updateError
+  } =
+    await supabaseClient
+      .from("negocios")
+      .update({
+        foto_portada: ""
+      })
+      .eq(
+        "id",
+        negocioId
+      )
+      .eq(
+        "usuario_id",
+        usuarioId
+      );
+
+  if (updateError) {
+
+    console.error(
+      "Error eliminando portada:",
+      updateError
+    );
+
+    mostrarToast(
+      "No se pudo eliminar la portada."
+    );
+
+    return;
+
+  }
+
+  ReservaYa.negocioActual.foto_portada =
+    "";
+
+  mostrarVistaPortadaNegocio();
+
+  mostrarToast(
+    "Portada eliminada."
+  );
+
+  await cargarDatosDemo();
+
+}
+
+function mostrarVistaPortadaNegocio() {
+
+  const preview =
+    document.getElementById(
+      "businessCoverPreview"
+    );
+
+  const removeButton =
+    document.getElementById(
+      "businessCoverRemoveButton"
+    );
+
+  if (!preview) return;
+
+  const foto =
+    ReservaYa.negocioActual?.foto_portada ||
+    "";
+
+  if (foto) {
+
+    preview.innerHTML = `
+      <img
+        src="${escaparHTML(foto)}"
+        alt="Portada de ${escaparHTML(
+          ReservaYa.negocioActual?.nombre ||
+          "negocio"
+        )}"
+      >
+    `;
+
+    if (removeButton) {
+      removeButton.classList.remove(
+        "hidden"
+      );
+    }
+
+    return;
+
+  }
+
+  preview.innerHTML = `
+    <div class="business-cover-manager-empty">
+      <span>📷</span>
+      <strong>Sin foto de portada</strong>
+      <small>
+        Tu negocio todavía no tiene una imagen.
+      </small>
+    </div>
+  `;
+
+  if (removeButton) {
+
+    removeButton.classList.add(
+      "hidden"
+    );
+
+  }
+
+}
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    const input =
+      document.getElementById(
+        "businessCoverInput"
+      );
+
+    if (!input) return;
+
+    input.addEventListener(
+      "change",
+      async event => {
+
+        const archivo =
+          event.target.files?.[0];
+
+        if (!archivo) return;
+
+        await subirFotoPortada(
+          archivo
+        );
+
+        event.target.value = "";
+
+      }
+    );
+
+  }
+);
