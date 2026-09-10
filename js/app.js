@@ -4493,18 +4493,15 @@ async function abrirPanelNegocio() {
 
   }
 
-  if (
-    ReservaYa.negocioActual
-  ) {
+if (ReservaYa.negocioActual) {
+  cambiarVista("business");
 
-    cambiarVista(
-      "business"
-    );
+  await cargarDatosPanelNegocio();
 
-    await cargarDatosPanelNegocio();
+  mostrarVistaPortadaNegocio();
 
-    return;
-
+  return;
+}
   }
 
   mostrarToast(
