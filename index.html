@@ -1243,7 +1243,40 @@
 
     </div>
 
+<!-- =====================================================
+     BUSINESS PHOTO VIEWER
+====================================================== -->
 
+<div
+  id="businessPhotoModal"
+  class="business-photo-modal hidden"
+  onclick="cerrarFotoPortada(event)"
+>
+
+  <button
+    type="button"
+    class="business-photo-close"
+    onclick="cerrarFotoPortada()"
+    aria-label="Cerrar foto"
+  >
+    ✕
+  </button>
+
+  <div
+    class="business-photo-viewer"
+    onclick="event.stopPropagation()"
+  >
+
+    <img
+      id="businessPhotoModalImage"
+      src=""
+      alt="Foto del negocio"
+    >
+
+  </div>
+
+</div>
+    
     <!-- =====================================================
          TOAST SYSTEM
     ====================================================== -->
