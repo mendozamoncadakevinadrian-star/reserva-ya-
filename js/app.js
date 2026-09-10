@@ -4764,7 +4764,9 @@ async function cargarDatosPanelNegocio() {
     reservas,
     servicios
   );
-
+   
+ mostrarVistaPortadaNegocio();
+   
 }
 
 
