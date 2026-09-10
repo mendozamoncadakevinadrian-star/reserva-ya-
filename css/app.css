@@ -2325,3 +2325,131 @@ body {
   }
 
 }
+
+/* =====================================================
+   GESTOR DE PORTADA DEL NEGOCIO
+===================================================== */
+
+.business-cover-manager {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 20px;
+  background: linear-gradient(
+    145deg,
+    #171c29,
+    #11151f
+  );
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 10px 28px rgba(0,0,0,.20);
+}
+
+.business-cover-manager-header {
+  margin-bottom: 14px;
+}
+
+.business-cover-manager-header .eyebrow {
+  display: block;
+  margin-bottom: 5px;
+  color: #21d4df;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+.business-cover-manager-header h2 {
+  margin: 0;
+  color: #f5f7ff;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.business-cover-manager-header p {
+  margin: 6px 0 0;
+  color: #8f98ad;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.business-cover-manager-preview {
+  width: 100%;
+  min-height: 180px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+  background: #0d111a;
+  border: 1px solid rgba(255,255,255,.07);
+}
+
+.business-cover-manager-preview img {
+  width: 100%;
+  height: 180px;
+  display: block;
+  object-fit: cover;
+}
+
+.business-cover-manager-empty {
+  min-height: 180px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  text-align: center;
+}
+
+.business-cover-manager-empty span {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 3px;
+  border-radius: 13px;
+  background: rgba(124,108,255,.12);
+  border: 1px solid rgba(124,108,255,.2);
+  font-size: 18px;
+}
+
+.business-cover-manager-empty strong {
+  color: #f5f7ff;
+  font-size: 12px;
+}
+
+.business-cover-manager-empty small {
+  color: #7f899d;
+  font-size: 10px;
+}
+
+.business-cover-manager-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.business-cover-manager-actions button {
+  flex: 1;
+  margin-top: 0 !important;
+}
+
+@media (max-width: 420px) {
+
+  .business-cover-manager {
+    padding: 14px;
+    border-radius: 17px;
+  }
+
+  .business-cover-manager-preview,
+  .business-cover-manager-preview img,
+  .business-cover-manager-empty {
+    min-height: 155px;
+    height: 155px;
+  }
+
+  .business-cover-manager-header h2 {
+    font-size: 16px;
+  }
+
+}
