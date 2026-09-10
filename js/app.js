@@ -4493,15 +4493,15 @@ async function abrirPanelNegocio() {
 
   }
 
-if (ReservaYa.negocioActual) {
-  cambiarVista("business");
+  if (ReservaYa.negocioActual) {
 
-  await cargarDatosPanelNegocio();
+    cambiarVista("business");
 
-  return;
-}
-   
-}
+    await cargarDatosPanelNegocio();
+
+    return;
+
+  }
 
   mostrarToast(
     "Todavía no tienes un negocio registrado."
