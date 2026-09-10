@@ -959,10 +959,11 @@ ${
   negocio.foto_portada
     ? `
       <img
-        src="${escaparHTML(negocio.foto_portada)}"
-        alt="Portada de ${escaparHTML(negocio.nombre)}"
-        class="business-cover-image"
-      >
+       src="${escaparHTML(negocio.foto_portada)}"
+       alt="Portada de ${escaparHTML(negocio.nombre)}"
+       class="business-cover-image"
+       onclick="abrirFotoPortada('${escaparHTML(negocio.foto_portada)}')"
+     >
     `
     : `
       <div class="business-cover-placeholder">
@@ -8126,3 +8127,48 @@ document.addEventListener(
 
   }
 );
+
+function abrirFotoPortada(url) {
+
+  if (!url) return;
+
+  const modal =
+    document.getElementById("businessPhotoModal");
+
+  const imagen =
+    document.getElementById("businessPhotoModalImage");
+
+  if (!modal || !imagen) return;
+
+  imagen.src = url;
+
+  modal.classList.remove("hidden");
+
+}
+
+
+function cerrarFotoPortada(event) {
+
+  if (
+    event &&
+    event.target &&
+    event.target.id !== "businessPhotoModal"
+  ) {
+    return;
+  }
+
+  const modal =
+    document.getElementById("businessPhotoModal");
+
+  const imagen =
+    document.getElementById("businessPhotoModalImage");
+
+  if (!modal) return;
+
+  modal.classList.add("hidden");
+
+  if (imagen) {
+    imagen.src = "";
+  }
+
+}
