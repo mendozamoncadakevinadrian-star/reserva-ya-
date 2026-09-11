@@ -8785,10 +8785,12 @@ async function eliminarFotoGaleria(fotoId) {
 
   mostrarGaleriaNegocio();
 
-  mostrarToast(
-    "Foto eliminada de la galería."
-  );
+await cargarDatosDemo();
 
+mostrarToast(
+  "Foto eliminada de la galería."
+);
+   
 }
 
 document.addEventListener(
