@@ -8706,6 +8706,90 @@ async function subirFotosGaleria(archivos) {
   );
 
 }
+async function eliminarFotoGaleria(fotoId) {
+
+  if (!fotoId) return;
+
+  if (!ReservaYa.usuario) {
+
+    mostrarToast(
+      "Debes iniciar sesión."
+    );
+
+    return;
+
+  }
+
+  if (!ReservaYa.negocioActual) {
+
+    await detectarNegocioUsuario();
+
+  }
+
+  if (!ReservaYa.negocioActual) {
+
+    mostrarToast(
+      "No se encontró tu negocio."
+    );
+
+    return;
+
+  }
+
+  const confirmar =
+    confirm(
+      "¿Quieres eliminar esta foto de la galería?"
+    );
+
+  if (!confirmar) return;
+
+  const {
+    error
+  } =
+    await supabaseClient
+      .from("negocio_fotos")
+      .delete()
+      .eq(
+        "id",
+        fotoId
+      )
+      .eq(
+        "usuario_id",
+        ReservaYa.usuario.id
+      );
+
+  if (error) {
+
+    console.error(
+      "Error eliminando foto de galería:",
+      error
+    );
+
+    mostrarToast(
+      "No se pudo eliminar la foto."
+    );
+
+    return;
+
+  }
+
+  ReservaYa.negocioActual.fotos =
+    (
+      ReservaYa.negocioActual.fotos ||
+      []
+    ).filter(
+      foto =>
+        String(foto.id) !==
+        String(fotoId)
+    );
+
+  mostrarGaleriaNegocio();
+
+  mostrarToast(
+    "Foto eliminada de la galería."
+  );
+
+}
 
 document.addEventListener(
   "DOMContentLoaded",
