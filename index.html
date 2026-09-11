@@ -761,9 +761,12 @@
 
         <div class="business-dashboard">
 
-<!-- BUSINESS COVER -->
+
+<!-- BUSINESS PHOTOS -->
 
 <div class="business-cover-manager">
+
+  <!-- PORTADA -->
 
   <div class="business-cover-manager-header">
 
@@ -777,7 +780,7 @@
       </h2>
 
       <p>
-        Añade una foto para mostrar tu negocio a tus clientes.
+        Añade una foto principal para mostrar tu negocio a tus clientes.
       </p>
     </div>
 
@@ -817,7 +820,71 @@
     hidden
   >
 
+
+  <!-- GALERÍA -->
+
+  <div class="business-gallery-manager">
+
+    <div class="business-gallery-manager-header">
+
+      <div>
+
+        <span class="eyebrow">
+          GALERÍA DEL NEGOCIO
+        </span>
+
+        <h2>
+          Muestra más de tu negocio
+        </h2>
+
+        <p>
+          Añade hasta 4 fotos adicionales para que tus clientes conozcan mejor tu negocio.
+        </p>
+
+      </div>
+
+      <span
+        id="businessGalleryCount"
+        class="business-gallery-count"
+      >
+        0 / 4
+      </span>
+
+    </div>
+
+
+    <div
+      id="businessGalleryPreview"
+      class="business-gallery-manager-preview"
+    >
+    </div>
+
+
+    <div class="business-cover-manager-actions">
+
+      <button
+        type="button"
+        class="primary-button"
+        onclick="seleccionarFotoGaleria()"
+      >
+        ＋ Añadir foto a la galería
+      </button>
+
+    </div>
+
+
+    <input
+      type="file"
+      id="businessGalleryInput"
+      accept="image/jpeg,image/png,image/webp"
+      hidden
+      multiple
+    >
+
+  </div>
+
 </div>
+
           <!-- BUSINESS HEADER -->
 
           <div class="page-header">
