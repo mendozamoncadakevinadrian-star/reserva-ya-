@@ -4934,7 +4934,40 @@ async function cargarDatosPanelNegocio() {
       reservas,
       servicios
     );
+   
+  const {
+    data: fotosGaleria,
+    error: errorFotosGaleria
+  } =
+    await supabaseClient
+      .from("negocio_fotos")
+      .select("*")
+      .eq(
+        "negocio_id",
+        String(negocioId)
+      )
+      .order(
+        "orden",
+        { ascending: true }
+      );
 
+  if (errorFotosGaleria) {
+
+    console.error(
+      "Error cargando fotos de galería:",
+      errorFotosGaleria
+    );
+
+  }
+
+  ReservaYa.negocioActual.fotos =
+    (fotosGaleria || [])
+      .sort(
+        (a, b) =>
+          Number(a.orden) -
+          Number(b.orden)
+      )
+      .slice(0, 4);
   actualizarElemento(
     "statReservations",
     totalReservas
@@ -4995,14 +5028,16 @@ async function cargarDatosPanelNegocio() {
     reservas,
     servicios
   );
-
+   
   renderizarPulse(
     reservas,
     servicios
   );
-   
- mostrarVistaPortadaNegocio();
-   
+
+  mostrarVistaPortadaNegocio();
+
+  mostrarGaleriaNegocio();
+  
 }
 
 
@@ -8336,6 +8371,375 @@ function mostrarVistaPortadaNegocio() {
   }
 
 }
+
+function mostrarGaleriaNegocio() {
+
+  const preview =
+    document.getElementById(
+      "businessGalleryPreview"
+    );
+
+  const contador =
+    document.getElementById(
+      "businessGalleryCount"
+    );
+
+  if (!preview) return;
+
+  const fotos =
+    ReservaYa.negocioActual?.fotos ||
+    [];
+
+  if (contador) {
+
+    contador.textContent =
+      `${fotos.length} / 4`;
+
+  }
+
+  if (!fotos.length) {
+
+    preview.innerHTML = `
+      <div class="business-gallery-manager-empty">
+
+        <span>📷</span>
+
+        <strong>
+          Sin fotos adicionales
+        </strong>
+
+        <small>
+          Añade hasta 4 fotos para mostrar más de tu negocio.
+        </small>
+
+      </div>
+    `;
+
+    return;
+
+  }
+
+  preview.innerHTML =
+    fotos
+      .map(
+        foto => `
+          <div
+            class="business-gallery-manager-item"
+          >
+
+            <img
+              src="${escaparHTML(foto.url)}"
+              alt="Foto de ${escaparHTML(
+                ReservaYa.negocioActual?.nombre ||
+                "negocio"
+              )}"
+              onclick="abrirFotoPortada('${escaparHTML(
+                foto.url
+              )}')"
+            >
+
+            <button
+              type="button"
+              class="business-gallery-manager-delete"
+              onclick="eliminarFotoGaleria('${foto.id}')"
+              aria-label="Eliminar foto"
+            >
+              🗑️
+            </button>
+
+          </div>
+        `
+      )
+      .join("");
+
+}
+function seleccionarFotoGaleria() {
+
+  const input =
+    document.getElementById(
+      "businessGalleryInput"
+    );
+
+  if (!input) return;
+
+  const fotos =
+    ReservaYa.negocioActual?.fotos ||
+    [];
+
+  if (fotos.length >= 4) {
+
+    mostrarToast(
+      "Ya tienes las 4 fotos de la galería."
+    );
+
+    return;
+
+  }
+
+  input.click();
+
+}
+
+
+async function subirFotosGaleria(archivos) {
+
+  if (!archivos || !archivos.length) {
+    return;
+  }
+
+  if (!ReservaYa.usuario) {
+
+    mostrarToast(
+      "Debes iniciar sesión."
+    );
+
+    return;
+
+  }
+
+  if (!ReservaYa.negocioActual) {
+
+    await detectarNegocioUsuario();
+
+  }
+
+  if (!ReservaYa.negocioActual) {
+
+    mostrarToast(
+      "No se encontró tu negocio."
+    );
+
+    return;
+
+  }
+
+  const fotosActuales =
+    ReservaYa.negocioActual.fotos ||
+    [];
+
+  const espacioDisponible =
+    4 - fotosActuales.length;
+
+  if (espacioDisponible <= 0) {
+
+    mostrarToast(
+      "Ya tienes las 4 fotos de la galería."
+    );
+
+    return;
+
+  }
+
+  const archivosSeleccionados =
+    Array.from(archivos)
+      .slice(
+        0,
+        espacioDisponible
+      );
+
+  const tiposPermitidos = [
+    "image/jpeg",
+    "image/png",
+    "image/webp"
+  ];
+
+  for (
+    const archivo
+    of archivosSeleccionados
+  ) {
+
+    if (
+      !tiposPermitidos.includes(
+        archivo.type
+      )
+    ) {
+
+      mostrarToast(
+        "Solo puedes subir JPG, PNG o WEBP."
+      );
+
+      continue;
+
+    }
+
+    if (
+      archivo.size >
+      5 * 1024 * 1024
+    ) {
+
+      mostrarToast(
+        "Cada imagen puede pesar máximo 5 MB."
+      );
+
+      continue;
+
+    }
+
+    mostrarToast(
+      "Subiendo foto..."
+    );
+
+    const usuarioId =
+      ReservaYa.usuario.id;
+
+    const negocioId =
+      ReservaYa.negocioActual.id;
+
+    const orden =
+      fotosActuales.length + 1;
+
+    const extension =
+      archivo.name
+        .split(".")
+        .pop()
+        .toLowerCase();
+
+    const nombreArchivo =
+      `${negocioId}-galeria-${Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2, 8)}.${extension}`;
+
+    const ruta =
+      `${usuarioId}/${nombreArchivo}`;
+
+    const {
+      data: uploadData,
+      error: uploadError
+    } =
+      await supabaseClient.storage
+        .from(
+          "negocios-portadas"
+        )
+        .upload(
+          ruta,
+          archivo,
+          {
+            cacheControl: "3600",
+            upsert: false,
+            contentType:
+              archivo.type
+          }
+        );
+
+    if (uploadError) {
+
+      console.error(
+        "Error subiendo foto de galería:",
+        uploadError
+      );
+
+      mostrarToast(
+        "No se pudo subir una de las fotos."
+      );
+
+      continue;
+
+    }
+
+    const {
+      data: publicUrlData
+    } =
+      supabaseClient.storage
+        .from(
+          "negocios-portadas"
+        )
+        .getPublicUrl(
+          uploadData.path
+        );
+
+    const fotoUrl =
+      publicUrlData.publicUrl;
+
+    const {
+      data: fotoGuardada,
+      error: insertError
+    } =
+      await supabaseClient
+        .from(
+          "negocio_fotos"
+        )
+        .insert({
+          negocio_id:
+            String(negocioId),
+
+          usuario_id:
+            usuarioId,
+
+          url:
+            fotoUrl,
+
+          orden:
+            orden
+        })
+        .select()
+        .single();
+
+    if (insertError) {
+
+      console.error(
+        "Error guardando foto de galería:",
+        insertError
+      );
+
+      mostrarToast(
+        "La foto se subió, pero no se pudo guardar."
+      );
+
+      continue;
+
+    }
+
+    fotosActuales.push(
+      fotoGuardada
+    );
+
+  }
+
+  ReservaYa.negocioActual.fotos =
+    fotosActuales
+      .slice(0, 4);
+
+  mostrarGaleriaNegocio();
+
+  mostrarToast(
+    "Galería actualizada correctamente."
+  );
+
+}
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    const input =
+      document.getElementById(
+        "businessGalleryInput"
+      );
+
+    if (!input) return;
+
+    input.addEventListener(
+      "change",
+      async event => {
+
+        const archivos =
+          event.target.files;
+
+        if (!archivos?.length) {
+          return;
+        }
+
+        await subirFotosGaleria(
+          archivos
+        );
+
+        event.target.value = "";
+
+      }
+    );
+
+  }
+);
 
 document.addEventListener(
   "DOMContentLoaded",
