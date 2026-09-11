@@ -1673,21 +1673,159 @@ async function abrirNegocio(id) {
       c =>
         c.id === negocio.categoria
     );
+  const fotosFicha = [];
 
+  if (negocio.foto_portada) {
+
+    fotosFicha.push(
+      negocio.foto_portada
+    );
+
+  }
+
+  if (
+    Array.isArray(
+      negocio.fotos
+    )
+  ) {
+
+    negocio.fotos.forEach(
+      foto => {
+
+        if (
+          foto &&
+          !fotosFicha.includes(foto)
+        ) {
+
+          fotosFicha.push(
+            foto
+          );
+
+        }
+
+      }
+    );
+
+  }
+
+  const fotosFichaFinales =
+    fotosFicha.slice(0, 5);
+
+  let galeriaFichaHTML = "";
+
+  if (
+    fotosFichaFinales.length
+  ) {
+
+    galeriaFichaHTML = `
+
+      <div
+        class="business-gallery"
+        ontouchstart="
+          iniciarSwipeNegocio(event)
+        "
+        ontouchend="
+          finalizarSwipeNegocio(event)
+        "
+      >
+
+        <div
+          class="business-gallery-track"
+          data-indice="0"
+        >
+
+          ${
+            fotosFichaFinales
+              .map(
+                (
+                  foto,
+                  indice
+                ) => `
+
+                  <div
+                    class="business-gallery-slide"
+                  >
+
+                    <img
+                      src="${escaparHTML(
+                        foto
+                      )}"
+                      alt="Foto ${
+                        indice + 1
+                      } de ${escaparHTML(
+                        negocio.nombre
+                      )}"
+                      class="business-cover-image"
+                      onclick="
+                        abrirFotoPortada(
+                          '${escaparHTML(
+                            foto
+                          )}'
+                        )
+                      "
+                    >
+
+                  </div>
+
+                `
+              )
+              .join("")
+          }
+
+        </div>
+
+        ${
+          fotosFichaFinales.length > 1
+            ? `
+
+              <div
+                class="business-gallery-dots"
+              >
+
+                ${
+                  fotosFichaFinales
+                    .map(
+                      (
+                        foto,
+                        indice
+                      ) => `
+
+                        <span
+                          class="
+                            business-gallery-dot
+                            ${
+                              indice === 0
+                                ? "active"
+                                : ""
+                            }
+                          "
+                        ></span>
+
+                      `
+                    )
+                    .join("")
+                }
+
+              </div>
+
+            `
+            : ""
+        }
+
+      </div>
+
+    `;
+
+  }
   abrirModal(`
 
     <div style="
       text-align:center
     ">
 
-      <div style="
-        font-size:55px
-      ">
-        ${
-          categoria?.icono ||
-          "📍"
-        }
-      </div>
+            ${
+        galeriaFichaHTML
+      }
 
       <h2 style="
         margin-top:10px
@@ -8694,17 +8832,18 @@ async function subirFotosGaleria(archivos) {
     );
 
   }
-
   ReservaYa.negocioActual.fotos =
     fotosActuales
       .slice(0, 4);
 
   mostrarGaleriaNegocio();
 
+  await cargarDatosDemo();
+
   mostrarToast(
     "Galería actualizada correctamente."
   );
-
+  
 }
 async function eliminarFotoGaleria(fotoId) {
 
