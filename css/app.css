@@ -2844,3 +2844,114 @@ body {
   }
 
 }
+
+/* =====================================================
+   BUSINESS INFORMATION
+===================================================== */
+
+.business-info-manager {
+  margin-top: 16px;
+  padding: 18px;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #171c29, #11151f);
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 10px 28px rgba(0,0,0,.20);
+}
+
+.business-info-manager-header {
+  margin-bottom: 15px;
+}
+
+.business-info-manager-header .eyebrow {
+  display: block;
+  margin-bottom: 5px;
+  color: #21d4df;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+.business-info-manager-header h2 {
+  margin: 0;
+  color: #f5f7ff;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.business-info-manager-header p {
+  margin: 6px 0 0;
+  color: #8f98ad;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.business-info-form {
+  display: grid;
+  gap: 12px;
+}
+
+.business-info-field {
+  display: grid;
+  gap: 6px;
+}
+
+.business-info-field label {
+  color: #cbd2e1;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.business-info-field input,
+.business-info-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border-radius: 11px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: #0d111a;
+  color: #f5f7ff;
+  font-family: inherit;
+  font-size: 12px;
+  outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.business-info-field input::placeholder,
+.business-info-field textarea::placeholder {
+  color: #687286;
+}
+
+.business-info-field input:focus,
+.business-info-field textarea:focus {
+  border-color: rgba(124,108,255,.65);
+  box-shadow: 0 0 0 3px rgba(124,108,255,.10);
+}
+
+.business-info-field textarea {
+  min-height: 95px;
+  resize: vertical;
+  line-height: 1.45;
+}
+
+.business-info-field small {
+  color: #697388;
+  font-size: 9px;
+}
+
+.business-info-save {
+  width: 100%;
+  margin-top: 3px !important;
+}
+
+@media(max-width:420px) {
+
+  .business-info-manager {
+    padding: 14px;
+    border-radius: 17px;
+  }
+
+  .business-info-manager-header h2 {
+    font-size: 16px;
+  }
+
+}
