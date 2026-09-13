@@ -884,6 +884,113 @@
   </div>
 
 </div>
+          <!-- BUSINESS INFORMATION -->
+
+<div class="business-info-manager">
+
+  <div class="business-info-manager-header">
+
+    <div>
+      <span class="eyebrow">
+        INFORMACIÓN DEL NEGOCIO
+      </span>
+
+      <h2>
+        Mantén tu negocio actualizado
+      </h2>
+
+      <p>
+        Esta información será visible para las personas que descubran tu negocio.
+      </p>
+    </div>
+
+  </div>
+
+
+  <div class="business-info-form">
+
+    <div class="business-info-field">
+
+      <label for="businessInfoName">
+        Nombre del negocio
+      </label>
+
+      <input
+        id="businessInfoName"
+        type="text"
+        placeholder="Ej. Asaderos"
+        maxlength="100"
+        autocomplete="organization"
+      >
+
+    </div>
+
+
+    <div class="business-info-field">
+
+      <label for="businessInfoAddress">
+        Dirección
+      </label>
+
+      <input
+        id="businessInfoAddress"
+        type="text"
+        placeholder="Ej. Calle 10 #20-30"
+        maxlength="200"
+        autocomplete="street-address"
+      >
+
+    </div>
+
+
+    <div class="business-info-field">
+
+      <label for="businessInfoPhone">
+        Teléfono
+      </label>
+
+      <input
+        id="businessInfoPhone"
+        type="tel"
+        placeholder="Ej. 300 123 4567"
+        maxlength="30"
+        autocomplete="tel"
+      >
+
+    </div>
+
+
+    <div class="business-info-field">
+
+      <label for="businessInfoDescription">
+        Descripción
+      </label>
+
+      <textarea
+        id="businessInfoDescription"
+        placeholder="Cuéntales a tus clientes qué ofrece tu negocio..."
+        maxlength="500"
+        rows="4"
+      ></textarea>
+
+      <small>
+        Máximo 500 caracteres.
+      </small>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="primary-button business-info-save"
+      onclick="guardarInformacionNegocio()"
+    >
+      💾 Guardar cambios
+    </button>
+
+  </div>
+
+</div>
 
           <!-- BUSINESS HEADER -->
 
