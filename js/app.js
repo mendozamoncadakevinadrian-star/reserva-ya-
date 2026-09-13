@@ -697,6 +697,10 @@ async function cargarDatosDemo() {
         ubicacion:
           negocio.direccion ||
           "",
+        
+        direccion:
+          negocio.direccion ||
+          "",
 
         descripcion:
           negocio.descripcion ||
@@ -5536,9 +5540,12 @@ if (businessInfoName) {
 }
 
 if (businessInfoAddress) {
-  businessInfoAddress.value = ReservaYa.negocioActual.ubicacion || "";
+  businessInfoAddress.value =
+    ReservaYa.negocioActual.direccion ||
+    ReservaYa.negocioActual.ubicacion ||
+    "";
 }
-
+   
 if (businessInfoPhone) {
   businessInfoPhone.value = ReservaYa.negocioActual.telefono || "";
 }
