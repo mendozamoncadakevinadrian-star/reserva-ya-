@@ -681,6 +681,10 @@ async function cargarDatosDemo() {
         nombre:
           negocio.nombre ||
           "Negocio",
+         
+        telefono:
+          negocio.telefono ||
+          "",
 
         categoria:
           negocio.categoria ||
@@ -5522,6 +5526,26 @@ async function cargarDatosPanelNegocio() {
     ReservaYa.negocioActual.descripcion ||
       "Administra tu negocio desde ReservaYa."
   );
+const businessInfoName = document.getElementById("businessInfoName");
+const businessInfoAddress = document.getElementById("businessInfoAddress");
+const businessInfoPhone = document.getElementById("businessInfoPhone");
+const businessInfoDescription = document.getElementById("businessInfoDescription");
+
+if (businessInfoName) {
+  businessInfoName.value = ReservaYa.negocioActual.nombre || "";
+}
+
+if (businessInfoAddress) {
+  businessInfoAddress.value = ReservaYa.negocioActual.ubicacion || "";
+}
+
+if (businessInfoPhone) {
+  businessInfoPhone.value = ReservaYa.negocioActual.telefono || "";
+}
+
+if (businessInfoDescription) {
+  businessInfoDescription.value = ReservaYa.negocioActual.descripcion || "";
+}
 
   renderizarResumenBusiness(
     reservas,
@@ -5539,6 +5563,84 @@ async function cargarDatosPanelNegocio() {
   
 }
 
+async function guardarInformacionNegocio() {
+
+  if (!ReservaYa.usuario) {
+    mostrarToast("Debes iniciar sesión.");
+    return;
+  }
+
+  if (!ReservaYa.negocioActual) {
+    await detectarNegocioUsuario();
+  }
+
+  if (!ReservaYa.negocioActual) {
+    mostrarToast("No se encontró tu negocio.");
+    return;
+  }
+
+  const nombreInput = document.getElementById("businessInfoName");
+  const direccionInput = document.getElementById("businessInfoAddress");
+  const telefonoInput = document.getElementById("businessInfoPhone");
+  const descripcionInput = document.getElementById("businessInfoDescription");
+
+  if (!nombreInput || !direccionInput || !telefonoInput || !descripcionInput) {
+    mostrarToast("No se encontraron los campos del negocio.");
+    return;
+  }
+
+  const nombre = nombreInput.value.trim();
+  const direccion = direccionInput.value.trim();
+  const telefono = telefonoInput.value.trim();
+  const descripcion = descripcionInput.value.trim();
+
+  if (!nombre) {
+    mostrarToast("El nombre del negocio es obligatorio.");
+    nombreInput.focus();
+    return;
+  }
+
+  const negocioId = ReservaYa.negocioActual.id;
+
+  const { data, error } = await supabaseClient
+    .from("negocios")
+    .update({
+      nombre,
+      direccion,
+      telefono,
+      descripcion
+    })
+    .eq("id", negocioId)
+    .eq("usuario_id", ReservaYa.usuario.id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error actualizando información del negocio:", error);
+    mostrarToast("No se pudo guardar la información.");
+    return;
+  }
+
+  ReservaYa.negocioActual = {
+    ...ReservaYa.negocioActual,
+    ...data
+  };
+
+  const indiceNegocio = ReservaYa.negocios.findIndex(
+    negocio => String(negocio.id) === String(negocioId)
+  );
+
+  if (indiceNegocio !== -1) {
+    ReservaYa.negocios[indiceNegocio] = {
+      ...ReservaYa.negocios[indiceNegocio],
+      ...data
+    };
+  }
+
+  await cargarDatosDemo();
+
+  mostrarToast("Información del negocio actualizada.");
+}
 
 /* =====================================================
    INGRESOS
