@@ -1596,6 +1596,11 @@ async function abrirNegocio(id) {
   ReservaYa.negocioActual =
     negocio;
 
+
+  // =========================================================
+  // HORARIOS
+  // =========================================================
+
   const {
     data: horarios
   } =
@@ -1668,11 +1673,49 @@ async function abrirNegocio(id) {
 
   }
 
-  const categoria =
-    CATEGORIAS.find(
-      c =>
-        c.id === negocio.categoria
+
+  // =========================================================
+  // SERVICIOS
+  // =========================================================
+
+  const {
+    data: servicios,
+    error: errorServicios
+  } =
+    await supabaseClient
+      .from("servicios")
+      .select("*")
+      .eq(
+        "negocio_id",
+        negocio.id
+      )
+      .order(
+        "nombre",
+        {
+          ascending: true
+        }
+      );
+
+  if (errorServicios) {
+
+    console.error(
+      "Error cargando servicios del negocio:",
+      errorServicios
     );
+
+  }
+
+  const serviciosNegocio =
+    servicios || [];
+
+  ReservaYa.serviciosActuales =
+    serviciosNegocio;
+
+
+  // =========================================================
+  // GALERÍA
+  // =========================================================
+
   const fotosFicha = [];
 
   if (negocio.foto_portada) {
@@ -1694,7 +1737,9 @@ async function abrirNegocio(id) {
 
         if (
           foto &&
-          !fotosFicha.includes(foto)
+          !fotosFicha.includes(
+            foto
+          )
         ) {
 
           fotosFicha.push(
@@ -1709,9 +1754,14 @@ async function abrirNegocio(id) {
   }
 
   const fotosFichaFinales =
-    fotosFicha.slice(0, 5);
+    fotosFicha.slice(
+      0,
+      5
+    );
+
 
   let galeriaFichaHTML = "";
+
 
   if (
     fotosFichaFinales.length
@@ -1774,6 +1824,7 @@ async function abrirNegocio(id) {
 
         </div>
 
+
         ${
           fotosFichaFinales.length > 1
             ? `
@@ -1816,54 +1867,338 @@ async function abrirNegocio(id) {
 
     `;
 
+  } else {
+
+    galeriaFichaHTML = `
+
+      <div
+        class="business-cover-placeholder"
+      >
+
+        <span
+          class="
+            business-cover-placeholder-icon
+          "
+        >
+          📷
+        </span>
+
+        <strong>
+          Portada del negocio
+        </strong>
+
+        <span>
+          Este negocio aún no tiene una foto
+        </span>
+
+      </div>
+
+    `;
+
   }
+
+
+  // =========================================================
+  // SERVICIOS HTML
+  // =========================================================
+
+  let serviciosHTML = "";
+
+
+  if (
+    serviciosNegocio.length
+  ) {
+
+    serviciosHTML = `
+
+      <div
+        style="
+          margin-top:20px;
+          text-align:left;
+        "
+      >
+
+        <div
+          style="
+            margin-bottom:10px;
+          "
+        >
+
+          <div
+            style="
+              color:#21d4df;
+              font-size:10px;
+              font-weight:800;
+              letter-spacing:.08em;
+              text-transform:uppercase;
+              margin-bottom:4px;
+            "
+          >
+            SERVICIOS
+          </div>
+
+          <h3
+            style="
+              margin:0;
+              color:#f5f7ff;
+              font-size:18px;
+            "
+          >
+            🛠️ Servicios disponibles
+          </h3>
+
+        </div>
+
+
+        <div
+          style="
+            display:grid;
+            gap:9px;
+          "
+        >
+
+          ${
+            serviciosNegocio
+              .map(
+                servicio => {
+
+                  const precio =
+                    servicio.precio !== null &&
+                    servicio.precio !== undefined
+                      ? formatearPrecio(
+                          servicio.precio
+                        )
+                      : "";
+
+                  const duracion =
+                    servicio.duracion !== null &&
+                    servicio.duracion !== undefined
+                      ? `${Number(
+                          servicio.duracion
+                        )} min`
+                      : "";
+
+                  return `
+
+                    <div
+                      style="
+                        padding:12px;
+                        border-radius:13px;
+                        background:#171c29;
+                        border:1px solid rgba(255,255,255,.07);
+                      "
+                    >
+
+                      <div
+                        style="
+                          display:flex;
+                          align-items:flex-start;
+                          justify-content:space-between;
+                          gap:10px;
+                        "
+                      >
+
+                        <div
+                          style="
+                            min-width:0;
+                          "
+                        >
+
+                          <strong
+                            style="
+                              display:block;
+                              color:#f5f7ff;
+                              font-size:13px;
+                              line-height:1.25;
+                            "
+                          >
+                            ${escaparHTML(
+                              servicio.nombre ||
+                              "Servicio"
+                            )}
+                          </strong>
+
+                          ${
+                            duracion
+                              ? `
+                                <span
+                                  style="
+                                    display:block;
+                                    margin-top:4px;
+                                    color:#8f98ad;
+                                    font-size:10px;
+                                  "
+                                >
+                                  ⏱️ ${duracion}
+                                </span>
+                              `
+                              : ""
+                          }
+
+                        </div>
+
+
+                        ${
+                          precio
+                            ? `
+                              <strong
+                                style="
+                                  flex-shrink:0;
+                                  color:#21d4df;
+                                  font-size:12px;
+                                  white-space:nowrap;
+                                "
+                              >
+                                ${precio}
+                              </strong>
+                            `
+                            : ""
+                        }
+
+                      </div>
+
+                    </div>
+
+                  `;
+
+                }
+              )
+              .join("")
+          }
+
+        </div>
+
+      </div>
+
+    `;
+
+  } else {
+
+    serviciosHTML = `
+
+      <div
+        style="
+          margin-top:20px;
+          padding:14px;
+          border-radius:14px;
+          background:#171c29;
+          border:1px solid rgba(255,255,255,.07);
+          text-align:left;
+        "
+      >
+
+        <div
+          style="
+            color:#21d4df;
+            font-size:10px;
+            font-weight:800;
+            letter-spacing:.08em;
+            margin-bottom:5px;
+          "
+        >
+          SERVICIOS
+        </div>
+
+        <strong
+          style="
+            color:#f5f7ff;
+            font-size:13px;
+          "
+        >
+          🛠️ Sin servicios configurados
+        </strong>
+
+        <p
+          style="
+            margin:5px 0 0;
+            color:#7f899d;
+            font-size:10px;
+          "
+        >
+          Este negocio todavía no ha añadido servicios.
+        </p>
+
+      </div>
+
+    `;
+
+  }
+
+
+  // =========================================================
+  // MODAL
+  // =========================================================
+
   abrirModal(`
 
-    <div style="
-      text-align:center
-    ">
+    <div
+      style="
+        text-align:center;
+      "
+    >
 
-            ${
-        galeriaFichaHTML
-      }
+      ${galeriaFichaHTML}
 
-      <h2 style="
-        margin-top:10px
-      ">
+
+      <h2
+        style="
+          margin-top:14px;
+          color:#f5f7ff;
+        "
+      >
         ${escaparHTML(
           negocio.nombre
         )}
       </h2>
 
-      <p style="
-        color:#727887;
-        margin-top:5px
-      ">
-        ${escaparHTML(
-          negocio.ciudad
+
+      <p
+        style="
+          color:#8f98ad;
+          margin-top:5px;
+          font-size:12px;
+        "
+      >
+        📍 ${escaparHTML(
+          negocio.ciudad ||
+          negocio.ubicacion ||
+          "Ubicación no disponible"
         )}
       </p>
+
 
       ${
         negocio.descripcion
           ? `
-            <p style="
-              margin-top:14px;
-              color:#555;
-              line-height:1.5;
-              text-align:left;
-            ">
+
+            <p
+              style="
+                margin-top:14px;
+                color:#b8c0d0;
+                line-height:1.5;
+                text-align:left;
+                font-size:12px;
+              "
+            >
               ${escaparHTML(
                 negocio.descripcion
               )}
             </p>
+
           `
           : ""
       }
 
-      <div style="
-        margin-top:15px
-      ">
+
+      <div
+        style="
+          margin-top:12px;
+          color:#c8c2ff;
+          font-size:12px;
+          font-weight:700;
+        "
+      >
+
         ⭐
         ${Number(
           negocio.rating || 0
@@ -1876,31 +2211,48 @@ async function abrirNegocio(id) {
         )}
 
         reseñas
+
       </div>
 
-      <div style="
-        margin-top:20px;
-        padding:14px;
-        border-radius:14px;
-        background:#f8f9fb;
-        text-align:left;
-      ">
 
-        <div style="
-          font-weight:700;
-          margin-bottom:5px;
-        ">
+      ${serviciosHTML}
+
+
+      <!-- HORARIOS -->
+
+      <div
+        style="
+          margin-top:20px;
+          padding:14px;
+          border-radius:14px;
+          background:#171c29;
+          border:1px solid rgba(255,255,255,.07);
+          text-align:left;
+        "
+      >
+
+        <div
+          style="
+            font-weight:700;
+            color:#f5f7ff;
+            margin-bottom:5px;
+            font-size:13px;
+          "
+        >
           🕐 Horario de atención
         </div>
 
-        <div style="
-          color:#727887;
-          font-size:14px;
-        ">
+        <div
+          style="
+            color:#8f98ad;
+            font-size:11px;
+          "
+        >
           ${escaparHTML(
             resumenHorario
           )}
         </div>
+
 
         <button
           class="secondary-button"
@@ -1919,6 +2271,9 @@ async function abrirNegocio(id) {
 
       </div>
 
+
+      <!-- RESERVAR -->
+
       <button
         class="primary-button"
         style="
@@ -1933,6 +2288,9 @@ async function abrirNegocio(id) {
       >
         📅 ${t("reserve")}
       </button>
+
+
+      <!-- FAVORITO -->
 
       <button
         class="secondary-button"
@@ -1955,11 +2313,14 @@ async function abrirNegocio(id) {
         }
       </button>
 
+
     </div>
 
   `);
 
 }
+                  
+            
 
 
 /* =====================================================
