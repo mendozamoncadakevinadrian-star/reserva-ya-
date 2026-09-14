@@ -6412,16 +6412,42 @@ async function administrarServicios() {
 
     <div>
 
-      <h2>
-        🛠️ Servicios
-      </h2>
+ <div style="
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:8px;
+">
 
-      <p style="
-        color:#727887;
-        margin:5px 0 18px;
-      ">
-        Servicios configurados para tu negocio.
-      </p>
+  <h2 style="
+    margin:0;
+  ">
+    🛠️ Servicios
+  </h2>
+
+  <button
+    type="button"
+    class="primary-button"
+    onclick="nuevoServicio()"
+    style="
+      flex-shrink:0;
+      padding:9px 12px;
+      font-size:11px;
+    "
+  >
+    ➕ Nuevo
+  </button>
+
+</div>
+
+
+<p style="
+  color:#727887;
+  margin:5px 0 18px;
+">
+  Servicios configurados para tu negocio.
+</p>
 
       ${
         servicios.length
@@ -6503,6 +6529,307 @@ async function administrarServicios() {
     </div>
 
   `);
+
+}
+
+async function nuevoServicio() {
+
+  if (
+    !ReservaYa.usuario ||
+    !ReservaYa.negocioActual
+  ) {
+
+    mostrarToast(
+      "Necesitas un negocio registrado."
+    );
+
+    return;
+  }
+
+  abrirModal(`
+
+    <div>
+
+      <h2>
+        ➕ Nuevo servicio
+      </h2>
+
+      <p style="
+        color:#727887;
+        margin:5px 0 18px;
+      ">
+        Añade un servicio que tus clientes puedan reservar.
+      </p>
+
+
+      <div style="
+        display:grid;
+        gap:12px;
+      ">
+
+        <div>
+
+          <label style="
+            display:block;
+            margin-bottom:6px;
+            color:#555;
+            font-size:13px;
+            font-weight:700;
+          ">
+            Nombre del servicio
+          </label>
+
+          <input
+            id="nuevoServicioNombre"
+            type="text"
+            placeholder="Ej. Corte de cabello"
+            maxlength="100"
+            style="
+              width:100%;
+              box-sizing:border-box;
+              padding:12px;
+              border:1px solid #ddd;
+              border-radius:10px;
+              font-size:14px;
+            "
+          >
+
+        </div>
+
+
+        <div>
+
+          <label style="
+            display:block;
+            margin-bottom:6px;
+            color:#555;
+            font-size:13px;
+            font-weight:700;
+          ">
+            Precio
+          </label>
+
+          <input
+            id="nuevoServicioPrecio"
+            type="number"
+            min="0"
+            step="1"
+            placeholder="Ej. 25000"
+            style="
+              width:100%;
+              box-sizing:border-box;
+              padding:12px;
+              border:1px solid #ddd;
+              border-radius:10px;
+              font-size:14px;
+            "
+          >
+
+        </div>
+
+
+        <div>
+
+          <label style="
+            display:block;
+            margin-bottom:6px;
+            color:#555;
+            font-size:13px;
+            font-weight:700;
+          ">
+            Duración en minutos
+          </label>
+
+          <input
+            id="nuevoServicioDuracion"
+            type="number"
+            min="1"
+            step="1"
+            placeholder="Ej. 30"
+            style="
+              width:100%;
+              box-sizing:border-box;
+              padding:12px;
+              border:1px solid #ddd;
+              border-radius:10px;
+              font-size:14px;
+            "
+          >
+
+        </div>
+
+
+        <button
+          type="button"
+          class="primary-button"
+          style="
+            width:100%;
+            margin-top:4px;
+          "
+          onclick="guardarNuevoServicio()"
+        >
+          💾 Guardar servicio
+        </button>
+
+      </div>
+
+    </div>
+
+  `);
+
+}
+
+async function guardarNuevoServicio() {
+
+  if (
+    !ReservaYa.usuario ||
+    !ReservaYa.negocioActual
+  ) {
+
+    mostrarToast(
+      "Necesitas un negocio registrado."
+    );
+
+    return;
+  }
+
+
+  const nombreInput =
+    document.getElementById(
+      "nuevoServicioNombre"
+    );
+
+  const precioInput =
+    document.getElementById(
+      "nuevoServicioPrecio"
+    );
+
+  const duracionInput =
+    document.getElementById(
+      "nuevoServicioDuracion"
+    );
+
+
+  if (
+    !nombreInput ||
+    !precioInput ||
+    !duracionInput
+  ) {
+
+    mostrarToast(
+      "No se encontraron los campos del servicio."
+    );
+
+    return;
+  }
+
+
+  const nombre =
+    nombreInput.value.trim();
+
+  const precio =
+    precioInput.value.trim();
+
+  const duracion =
+    duracionInput.value.trim();
+
+
+  if (!nombre) {
+
+    mostrarToast(
+      "Escribe el nombre del servicio."
+    );
+
+    nombreInput.focus();
+
+    return;
+  }
+
+
+  if (
+    precio === "" ||
+    Number(precio) < 0
+  ) {
+
+    mostrarToast(
+      "Escribe un precio válido."
+    );
+
+    precioInput.focus();
+
+    return;
+  }
+
+
+  if (
+    duracion === "" ||
+    Number(duracion) <= 0
+  ) {
+
+    mostrarToast(
+      "Escribe una duración válida."
+    );
+
+    duracionInput.focus();
+
+    return;
+  }
+
+
+  const { data, error } =
+    await supabaseClient
+      .from("servicios")
+      .insert({
+        negocio_id:
+          ReservaYa.negocioActual.id,
+
+        nombre,
+
+        precio:
+          Number(precio),
+
+        duracion:
+          Number(duracion)
+      })
+      .select()
+      .single();
+
+
+  if (error) {
+
+    console.error(
+      "Error creando servicio:",
+      error
+    );
+
+    mostrarToast(
+      "No se pudo guardar el servicio."
+    );
+
+    return;
+  }
+
+
+  ReservaYa.serviciosActuales =
+    Array.isArray(
+      ReservaYa.serviciosActuales
+    )
+      ? [
+          ...ReservaYa.serviciosActuales,
+          data
+        ]
+      : [data];
+
+
+  cerrarModal();
+
+
+  mostrarToast(
+    "Servicio creado correctamente."
+  );
+
+
+  administrarServicios();
 
 }
 
