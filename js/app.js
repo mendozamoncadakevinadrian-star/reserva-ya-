@@ -7152,20 +7152,19 @@ async function guardarEdicionServicio(servicioId) {
 
 
   const { data, error } =
-    await supabaseClient
-      .from("servicios")
-      .update({
-        nombre,
-        precio: Number(precio),
-        duracion: Number(duracion)
-      })
-      .eq("id", servicioId)
-      .eq(
-        "negocio_id",
-        ReservaYa.negocioActual.id
-      )
-      .select()
-      .single();
+  await supabaseClient
+    .from("servicios")
+    .update({
+      nombre,
+      precio: Number(precio),
+      duracion: Number(duracion)
+    })
+    .eq("id", servicioId)
+    .eq(
+      "negocio_id",
+      ReservaYa.negocioActual.id
+    )
+    .select();
 
 
 if (error) {
@@ -7186,6 +7185,13 @@ if (error) {
   return;
 }
 
+const servicioActualizado =
+  Array.isArray(data)
+    ? data[0]
+    : data;
+
+
+if (servicioActualizado) {
 
   ReservaYa.serviciosActuales =
     Array.isArray(
@@ -7195,10 +7201,13 @@ if (error) {
           servicio =>
             String(servicio.id) ===
             String(servicioId)
-              ? data
+              ? servicioActualizado
               : servicio
         )
-      : [data];
+      : [servicioActualizado];
+
+}
+  
 
 
   cerrarModal();
