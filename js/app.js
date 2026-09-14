@@ -2173,7 +2173,26 @@ async function abrirNegocio(id) {
           "Ubicación no disponible"
         )}
       </p>
+      
+${
+  negocio.telefono
+    ? `
 
+      <p
+        style="
+          color:#8f98ad;
+          margin-top:6px;
+          font-size:12px;
+        "
+      >
+        📞 ${escaparHTML(
+          negocio.telefono
+        )}
+      </p>
+
+    `
+    : ""
+}
 
       ${
         negocio.descripcion
