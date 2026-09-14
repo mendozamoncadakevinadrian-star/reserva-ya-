@@ -7168,19 +7168,23 @@ async function guardarEdicionServicio(servicioId) {
       .single();
 
 
-  if (error) {
+if (error) {
 
-    console.error(
-      "Error actualizando servicio:",
-      error
-    );
+  console.error(
+    "Error actualizando servicio:",
+    error
+  );
 
-    mostrarToast(
+  mostrarToast(
+    "Error: " +
+    (
+      error.message ||
       "No se pudo actualizar el servicio."
-    );
+    )
+  );
 
-    return;
-  }
+  return;
+}
 
 
   ReservaYa.serviciosActuales =
