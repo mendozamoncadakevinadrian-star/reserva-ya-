@@ -7062,6 +7062,11 @@ async function editarServicio(servicioId) {
 
 }
 async function guardarEdicionServicio(servicioId) {
+   
+   console.log(
+  "SERVICIO QUE SE VA A EDITAR:",
+  servicioId
+);
 
   if (
     !ReservaYa.usuario ||
@@ -7209,8 +7214,8 @@ if (servicioActualizado) {
 
 
   mostrarToast(
-    "Servicio actualizado correctamente."
-  );
+  "ID EDITADO: " + servicioId
+);
 
 
   administrarServicios();
