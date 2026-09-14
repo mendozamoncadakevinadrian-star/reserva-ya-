@@ -6452,59 +6452,111 @@ async function administrarServicios() {
       ${
         servicios.length
 
-          ? servicios
-              .map(
-                servicio => `
+          ? servicios.
+         map(
+          servicio => `
 
-                  <div style="
-                    padding:14px 0;
-                    border-bottom:1px solid #eee;
-                    display:flex;
-                    justify-content:space-between;
-                    gap:10px;
-                  ">
+    <div style="
+      padding:14px 0;
+      border-bottom:1px solid #eee;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+    ">
 
-                    <div>
+      <div style="
+        flex:1;
+        min-width:0;
+      ">
 
-                      <strong>
-                        ${escaparHTML(
-                          servicio.nombre
-                        )}
-                      </strong>
+        <strong>
+          ${escaparHTML(
+            servicio.nombre
+          )}
+        </strong>
 
-                      ${
-                        servicio.duracion
-                          ? `
-                            <div style="
-                              color:#727887;
-                              margin-top:4px;
-                              font-size:13px;
-                            ">
-                              ⏱️
-                              ${Number(
-                                servicio.duracion
-                              )} min
-                            </div>
-                          `
-                          : ""
-                      }
+        ${
+          servicio.duracion
+            ? `
+              <div style="
+                color:#727887;
+                margin-top:4px;
+                font-size:13px;
+              ">
+                ⏱️
+                ${Number(
+                  servicio.duracion
+                )} min
+              </div>
+            `
+            : ""
+        }
 
-                    </div>
+        <div style="
+          margin-top:4px;
+          font-weight:700;
+        ">
+          ${
+            servicio.precio !== null
+              ? formatearPrecio(
+                  servicio.precio
+                )
+              : "—"
+          }
+        </div>
 
-                    <strong>
-                      ${
-                        servicio.precio !== null
-                          ? formatearPrecio(
-                              servicio.precio
-                            )
-                          : "—"
-                      }
-                    </strong>
+      </div>
 
-                  </div>
 
-                `
-              )
+      <div style="
+        display:flex;
+        gap:6px;
+        flex-shrink:0;
+      ">
+
+        <button
+          type="button"
+          onclick="editarServicio('${servicio.id}')"
+          style="
+            border:0;
+            background:#eef0ff;
+            color:#5b50d6;
+            border-radius:8px;
+            padding:8px 9px;
+            cursor:pointer;
+            font-size:13px;
+          "
+          title="Editar servicio"
+        >
+          ✏️
+        </button>
+
+
+        <button
+          type="button"
+          onclick="eliminarServicio('${servicio.id}')"
+          style="
+            border:0;
+            background:#fff0f0;
+            color:#d33;
+            border-radius:8px;
+            padding:8px 9px;
+            cursor:pointer;
+            font-size:13px;
+          "
+          title="Eliminar servicio"
+        >
+          🗑️
+        </button>
+
+      </div>
+
+    </div>
+
+  `
+)
+              
               .join("")
 
           : `
