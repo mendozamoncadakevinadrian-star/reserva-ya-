@@ -6885,6 +6885,329 @@ async function guardarNuevoServicio() {
 
 }
 
+async function editarServicio(servicioId) {
+
+  if (
+    !ReservaYa.usuario ||
+    !ReservaYa.negocioActual
+  ) {
+    mostrarToast(
+      "Necesitas un negocio registrado."
+    );
+    return;
+  }
+
+
+  const { data, error } =
+    await supabaseClient
+      .from("servicios")
+      .select("*")
+      .eq("id", servicioId)
+      .eq(
+        "negocio_id",
+        ReservaYa.negocioActual.id
+      )
+      .single();
+
+
+  if (error || !data) {
+
+    console.error(
+      "Error cargando servicio:",
+      error
+    );
+
+    mostrarToast(
+      "No se pudo cargar el servicio."
+    );
+
+    return;
+  }
+
+
+  abrirModal(`
+
+    <div>
+
+      <h2>
+        ✏️ Editar servicio
+      </h2>
+
+      <p style="
+        color:#727887;
+        margin:5px 0 18px;
+      ">
+        Modifica la información del servicio.
+      </p>
+
+
+      <div style="
+        display:grid;
+        gap:12px;
+      ">
+
+
+        <div>
+
+          <label style="
+            display:block;
+            margin-bottom:6px;
+            color:#555;
+            font-size:13px;
+            font-weight:700;
+          ">
+            Nombre del servicio
+          </label>
+
+          <input
+            id="editarServicioNombre"
+            type="text"
+            value="${escaparHTML(
+              data.nombre || ""
+            )}"
+            maxlength="100"
+            style="
+              width:100%;
+              box-sizing:border-box;
+              padding:12px;
+              border:1px solid #ddd;
+              border-radius:10px;
+              font-size:14px;
+            "
+          >
+
+        </div>
+
+
+        <div>
+
+          <label style="
+            display:block;
+            margin-bottom:6px;
+            color:#555;
+            font-size:13px;
+            font-weight:700;
+          ">
+            Precio
+          </label>
+
+          <input
+            id="editarServicioPrecio"
+            type="number"
+            min="0"
+            step="1"
+            value="${data.precio ?? 0}"
+            style="
+              width:100%;
+              box-sizing:border-box;
+              padding:12px;
+              border:1px solid #ddd;
+              border-radius:10px;
+              font-size:14px;
+            "
+          >
+
+        </div>
+
+
+        <div>
+
+          <label style="
+            display:block;
+            margin-bottom:6px;
+            color:#555;
+            font-size:13px;
+            font-weight:700;
+          ">
+            Duración en minutos
+          </label>
+
+          <input
+            id="editarServicioDuracion"
+            type="number"
+            min="1"
+            step="1"
+            value="${data.duracion ?? 30}"
+            style="
+              width:100%;
+              box-sizing:border-box;
+              padding:12px;
+              border:1px solid #ddd;
+              border-radius:10px;
+              font-size:14px;
+            "
+          >
+
+        </div>
+
+
+        <button
+          type="button"
+          class="primary-button"
+          style="
+            width:100%;
+            margin-top:4px;
+          "
+          onclick="guardarEdicionServicio('${servicioId}')"
+        >
+          💾 Guardar cambios
+        </button>
+
+
+      </div>
+
+    </div>
+
+  `);
+
+}
+async function guardarEdicionServicio(servicioId) {
+
+  if (
+    !ReservaYa.usuario ||
+    !ReservaYa.negocioActual
+  ) {
+    mostrarToast(
+      "Necesitas un negocio registrado."
+    );
+    return;
+  }
+
+
+  const nombreInput =
+    document.getElementById(
+      "editarServicioNombre"
+    );
+
+  const precioInput =
+    document.getElementById(
+      "editarServicioPrecio"
+    );
+
+  const duracionInput =
+    document.getElementById(
+      "editarServicioDuracion"
+    );
+
+
+  if (
+    !nombreInput ||
+    !precioInput ||
+    !duracionInput
+  ) {
+    mostrarToast(
+      "No se encontraron los campos del servicio."
+    );
+    return;
+  }
+
+
+  const nombre =
+    nombreInput.value.trim();
+
+  const precio =
+    precioInput.value.trim();
+
+  const duracion =
+    duracionInput.value.trim();
+
+
+  if (!nombre) {
+    mostrarToast(
+      "Escribe el nombre del servicio."
+    );
+
+    nombreInput.focus();
+
+    return;
+  }
+
+
+  if (
+    precio === "" ||
+    Number(precio) < 0
+  ) {
+    mostrarToast(
+      "Escribe un precio válido."
+    );
+
+    precioInput.focus();
+
+    return;
+  }
+
+
+  if (
+    duracion === "" ||
+    Number(duracion) <= 0
+  ) {
+    mostrarToast(
+      "Escribe una duración válida."
+    );
+
+    duracionInput.focus();
+
+    return;
+  }
+
+
+  const { data, error } =
+    await supabaseClient
+      .from("servicios")
+      .update({
+        nombre,
+        precio: Number(precio),
+        duracion: Number(duracion)
+      })
+      .eq("id", servicioId)
+      .eq(
+        "negocio_id",
+        ReservaYa.negocioActual.id
+      )
+      .select()
+      .single();
+
+
+  if (error) {
+
+    console.error(
+      "Error actualizando servicio:",
+      error
+    );
+
+    mostrarToast(
+      "No se pudo actualizar el servicio."
+    );
+
+    return;
+  }
+
+
+  ReservaYa.serviciosActuales =
+    Array.isArray(
+      ReservaYa.serviciosActuales
+    )
+      ? ReservaYa.serviciosActuales.map(
+          servicio =>
+            String(servicio.id) ===
+            String(servicioId)
+              ? data
+              : servicio
+        )
+      : [data];
+
+
+  cerrarModal();
+
+
+  mostrarToast(
+    "Servicio actualizado correctamente."
+  );
+
+
+  administrarServicios();
+
+}
 
 /* =====================================================
    HORARIOS BUSINESS
