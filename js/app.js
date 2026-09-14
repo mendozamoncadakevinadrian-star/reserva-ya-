@@ -7160,12 +7160,7 @@ async function guardarEdicionServicio(servicioId) {
       duracion: Number(duracion)
     })
     .eq("id", servicioId)
-    .eq(
-      "negocio_id",
-      ReservaYa.negocioActual.id
-    )
     .select();
-
 
 if (error) {
 
