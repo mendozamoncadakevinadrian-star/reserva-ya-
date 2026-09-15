@@ -2456,7 +2456,20 @@ async function abrirServiciosNegocio() {
 }
                   
             
+function volverAFichaNegocio() {
 
+  if (
+    ReservaYa.negocioActual &&
+    ReservaYa.negocioActual.id
+  ) {
+
+    abrirNegocio(
+      ReservaYa.negocioActual.id
+    );
+
+  }
+
+}
 
 /* =====================================================
    HORARIOS
