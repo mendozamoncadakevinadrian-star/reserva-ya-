@@ -5898,7 +5898,6 @@ async function abrirReservasNegocio() {
     !ReservaYa.usuario ||
     !ReservaYa.negocioActual
   ) {
-
     mostrarToast(
       "Necesitas un negocio registrado."
     );
@@ -5936,7 +5935,7 @@ async function abrirReservasNegocio() {
   if (error) {
 
     console.error(
-      "Error cargando reservas del negocio:",
+      "Error cargando reservas:",
       error
     );
 
@@ -5953,94 +5952,106 @@ async function abrirReservasNegocio() {
       : [];
 
   /*
-   * Convierte la fecha y hora guardadas
-   * en Citas en una fecha real del dispositivo.
-   *
-   * Acepta:
-   * 10:30
-   * 10.30
-   * 10:00
-   * 10
+   * Convierte fecha + hora de Citas
+   * en una fecha real.
    */
-  function convertirFechaHoraReserva(
-    fecha,
-    hora
+  function obtenerFechaReserva(
+    reserva
   ) {
 
-    if (!fecha) {
+    if (!reserva.fecha) {
       return null;
     }
 
+    const fecha =
+      String(
+        reserva.fecha
+      ).trim();
+
     const partesFecha =
-      String(fecha)
-        .split("-")
-        .map(Number);
+      fecha.split("-");
 
     if (
-      partesFecha.length !== 3 ||
-      partesFecha.some(
-        numero =>
-          Number.isNaN(numero)
-      )
+      partesFecha.length !== 3
     ) {
       return null;
     }
 
     const anio =
-      partesFecha[0];
+      Number(
+        partesFecha[0]
+      );
 
     const mes =
-      partesFecha[1] - 1;
+      Number(
+        partesFecha[1]
+      );
 
     const dia =
-      partesFecha[2];
-
-    const horaNormalizada =
-      String(
-        hora || "00:00"
-      )
-        .trim()
-        .replace(".", ":");
-
-    const partesHora =
-      horaNormalizada
-        .split(":")
-        .map(Number);
-
-    const horas =
-      Number.isNaN(
-        partesHora[0]
-      )
-        ? 0
-        : partesHora[0];
-
-    const minutos =
-      Number.isNaN(
-        partesHora[1]
-      )
-        ? 0
-        : partesHora[1];
-
-    const fechaFinal =
-      new Date(
-        anio,
-        mes,
-        dia,
-        horas,
-        minutos,
-        0,
-        0
+      Number(
+        partesFecha[2]
       );
 
     if (
-      Number.isNaN(
-        fechaFinal.getTime()
-      )
+      !anio ||
+      !mes ||
+      !dia
     ) {
       return null;
     }
 
-    return fechaFinal;
+    /*
+     * Normalizamos la hora.
+     *
+     * Ejemplos:
+     * 10.00 → 10:00
+     * 10:00 → 10:00
+     * 10 → 10:00
+     */
+    let horaTexto =
+      String(
+        reserva.hora || "00:00"
+      )
+        .trim()
+        .replace(
+          ".",
+          ":"
+        );
+
+    const partesHora =
+      horaTexto.split(":");
+
+    let horas =
+      Number(
+        partesHora[0]
+      );
+
+    let minutos =
+      Number(
+        partesHora[1] || 0
+      );
+
+    if (
+      Number.isNaN(horas)
+    ) {
+      horas = 0;
+    }
+
+    if (
+      Number.isNaN(minutos)
+    ) {
+      minutos = 0;
+    }
+
+    return new Date(
+      anio,
+      mes - 1,
+      dia,
+      horas,
+      minutos,
+      0,
+      0
+    );
   }
 
   const ahora =
@@ -6049,9 +6060,11 @@ async function abrirReservasNegocio() {
   /*
    * PRÓXIMAS
    *
-   * Solo reservas que:
-   * - todavía no han ocurrido
-   * - no están canceladas
+   * Solo:
+   * - fechas futuras
+   * - hoy pero hora futura
+   * - estados distintos de Cancelada
+   * - estados distintos de Completada
    */
   const proximas =
     lista.filter(
@@ -6059,27 +6072,30 @@ async function abrirReservasNegocio() {
 
         const estado =
           String(
-            reserva.estado || ""
-          ).toLowerCase();
+            reserva.estado ||
+            "Pendiente"
+          )
+            .trim()
+            .toLowerCase();
 
         if (
-          estado === "cancelada"
+          estado === "cancelada" ||
+          estado === "completada"
         ) {
           return false;
         }
 
-        const fechaHora =
-          convertirFechaHoraReserva(
-            reserva.fecha,
-            reserva.hora
+        const fechaReserva =
+          obtenerFechaReserva(
+            reserva
           );
 
-        if (!fechaHora) {
+        if (!fechaReserva) {
           return false;
         }
 
         return (
-          fechaHora.getTime() >=
+          fechaReserva.getTime() >=
           ahora.getTime()
         );
       }
@@ -6088,9 +6104,10 @@ async function abrirReservasNegocio() {
   /*
    * HISTORIAL
    *
-   * Incluye:
-   * - reservas que ya pasaron
-   * - reservas canceladas
+   * Todo lo que:
+   * - ya pasó
+   * - fue cancelado
+   * - fue completado
    */
   const historial =
     lista.filter(
@@ -6098,31 +6115,86 @@ async function abrirReservasNegocio() {
 
         const estado =
           String(
-            reserva.estado || ""
-          ).toLowerCase();
+            reserva.estado ||
+            "Pendiente"
+          )
+            .trim()
+            .toLowerCase();
 
         if (
-          estado === "cancelada"
+          estado === "cancelada" ||
+          estado === "completada"
         ) {
           return true;
         }
 
-        const fechaHora =
-          convertirFechaHoraReserva(
-            reserva.fecha,
-            reserva.hora
+        const fechaReserva =
+          obtenerFechaReserva(
+            reserva
           );
 
-        if (!fechaHora) {
+        if (!fechaReserva) {
           return true;
         }
 
         return (
-          fechaHora.getTime() <
+          fechaReserva.getTime() <
           ahora.getTime()
         );
       }
     );
+
+  /*
+   * Ordenamos próximas:
+   * más cercana primero.
+   */
+  proximas.sort(
+    (a, b) => {
+
+      const fechaA =
+        obtenerFechaReserva(a);
+
+      const fechaB =
+        obtenerFechaReserva(b);
+
+      return (
+        fechaA.getTime() -
+        fechaB.getTime()
+      );
+    }
+  );
+
+  /*
+   * Ordenamos historial:
+   * más reciente primero.
+   */
+  historial.sort(
+    (a, b) => {
+
+      const fechaA =
+        obtenerFechaReserva(a);
+
+      const fechaB =
+        obtenerFechaReserva(b);
+
+      if (!fechaA && !fechaB) {
+        return 0;
+      }
+
+      if (!fechaA) {
+        return 1;
+      }
+
+      if (!fechaB) {
+        return -1;
+      }
+
+      return (
+        fechaB.getTime() -
+        fechaA.getTime()
+      );
+    }
+  );
 
   function crearReservaHTML(
     reserva
@@ -6134,6 +6206,10 @@ async function abrirReservasNegocio() {
         "Pendiente"
       );
 
+    const nombre =
+      reserva.nombre_cliente ||
+      "Cliente sin nombre";
+
     const fecha =
       reserva.fecha ||
       "Fecha no disponible";
@@ -6141,10 +6217,6 @@ async function abrirReservasNegocio() {
     const hora =
       reserva.hora ||
       "Hora no disponible";
-
-    const nombreCliente =
-      reserva.nombre_cliente ||
-      "Cliente sin nombre";
 
     const telefono =
       reserva.telefono_cliente ||
@@ -6154,6 +6226,11 @@ async function abrirReservasNegocio() {
       reserva.comentario ||
       "";
 
+    const estadoLower =
+      estado
+        .trim()
+        .toLowerCase();
+
     let estadoColor =
       "#f59e0b";
 
@@ -6161,7 +6238,7 @@ async function abrirReservasNegocio() {
       "#fff7ed";
 
     if (
-      estado.toLowerCase() ===
+      estadoLower ===
       "cancelada"
     ) {
 
@@ -6173,7 +6250,7 @@ async function abrirReservasNegocio() {
     }
 
     if (
-      estado.toLowerCase() ===
+      estadoLower ===
       "completada"
     ) {
 
@@ -6191,7 +6268,6 @@ async function abrirReservasNegocio() {
           border:1px solid #e8eaf0;
           border-radius:16px;
           padding:15px;
-          box-shadow:0 4px 12px rgba(0,0,0,.04);
         "
       >
 
@@ -6200,11 +6276,11 @@ async function abrirReservasNegocio() {
             display:flex;
             justify-content:space-between;
             align-items:flex-start;
-            gap:12px;
+            gap:10px;
           "
         >
 
-          <div style="min-width:0;">
+          <div>
 
             <strong
               style="
@@ -6214,7 +6290,7 @@ async function abrirReservasNegocio() {
               "
             >
               ${escaparHTML(
-                nombreCliente
+                nombre
               )}
             </strong>
 
@@ -6264,13 +6340,13 @@ async function abrirReservasNegocio() {
 
           <span
             style="
-              flex-shrink:0;
               background:${estadoFondo};
               color:${estadoColor};
-              border-radius:999px;
               padding:6px 10px;
+              border-radius:999px;
               font-size:12px;
               font-weight:700;
+              white-space:nowrap;
             "
           >
             ${escaparHTML(
@@ -6287,7 +6363,7 @@ async function abrirReservasNegocio() {
                 style="
                   margin-top:12px;
                   padding-top:10px;
-                  border-top:1px solid #f0f1f4;
+                  border-top:1px solid #eee;
                   color:#727887;
                   font-size:13px;
                 "
@@ -6304,29 +6380,71 @@ async function abrirReservasNegocio() {
     `;
   }
 
-  const proximasHTML =
-    proximas
-      .map(
-        crearReservaHTML
-      )
-      .join("");
+  const htmlProximas =
+    proximas.length
+      ? proximas
+          .map(
+            crearReservaHTML
+          )
+          .join("")
+      : `
+          <div
+            style="
+              padding:30px 10px;
+              text-align:center;
+              color:#727887;
+            "
+          >
+            <div
+              style="
+                font-size:34px;
+                margin-bottom:8px;
+              "
+            >
+              📅
+            </div>
 
-  const historialHTML =
-    historial
-      .map(
-        crearReservaHTML
-      )
-      .join("");
+            <strong>
+              No hay reservas próximas
+            </strong>
+          </div>
+        `;
+
+  const htmlHistorial =
+    historial.length
+      ? historial
+          .map(
+            crearReservaHTML
+          )
+          .join("")
+      : `
+          <div
+            style="
+              padding:30px 10px;
+              text-align:center;
+              color:#727887;
+            "
+          >
+            <div
+              style="
+                font-size:34px;
+                margin-bottom:8px;
+              "
+            >
+              📚
+            </div>
+
+            <strong>
+              No hay historial
+            </strong>
+          </div>
+        `;
 
   abrirModal(`
 
     <div>
 
-      <div
-        style="
-          margin-bottom:18px;
-        "
-      >
+      <div style="margin-bottom:18px;">
 
         <div
           style="
@@ -6334,7 +6452,6 @@ async function abrirReservasNegocio() {
             font-weight:800;
             letter-spacing:.08em;
             color:#6b7280;
-            margin-bottom:5px;
           "
         >
           RESERVAS
@@ -6342,7 +6459,7 @@ async function abrirReservasNegocio() {
 
         <h2
           style="
-            margin:0;
+            margin:4px 0 0;
             font-size:24px;
             color:#171923;
           "
@@ -6350,27 +6467,9 @@ async function abrirReservasNegocio() {
           📅 Reservas recibidas
         </h2>
 
-        <p
-          style="
-            margin:6px 0 0;
-            color:#727887;
-            font-size:14px;
-          "
-        >
-          ${proximas.length}
-          próxima${
-            proximas.length === 1
-              ? ""
-              : "s"
-          }
-
-          ·
-
-          ${historial.length}
-          en historial
-        </p>
-
       </div>
+
+      <!-- BOTONES -->
 
       <div
         style="
@@ -6381,43 +6480,51 @@ async function abrirReservasNegocio() {
       >
 
         <button
-          id="btnProximasReservas"
           type="button"
+          id="btnReservasProximas"
           style="
+            flex:1;
             border:none;
             background:#171923;
             color:#fff;
             border-radius:10px;
-            padding:9px 13px;
+            padding:10px;
             font-weight:700;
             cursor:pointer;
           "
         >
           🟢 Próximas
-          (${proximas.length})
+          <span>
+            (${proximas.length})
+          </span>
         </button>
 
         <button
-          id="btnHistorialReservas"
           type="button"
+          id="btnReservasHistorial"
           style="
+            flex:1;
             border:none;
             background:#f1f2f5;
             color:#555b6b;
             border-radius:10px;
-            padding:9px 13px;
+            padding:10px;
             font-weight:700;
             cursor:pointer;
           "
         >
           📚 Historial
-          (${historial.length})
+          <span>
+            (${historial.length})
+          </span>
         </button>
 
       </div>
 
+      <!-- CONTENIDO PRÓXIMAS -->
+
       <div
-        id="reservasProximas"
+        id="contenidoReservasProximas"
         style="
           display:grid;
           gap:10px;
@@ -6425,47 +6532,13 @@ async function abrirReservasNegocio() {
           overflow-y:auto;
         "
       >
-
-        ${
-          proximasHTML ||
-          `
-            <div
-              style="
-                padding:24px 10px;
-                text-align:center;
-                color:#727887;
-              "
-            >
-              <div
-                style="
-                  font-size:32px;
-                  margin-bottom:8px;
-                "
-              >
-                📅
-              </div>
-
-              <strong>
-                No tienes reservas próximas
-              </strong>
-
-              <div
-                style="
-                  margin-top:5px;
-                  font-size:13px;
-                "
-              >
-                Aquí aparecerán las próximas reservas de tus clientes.
-              </div>
-
-            </div>
-          `
-        }
-
+        ${htmlProximas}
       </div>
 
+      <!-- CONTENIDO HISTORIAL -->
+
       <div
-        id="reservasHistorial"
+        id="contenidoReservasHistorial"
         style="
           display:none;
           gap:10px;
@@ -6473,43 +6546,7 @@ async function abrirReservasNegocio() {
           overflow-y:auto;
         "
       >
-
-        ${
-          historialHTML ||
-          `
-            <div
-              style="
-                padding:24px 10px;
-                text-align:center;
-                color:#727887;
-              "
-            >
-              <div
-                style="
-                  font-size:32px;
-                  margin-bottom:8px;
-                "
-              >
-                📚
-              </div>
-
-              <strong>
-                Historial vacío
-              </strong>
-
-              <div
-                style="
-                  margin-top:5px;
-                  font-size:13px;
-                "
-              >
-                Todavía no hay reservas anteriores.
-              </div>
-
-            </div>
-          `
-        }
-
+        ${htmlHistorial}
       </div>
 
     </div>
@@ -6517,84 +6554,88 @@ async function abrirReservasNegocio() {
   `);
 
   /*
-   * Activamos los botones DESPUÉS
-   * de crear el contenido del modal.
+   * BOTÓN PRÓXIMAS
    */
 
-  const btnProximas =
+  const botonProximas =
     document.getElementById(
-      "btnProximasReservas"
+      "btnReservasProximas"
     );
 
-  const btnHistorial =
+  const botonHistorial =
     document.getElementById(
-      "btnHistorialReservas"
+      "btnReservasHistorial"
     );
 
-  const contenedorProximas =
+  const contenidoProximas =
     document.getElementById(
-      "reservasProximas"
+      "contenidoReservasProximas"
     );
 
-  const contenedorHistorial =
+  const contenidoHistorial =
     document.getElementById(
-      "reservasHistorial"
+      "contenidoReservasHistorial"
     );
 
   if (
-    btnProximas &&
-    btnHistorial &&
-    contenedorProximas &&
-    contenedorHistorial
+    botonProximas &&
+    botonHistorial &&
+    contenidoProximas &&
+    contenidoHistorial
   ) {
 
-    btnProximas.onclick =
-      function () {
+    botonProximas.onclick =
+      () => {
 
-        contenedorProximas.style.display =
+        contenidoProximas.style.display =
           "grid";
 
-        contenedorHistorial.style.display =
+        contenidoHistorial.style.display =
           "none";
 
-        btnProximas.style.background =
+        botonProximas.style.background =
           "#171923";
 
-        btnProximas.style.color =
+        botonProximas.style.color =
           "#fff";
 
-        btnHistorial.style.background =
+        botonHistorial.style.background =
           "#f1f2f5";
 
-        btnHistorial.style.color =
+        botonHistorial.style.color =
           "#555b6b";
       };
 
-    btnHistorial.onclick =
-      function () {
+    botonHistorial.onclick =
+      () => {
 
-        contenedorProximas.style.display =
+        contenidoProximas.style.display =
           "none";
 
-        contenedorHistorial.style.display =
+        contenidoHistorial.style.display =
           "grid";
 
-        btnHistorial.style.background =
+        botonHistorial.style.background =
           "#171923";
 
-        btnHistorial.style.color =
+        botonHistorial.style.color =
           "#fff";
 
-        btnProximas.style.background =
+        botonProximas.style.background =
           "#f1f2f5";
 
-        btnProximas.style.color =
+        botonProximas.style.color =
           "#555b6b";
       };
 
   }
 
-}              
+}
+  
+    
+      
+
+        
 
     
 /* =====================================================
