@@ -6585,48 +6585,49 @@ async function abrirReservasNegocio() {
   ) {
 
     botonProximas.onclick =
-      () => {
+  () => {
 
-        contenidoProximas.style.display =
-          "grid";
+    contenidoProximas.style.display =
+      "grid";
 
-        contenidoHistorial.style.display =
-          "none";
+    contenidoHistorial.style.display =
+      "none";
 
-        botonProximas.style.background =
-          "#171923";
+    botonProximas.style.background =
+      "#171923";
 
-        botonProximas.style.color =
-          "#fff";
+    botonProximas.style.color =
+      "#fff";
 
-        botonHistorial.style.background =
-          "#f1f2f5";
+    botonHistorial.style.background =
+      "#f1f2f5";
 
-        botonHistorial.style.color =
-          "#555b6b";
-      };
+    botonHistorial.style.color =
+      "#555b6b";
+  };
 
-    botonHistorial.onclick =
-      () => {
 
-        contenidoProximas.style.display =
-          "none";
+botonHistorial.onclick =
+  () => {
 
-        contenidoHistorial.style.display =
-          "grid";
+    contenidoProximas.style.display =
+      "none";
 
-        botonHistorial.style.background =
-          "#171923";
+    contenidoHistorial.style.display =
+      "grid";
 
-        botonHistorial.style.color =
-          "#fff";
+    botonHistorial.style.background =
+      "#171923";
 
-        botonProximas.style.background =
-          "#f1f2f5";
+    botonHistorial.style.color =
+      "#fff";
 
-        botonProximas.style.color =
-          "#555b6b";
-      };
+    botonProximas.style.background =
+      "#f1f2f5";
+
+    botonProximas.style.color =
+      "#555b6b";
+  };
 
   }
 
