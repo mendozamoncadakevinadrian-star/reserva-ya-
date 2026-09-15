@@ -5544,9 +5544,96 @@ async function cargarDatosPanelNegocio() {
     serviciosResponse.data ||
     [];
 
-  const totalReservas =
-    reservas.length;
+  const ahoraReservas =
+  new Date();
 
+const totalReservas =
+  reservas.filter(
+    reserva => {
+
+      const estado =
+        String(
+          reserva.estado || ""
+        ).toLowerCase();
+
+      if (
+        estado === "cancelada" ||
+        estado === "completada"
+      ) {
+        return false;
+      }
+
+      if (!reserva.fecha) {
+        return false;
+      }
+
+      const partesFecha =
+        String(reserva.fecha)
+          .split("-")
+          .map(Number);
+
+      if (
+        partesFecha.length !== 3 ||
+        partesFecha.some(
+          numero =>
+            Number.isNaN(numero)
+        )
+      ) {
+        return false;
+      }
+
+      const horaNormalizada =
+        String(
+          reserva.hora || "00:00"
+        )
+          .trim()
+          .replace(".", ":");
+
+      const partesHora =
+        horaNormalizada
+          .split(":")
+          .map(Number);
+
+      const horas =
+        Number.isNaN(
+          partesHora[0]
+        )
+          ? 0
+          : partesHora[0];
+
+      const minutos =
+        Number.isNaN(
+          partesHora[1]
+        )
+          ? 0
+          : partesHora[1];
+
+      const fechaHoraReserva =
+        new Date(
+          partesFecha[0],
+          partesFecha[1] - 1,
+          partesFecha[2],
+          horas,
+          minutos,
+          0,
+          0
+        );
+
+      if (
+        Number.isNaN(
+          fechaHoraReserva.getTime()
+        )
+      ) {
+        return false;
+      }
+
+      return (
+        fechaHoraReserva >=
+        ahoraReservas
+      );
+
+    }
+  ).length;
   const clientesUnicos =
     new Set(
       reservas
@@ -5804,12 +5891,14 @@ async function guardarInformacionNegocio() {
   mostrarToast("Información del negocio actualizada.");
 }
 
+
 async function abrirReservasNegocio() {
 
   if (
     !ReservaYa.usuario ||
     !ReservaYa.negocioActual
   ) {
+
     mostrarToast(
       "Necesitas un negocio registrado."
     );
@@ -5864,10 +5953,10 @@ async function abrirReservasNegocio() {
       : [];
 
   /*
-   * Convierte fecha + hora de la reserva
-   * en un objeto Date.
+   * Convierte la fecha y hora guardadas
+   * en Citas en una fecha real del dispositivo.
    *
-   * Acepta formatos como:
+   * Acepta:
    * 10:30
    * 10.30
    * 10:00
@@ -5958,19 +6047,11 @@ async function abrirReservasNegocio() {
     new Date();
 
   /*
-   * Canceladas siempre van al historial.
-   */
-  const canceladas =
-    lista.filter(
-      reserva =>
-        String(
-          reserva.estado || ""
-        ).toLowerCase() ===
-        "cancelada"
-    );
-
-  /*
-   * Reservas futuras y activas.
+   * PRÓXIMAS
+   *
+   * Solo reservas que:
+   * - todavía no han ocurrido
+   * - no están canceladas
    */
   const proximas =
     lista.filter(
@@ -5997,13 +6078,18 @@ async function abrirReservasNegocio() {
           return false;
         }
 
-        return fechaHora >= ahora;
+        return (
+          fechaHora.getTime() >=
+          ahora.getTime()
+        );
       }
     );
 
   /*
-   * Historial:
-   * - reservas pasadas
+   * HISTORIAL
+   *
+   * Incluye:
+   * - reservas que ya pasaron
    * - reservas canceladas
    */
   const historial =
@@ -6031,22 +6117,12 @@ async function abrirReservasNegocio() {
           return true;
         }
 
-        return fechaHora < ahora;
+        return (
+          fechaHora.getTime() <
+          ahora.getTime()
+        );
       }
     );
-
-  function escaparTexto(
-    valor
-  ) {
-
-    return escaparHTML(
-      valor === null ||
-      valor === undefined
-        ? ""
-        : String(valor)
-    );
-
-  }
 
   function crearReservaHTML(
     reserva
@@ -6094,7 +6170,6 @@ async function abrirReservasNegocio() {
 
       estadoFondo =
         "#fef2f2";
-
     }
 
     if (
@@ -6107,7 +6182,6 @@ async function abrirReservasNegocio() {
 
       estadoFondo =
         "#f0fdf4";
-
     }
 
     return `
@@ -6139,7 +6213,7 @@ async function abrirReservasNegocio() {
                 color:#171923;
               "
             >
-              ${escaparTexto(
+              ${escaparHTML(
                 nombreCliente
               )}
             </strong>
@@ -6151,7 +6225,7 @@ async function abrirReservasNegocio() {
                 font-size:14px;
               "
             >
-              📅 ${escaparTexto(
+              📅 ${escaparHTML(
                 fecha
               )}
             </div>
@@ -6163,7 +6237,7 @@ async function abrirReservasNegocio() {
                 font-size:14px;
               "
             >
-              🕐 ${escaparTexto(
+              🕐 ${escaparHTML(
                 hora
               )}
             </div>
@@ -6178,7 +6252,7 @@ async function abrirReservasNegocio() {
                       font-size:14px;
                     "
                   >
-                    📞 ${escaparTexto(
+                    📞 ${escaparHTML(
                       telefono
                     )}
                   </div>
@@ -6199,7 +6273,7 @@ async function abrirReservasNegocio() {
               font-weight:700;
             "
           >
-            ${escaparTexto(
+            ${escaparHTML(
               estado
             )}
           </span>
@@ -6218,7 +6292,7 @@ async function abrirReservasNegocio() {
                   font-size:13px;
                 "
               >
-                💬 ${escaparTexto(
+                💬 ${escaparHTML(
                   comentario
                 )}
               </div>
@@ -6228,7 +6302,6 @@ async function abrirReservasNegocio() {
 
       </div>
     `;
-
   }
 
   const proximasHTML =
@@ -6290,7 +6363,9 @@ async function abrirReservasNegocio() {
               ? ""
               : "s"
           }
+
           ·
+
           ${historial.length}
           en historial
         </p>
@@ -6306,15 +6381,8 @@ async function abrirReservasNegocio() {
       >
 
         <button
+          id="btnProximasReservas"
           type="button"
-          onclick="
-            document.getElementById('reservasProximas').style.display='grid';
-            document.getElementById('reservasHistorial').style.display='none';
-            this.style.background='#171923';
-            this.style.color='#fff';
-            document.getElementById('btnHistorialReservas').style.background='#f1f2f5';
-            document.getElementById('btnHistorialReservas').style.color='#555b6b';
-          "
           style="
             border:none;
             background:#171923;
@@ -6332,14 +6400,6 @@ async function abrirReservasNegocio() {
         <button
           id="btnHistorialReservas"
           type="button"
-          onclick="
-            document.getElementById('reservasProximas').style.display='none';
-            document.getElementById('reservasHistorial').style.display='grid';
-            this.style.background='#171923';
-            this.style.color='#fff';
-            this.previousElementSibling.style.background='#f1f2f5';
-            this.previousElementSibling.style.color='#555b6b';
-          "
           style="
             border:none;
             background:#f1f2f5;
@@ -6397,6 +6457,7 @@ async function abrirReservasNegocio() {
               >
                 Aquí aparecerán las próximas reservas de tus clientes.
               </div>
+
             </div>
           `
         }
@@ -6444,6 +6505,7 @@ async function abrirReservasNegocio() {
               >
                 Todavía no hay reservas anteriores.
               </div>
+
             </div>
           `
         }
@@ -6454,7 +6516,85 @@ async function abrirReservasNegocio() {
 
   `);
 
-}
+  /*
+   * Activamos los botones DESPUÉS
+   * de crear el contenido del modal.
+   */
+
+  const btnProximas =
+    document.getElementById(
+      "btnProximasReservas"
+    );
+
+  const btnHistorial =
+    document.getElementById(
+      "btnHistorialReservas"
+    );
+
+  const contenedorProximas =
+    document.getElementById(
+      "reservasProximas"
+    );
+
+  const contenedorHistorial =
+    document.getElementById(
+      "reservasHistorial"
+    );
+
+  if (
+    btnProximas &&
+    btnHistorial &&
+    contenedorProximas &&
+    contenedorHistorial
+  ) {
+
+    btnProximas.onclick =
+      function () {
+
+        contenedorProximas.style.display =
+          "grid";
+
+        contenedorHistorial.style.display =
+          "none";
+
+        btnProximas.style.background =
+          "#171923";
+
+        btnProximas.style.color =
+          "#fff";
+
+        btnHistorial.style.background =
+          "#f1f2f5";
+
+        btnHistorial.style.color =
+          "#555b6b";
+      };
+
+    btnHistorial.onclick =
+      function () {
+
+        contenedorProximas.style.display =
+          "none";
+
+        contenedorHistorial.style.display =
+          "grid";
+
+        btnHistorial.style.background =
+          "#171923";
+
+        btnHistorial.style.color =
+          "#fff";
+
+        btnProximas.style.background =
+          "#f1f2f5";
+
+        btnProximas.style.color =
+          "#555b6b";
+      };
+
+  }
+
+}              
 
     
 /* =====================================================
