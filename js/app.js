@@ -2287,10 +2287,6 @@ async function abrirServiciosNegocio() {
 
   }
 
-  // Guardamos que el modal actual corresponde
-  // a la ventana de servicios.
-  ReservaYa.volverAFichaTrasCerrarServicios = true;
-
   abrirModal(`
 
     <div>
@@ -2453,7 +2449,9 @@ async function abrirServiciosNegocio() {
 
     </div>
 
-  `);
+  `,
+  "volverAFichaNegocio()"
+  );
 
 }
                   
