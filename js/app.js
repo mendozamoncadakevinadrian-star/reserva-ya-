@@ -5804,6 +5804,280 @@ async function guardarInformacionNegocio() {
   mostrarToast("Información del negocio actualizada.");
 }
 
+async function abrirReservasNegocio() {
+
+  if (
+    !ReservaYa.usuario ||
+    !ReservaYa.negocioActual
+  ) {
+
+    mostrarToast(
+      "Necesitas un negocio registrado."
+    );
+
+    return;
+
+  }
+
+
+  const negocioId =
+    ReservaYa.negocioActual.id;
+
+
+  const {
+    data: reservas,
+    error
+  } =
+    await supabaseClient
+      .from("Citas")
+      .select("*")
+      .eq(
+        "negocio_id",
+        negocioId
+      )
+      .order(
+        "fecha",
+        { ascending: true }
+      );
+
+
+  if (error) {
+
+    console.error(
+      "Error cargando reservas del negocio:",
+      error
+    );
+
+    mostrarToast(
+      "No se pudieron cargar las reservas."
+    );
+
+    return;
+
+  }
+
+
+  const lista =
+    reservas || [];
+
+
+  if (!lista.length) {
+
+    abrirModal(`
+
+      <div>
+
+        <div
+          style="
+            color:#21d4df;
+            font-size:10px;
+            font-weight:800;
+            letter-spacing:.08em;
+            text-transform:uppercase;
+            margin-bottom:5px;
+          "
+        >
+          RESERVAS
+        </div>
+
+        <h2
+          style="
+            margin:0 0 8px;
+            color:#f5f7ff;
+            font-size:19px;
+          "
+        >
+          📅 Reservas recibidas
+        </h2>
+
+        <p
+          style="
+            margin:0;
+            color:#8f98ad;
+            font-size:13px;
+            line-height:1.5;
+          "
+        >
+          Todavía no has recibido reservas.
+        </p>
+
+      </div>
+
+    `);
+
+    return;
+
+  }
+
+
+  const reservasHTML =
+    lista
+      .map(
+        reserva => {
+
+          const estado =
+            String(
+              reserva.estado ||
+              "Pendiente"
+            );
+
+
+          const fecha =
+            reserva.fecha ||
+            "Fecha no disponible";
+
+
+          const hora =
+            reserva.hora ||
+            "Hora no disponible";
+
+
+          return `
+
+            <div
+              style="
+                padding:14px;
+                border-radius:14px;
+                background:#171c29;
+                border:1px solid rgba(255,255,255,.07);
+              "
+            >
+
+              <div
+                style="
+                  display:flex;
+                  justify-content:space-between;
+                  align-items:flex-start;
+                  gap:10px;
+                "
+              >
+
+                <div>
+
+                  <strong
+                    style="
+                      display:block;
+                      color:#f5f7ff;
+                      font-size:14px;
+                    "
+                  >
+                    📅 ${escaparHTML(
+                      fecha
+                    )}
+                  </strong>
+
+                  <span
+                    style="
+                      display:block;
+                      margin-top:5px;
+                      color:#8f98ad;
+                      font-size:11px;
+                    "
+                  >
+                    🕐 ${escaparHTML(
+                      hora
+                    )}
+                  </span>
+
+                </div>
+
+
+                <span
+                  style="
+                    flex-shrink:0;
+                    padding:5px 8px;
+                    border-radius:8px;
+                    background:rgba(33,212,223,.10);
+                    color:#21d4df;
+                    font-size:10px;
+                    font-weight:800;
+                  "
+                >
+                  ${escaparHTML(
+                    estado
+                  )}
+                </span>
+
+              </div>
+
+            </div>
+
+          `;
+
+        }
+      )
+      .join("");
+
+
+  abrirModal(`
+
+    <div>
+
+      <div
+        style="
+          margin-bottom:18px;
+        "
+      >
+
+        <div
+          style="
+            color:#21d4df;
+            font-size:10px;
+            font-weight:800;
+            letter-spacing:.08em;
+            text-transform:uppercase;
+            margin-bottom:5px;
+          "
+        >
+          RESERVAS
+        </div>
+
+        <h2
+          style="
+            margin:0;
+            color:#f5f7ff;
+            font-size:19px;
+          "
+        >
+          📅 Reservas recibidas
+        </h2>
+
+        <p
+          style="
+            margin:5px 0 0;
+            color:#8f98ad;
+            font-size:11px;
+          "
+        >
+          ${lista.length}
+          ${
+            lista.length === 1
+              ? " reserva recibida"
+              : " reservas recibidas"
+          }
+        </p>
+
+      </div>
+
+
+      <div
+        style="
+          display:grid;
+          gap:9px;
+          max-height:60vh;
+          overflow-y:auto;
+        "
+      >
+
+        ${reservasHTML}
+
+      </div>
+
+    </div>
+
+  `);
+
+}
 /* =====================================================
    INGRESOS
 ===================================================== */
