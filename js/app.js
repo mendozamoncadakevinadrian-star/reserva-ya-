@@ -2287,6 +2287,10 @@ async function abrirServiciosNegocio() {
 
   }
 
+  // Guardamos que el modal actual corresponde
+  // a la ventana de servicios.
+  ReservaYa.volverAFichaTrasCerrarServicios = true;
+
   abrirModal(`
 
     <div>
@@ -2328,10 +2332,7 @@ async function abrirServiciosNegocio() {
 
         </div>
 
-        
-
       </div>
-
 
       <div
         style="
@@ -2419,7 +2420,6 @@ async function abrirServiciosNegocio() {
                         }
 
                       </div>
-
 
                       ${
                         precio
@@ -5241,8 +5241,23 @@ function cerrarModal(
       "hidden"
     );
 
-}
+  // Si venimos de la ventana de servicios,
+  // volvemos a mostrar la ficha del negocio.
+  if (
+    ReservaYa.volverAFichaTrasCerrarServicios &&
+    ReservaYa.negocioActual
+  ) {
 
+    ReservaYa.volverAFichaTrasCerrarServicios =
+      false;
+
+    abrirNegocio(
+      ReservaYa.negocioActual.id
+    );
+
+  }
+
+}
 
 /* =====================================================
    PREMIUM
