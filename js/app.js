@@ -7165,8 +7165,8 @@ async function guardarEdicionServicio(servicioId) {
       duracion: Number(duracion)
     })
     .eq("id", servicioId)
-    .select();
-
+    .select("id, nombre, precio, duracion");
+   
 if (error) {
 
   console.error(
