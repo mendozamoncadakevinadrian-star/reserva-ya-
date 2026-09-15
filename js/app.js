@@ -7228,6 +7228,95 @@ if (servicioActualizado) {
 
 }
 
+async function eliminarServicio(servicioId) {
+
+  if (
+    !ReservaYa.usuario ||
+    !ReservaYa.negocioActual
+  ) {
+
+    mostrarToast(
+      "Necesitas un negocio registrado."
+    );
+
+    return;
+
+  }
+
+  const servicio = Array.isArray(
+    ReservaYa.serviciosActuales
+  )
+    ? ReservaYa.serviciosActuales.find(
+        item =>
+          String(item.id) === String(servicioId)
+      )
+    : null;
+
+  const nombreServicio =
+    servicio?.nombre ||
+    "este servicio";
+
+  const confirmar = confirm(
+    `¿Seguro que quieres eliminar "${nombreServicio}"?`
+  );
+
+  if (!confirmar) {
+    return;
+  }
+
+  const {
+    error
+  } =
+    await supabaseClient
+      .from("servicios")
+      .delete()
+      .eq(
+        "id",
+        servicioId
+      )
+      .eq(
+        "negocio_id",
+        ReservaYa.negocioActual.id
+      );
+
+  if (error) {
+
+    console.error(
+      "Error eliminando servicio:",
+      error
+    );
+
+    mostrarToast(
+      "No se pudo eliminar el servicio."
+    );
+
+    return;
+
+  }
+
+  if (
+    Array.isArray(
+      ReservaYa.serviciosActuales
+    )
+  ) {
+
+    ReservaYa.serviciosActuales =
+      ReservaYa.serviciosActuales.filter(
+        servicio =>
+          String(servicio.id) !==
+          String(servicioId)
+      );
+
+  }
+
+  mostrarToast(
+    "Servicio eliminado correctamente."
+  );
+
+  administrarServicios();
+
+}
+
 /* =====================================================
    HORARIOS BUSINESS
 ===================================================== */
