@@ -2328,24 +2328,7 @@ async function abrirServiciosNegocio() {
 
         </div>
 
-        <button
-          type="button"
-          onclick="cerrarModal()"
-          style="
-            border:0;
-            background:rgba(255,255,255,.08);
-            color:#f5f7ff;
-            width:34px;
-            height:34px;
-            border-radius:50%;
-            font-size:18px;
-            cursor:pointer;
-            flex-shrink:0;
-          "
-          aria-label="Cerrar servicios"
-        >
-          ✕
-        </button>
+        
 
       </div>
 
