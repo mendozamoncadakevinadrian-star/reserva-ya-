@@ -7167,6 +7167,15 @@ async function guardarEdicionServicio(servicioId) {
     .eq("id", servicioId)
     .select("id, nombre, precio, duracion");
    
+   if (!data || data.length === 0) {
+
+  mostrarToast(
+    "No se encontró el servicio para actualizar."
+  );
+
+  return;
+}
+   
 if (error) {
 
   console.error(
