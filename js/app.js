@@ -1907,30 +1907,44 @@ async function abrirNegocio(id) {
 
 
   // =========================================================
-  // SERVICIOS HTML
-  // =========================================================
+// SERVICIOS HTML
+// =========================================================
 
-  let serviciosHTML = "";
+let serviciosHTML = "";
 
+if (
+  serviciosNegocio.length
+) {
 
-  if (
-    serviciosNegocio.length
-  ) {
+  serviciosHTML = `
 
-    serviciosHTML = `
+    <div
+      style="
+        margin-top:20px;
+        text-align:left;
+      "
+    >
 
-      <div
+      <button
+        type="button"
+        onclick="abrirServiciosNegocio()"
         style="
-          margin-top:20px;
+          width:100%;
+          padding:14px;
+          border-radius:14px;
+          background:#171c29;
+          border:1px solid rgba(255,255,255,.07);
+          color:#f5f7ff;
           text-align:left;
+          cursor:pointer;
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:12px;
         "
       >
 
-        <div
-          style="
-            margin-bottom:10px;
-          "
-        >
+        <div>
 
           <div
             style="
@@ -1945,194 +1959,101 @@ async function abrirNegocio(id) {
             SERVICIOS
           </div>
 
-          <h3
+          <strong
             style="
-              margin:0;
-              color:#f5f7ff;
-              font-size:18px;
+              font-size:14px;
+              display:block;
             "
           >
             🛠️ Servicios disponibles
-          </h3>
+          </strong>
+
+          <span
+            style="
+              display:block;
+              margin-top:4px;
+              color:#8f98ad;
+              font-size:10px;
+            "
+          >
+            ${serviciosNegocio.length}
+            ${
+              serviciosNegocio.length === 1
+                ? " servicio disponible"
+                : " servicios disponibles"
+            }
+          </span>
 
         </div>
 
-
-        <div
+        <span
           style="
-            display:grid;
-            gap:9px;
+            flex-shrink:0;
+            font-size:20px;
+            color:#21d4df;
           "
         >
+          ›
+        </span>
 
-          ${
-            serviciosNegocio
-              .map(
-                servicio => {
+      </button>
 
-                  const precio =
-                    servicio.precio !== null &&
-                    servicio.precio !== undefined
-                      ? formatearPrecio(
-                          servicio.precio
-                        )
-                      : "";
+    </div>
 
-                  const duracion =
-                    servicio.duracion !== null &&
-                    servicio.duracion !== undefined
-                      ? `${Number(
-                          servicio.duracion
-                        )} min`
-                      : "";
+  `;
 
-                  return `
+} else {
 
-                    <div
-                      style="
-                        padding:12px;
-                        border-radius:13px;
-                        background:#171c29;
-                        border:1px solid rgba(255,255,255,.07);
-                      "
-                    >
+  serviciosHTML = `
 
-                      <div
-                        style="
-                          display:flex;
-                          align-items:flex-start;
-                          justify-content:space-between;
-                          gap:10px;
-                        "
-                      >
-
-                        <div
-                          style="
-                            min-width:0;
-                          "
-                        >
-
-                          <strong
-                            style="
-                              display:block;
-                              color:#f5f7ff;
-                              font-size:13px;
-                              line-height:1.25;
-                            "
-                          >
-                            ${escaparHTML(
-                              servicio.nombre ||
-                              "Servicio"
-                            )}
-                          </strong>
-
-                          ${
-                            duracion
-                              ? `
-                                <span
-                                  style="
-                                    display:block;
-                                    margin-top:4px;
-                                    color:#8f98ad;
-                                    font-size:10px;
-                                  "
-                                >
-                                  ⏱️ ${duracion}
-                                </span>
-                              `
-                              : ""
-                          }
-
-                        </div>
-
-
-                        ${
-                          precio
-                            ? `
-                              <strong
-                                style="
-                                  flex-shrink:0;
-                                  color:#21d4df;
-                                  font-size:12px;
-                                  white-space:nowrap;
-                                "
-                              >
-                                ${precio}
-                              </strong>
-                            `
-                            : ""
-                        }
-
-                      </div>
-
-                    </div>
-
-                  `;
-
-                }
-              )
-              .join("")
-          }
-
-        </div>
-
-      </div>
-
-    `;
-
-  } else {
-
-    serviciosHTML = `
+    <div
+      style="
+        margin-top:20px;
+        padding:14px;
+        border-radius:14px;
+        background:#171c29;
+        border:1px solid rgba(255,255,255,.07);
+        text-align:left;
+      "
+    >
 
       <div
         style="
-          margin-top:20px;
-          padding:14px;
-          border-radius:14px;
-          background:#171c29;
-          border:1px solid rgba(255,255,255,.07);
-          text-align:left;
+          color:#21d4df;
+          font-size:10px;
+          font-weight:800;
+          letter-spacing:.08em;
+          margin-bottom:5px;
         "
       >
-
-        <div
-          style="
-            color:#21d4df;
-            font-size:10px;
-            font-weight:800;
-            letter-spacing:.08em;
-            margin-bottom:5px;
-          "
-        >
-          SERVICIOS
-        </div>
-
-        <strong
-          style="
-            color:#f5f7ff;
-            font-size:13px;
-          "
-        >
-          🛠️ Sin servicios configurados
-        </strong>
-
-        <p
-          style="
-            margin:5px 0 0;
-            color:#7f899d;
-            font-size:10px;
-          "
-        >
-          Este negocio todavía no ha añadido servicios.
-        </p>
-
+        SERVICIOS
       </div>
 
-    `;
+      <strong
+        style="
+          color:#f5f7ff;
+          font-size:13px;
+        "
+      >
+        🛠️ Sin servicios configurados
+      </strong>
 
-  }
+      <p
+        style="
+          margin:5px 0 0;
+          color:#7f899d;
+          font-size:10px;
+        "
+      >
+        Este negocio todavía no ha añadido servicios.
+      </p>
 
+    </div>
 
+  `;
+
+}
+   
   // =========================================================
   // MODAL
   // =========================================================
@@ -2340,6 +2261,212 @@ ${
         }
       </button>
 
+
+    </div>
+
+  `);
+
+}
+
+async function abrirServiciosNegocio() {
+
+  const servicios =
+    Array.isArray(
+      ReservaYa.serviciosActuales
+    )
+      ? ReservaYa.serviciosActuales
+      : [];
+
+  if (!servicios.length) {
+
+    mostrarToast(
+      "Este negocio no tiene servicios configurados."
+    );
+
+    return;
+
+  }
+
+  abrirModal(`
+
+    <div>
+
+      <div
+        style="
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:10px;
+          margin-bottom:18px;
+        "
+      >
+
+        <div>
+
+          <div
+            style="
+              color:#21d4df;
+              font-size:10px;
+              font-weight:800;
+              letter-spacing:.08em;
+              text-transform:uppercase;
+              margin-bottom:4px;
+            "
+          >
+            SERVICIOS
+          </div>
+
+          <h2
+            style="
+              margin:0;
+              color:#f5f7ff;
+              font-size:19px;
+            "
+          >
+            🛠️ Servicios disponibles
+          </h2>
+
+        </div>
+
+        <button
+          type="button"
+          onclick="cerrarModal()"
+          style="
+            border:0;
+            background:rgba(255,255,255,.08);
+            color:#f5f7ff;
+            width:34px;
+            height:34px;
+            border-radius:50%;
+            font-size:18px;
+            cursor:pointer;
+            flex-shrink:0;
+          "
+          aria-label="Cerrar servicios"
+        >
+          ✕
+        </button>
+
+      </div>
+
+
+      <div
+        style="
+          display:grid;
+          gap:9px;
+        "
+      >
+
+        ${
+          servicios
+            .map(
+              servicio => {
+
+                const precio =
+                  servicio.precio !== null &&
+                  servicio.precio !== undefined
+                    ? formatearPrecio(
+                        servicio.precio
+                      )
+                    : "";
+
+                const duracion =
+                  servicio.duracion !== null &&
+                  servicio.duracion !== undefined
+                    ? `${Number(
+                        servicio.duracion
+                      )} min`
+                    : "";
+
+                return `
+
+                  <div
+                    style="
+                      padding:13px;
+                      border-radius:13px;
+                      background:#171c29;
+                      border:1px solid rgba(255,255,255,.07);
+                    "
+                  >
+
+                    <div
+                      style="
+                        display:flex;
+                        align-items:flex-start;
+                        justify-content:space-between;
+                        gap:10px;
+                      "
+                    >
+
+                      <div
+                        style="
+                          min-width:0;
+                        "
+                      >
+
+                        <strong
+                          style="
+                            display:block;
+                            color:#f5f7ff;
+                            font-size:13px;
+                            line-height:1.3;
+                          "
+                        >
+                          ${escaparHTML(
+                            servicio.nombre ||
+                            "Servicio"
+                          )}
+                        </strong>
+
+                        ${
+                          duracion
+                            ? `
+                              <span
+                                style="
+                                  display:block;
+                                  margin-top:5px;
+                                  color:#8f98ad;
+                                  font-size:10px;
+                                "
+                              >
+                                ⏱️ ${duracion}
+                              </span>
+                            `
+                            : ""
+                        }
+
+                      </div>
+
+
+                      ${
+                        precio
+                          ? `
+                            <strong
+                              style="
+                                flex-shrink:0;
+                                color:#21d4df;
+                                font-size:12px;
+                                white-space:nowrap;
+                              "
+                            >
+                              ${precio}
+                            </strong>
+                          `
+                          : ""
+                      }
+
+                    </div>
+
+                  </div>
+
+                `;
+
+              }
+            )
+            .join("")
+        }
+
+      </div>
 
     </div>
 
