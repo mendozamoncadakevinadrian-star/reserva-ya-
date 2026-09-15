@@ -7222,10 +7222,7 @@ if (servicioActualizado) {
   cerrarModal();
 
 
-  mostrarToast(
-  "ID EDITADO: " + servicioId
-);
-
+  mostrarToast("Servicio actualizado correctamente.");
 
   administrarServicios();
 
