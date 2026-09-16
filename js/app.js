@@ -6556,7 +6556,37 @@ async function abrirReservasNegocio() {
   /*
    * BOTÓN PRÓXIMAS
    */
+console.log(
+  "RESERVAS: INICIALIZANDO PESTAÑAS"
+);
 
+console.log(
+  "BOTÓN PRÓXIMAS:",
+  document.getElementById(
+    "btnReservasProximas"
+  )
+);
+
+console.log(
+  "BOTÓN HISTORIAL:",
+  document.getElementById(
+    "btnReservasHistorial"
+  )
+);
+
+console.log(
+  "CONTENIDO PRÓXIMAS:",
+  document.getElementById(
+    "contenidoReservasProximas"
+  )
+);
+
+console.log(
+  "CONTENIDO HISTORIAL:",
+  document.getElementById(
+    "contenidoReservasHistorial"
+  )
+);
     
   const botonProximas =
   document.getElementById(
@@ -6584,8 +6614,10 @@ if (
   contenidoProximas &&
   contenidoHistorial
 ) {
+   
+const activarProximas = () => {
 
-  const activarProximas = () => {
+  alert("SE ACTIVÓ PRÓXIMAS");
 
     contenidoProximas.style.setProperty(
       "display",
@@ -6625,6 +6657,8 @@ if (
   };
 
   const activarHistorial = () => {
+
+  alert("SE ACTIVÓ HISTORIAL");
 
     contenidoProximas.style.setProperty(
       "display",
