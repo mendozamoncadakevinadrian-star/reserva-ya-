@@ -6557,99 +6557,119 @@ async function abrirReservasNegocio() {
    * BOTÓN PRÓXIMAS
    */
 
-    const botonProximas =
-    document.getElementById(
-      "btnReservasProximas"
-    );
-
-  const botonHistorial =
-    document.getElementById(
-      "btnReservasHistorial"
-    );
-
-  const contenidoProximas =
-    document.getElementById(
-      "contenidoReservasProximas"
-    );
-
-  const contenidoHistorial =
-    document.getElementById(
-      "contenidoReservasHistorial"
-    );
-
-  if (
-    botonProximas &&
-    botonHistorial &&
-    contenidoProximas &&
-    contenidoHistorial
-  ) {
-
-    function mostrarPestanaReservas(
-      tipo
-    ) {
-
-      const mostrarProximas =
-        tipo === "proximas";
-
-      contenidoProximas.style.display =
-        mostrarProximas
-          ? "grid"
-          : "none";
-
-      contenidoHistorial.style.display =
-        mostrarProximas
-          ? "none"
-          : "grid";
-
-      botonProximas.style.background =
-        mostrarProximas
-          ? "#171923"
-          : "#f1f2f5";
-
-      botonProximas.style.color =
-        mostrarProximas
-          ? "#fff"
-          : "#555b6b";
-
-      botonHistorial.style.background =
-        mostrarProximas
-          ? "#f1f2f5"
-          : "#171923";
-
-      botonHistorial.style.color =
-        mostrarProximas
-          ? "#555b6b"
-          : "#fff";
-    }
-
-    botonProximas.onclick =
-      () => {
-        mostrarPestanaReservas(
-          "proximas"
-        );
-      };
-
-    botonHistorial.onclick =
-      () => {
-        mostrarPestanaReservas(
-          "historial"
-        );
-      };
-
-    /*
-     * ESTADO INICIAL
-     *
-     * Al abrir el modal siempre
-     * comenzamos en PRÓXIMAS.
-     */
-    mostrarPestanaReservas(
-      "proximas"
-    );
-  }
-}
-  
     
-      
+  const botonProximas =
+  document.getElementById(
+    "btnReservasProximas"
+  );
+
+const botonHistorial =
+  document.getElementById(
+    "btnReservasHistorial"
+  );
+
+const contenidoProximas =
+  document.getElementById(
+    "contenidoReservasProximas"
+  );
+
+const contenidoHistorial =
+  document.getElementById(
+    "contenidoReservasHistorial"
+  );
+
+if (
+  botonProximas &&
+  botonHistorial &&
+  contenidoProximas &&
+  contenidoHistorial
+) {
+
+  const activarProximas = () => {
+
+    contenidoProximas.style.setProperty(
+      "display",
+      "grid",
+      "important"
+    );
+
+    contenidoHistorial.style.setProperty(
+      "display",
+      "none",
+      "important"
+    );
+
+    botonProximas.style.setProperty(
+      "background",
+      "#171923",
+      "important"
+    );
+
+    botonProximas.style.setProperty(
+      "color",
+      "#fff",
+      "important"
+    );
+
+    botonHistorial.style.setProperty(
+      "background",
+      "#f1f2f5",
+      "important"
+    );
+
+    botonHistorial.style.setProperty(
+      "color",
+      "#555b6b",
+      "important"
+    );
+  };
+
+  const activarHistorial = () => {
+
+    contenidoProximas.style.setProperty(
+      "display",
+      "none",
+      "important"
+    );
+
+    contenidoHistorial.style.setProperty(
+      "display",
+      "grid",
+      "important"
+    );
+
+    botonProximas.style.setProperty(
+      "background",
+      "#f1f2f5",
+      "important"
+    );
+
+    botonProximas.style.setProperty(
+      "color",
+      "#555b6b",
+      "important"
+    );
+
+    botonHistorial.style.setProperty(
+      "background",
+      "#171923",
+      "important"
+    );
+
+    botonHistorial.style.setProperty(
+      "color",
+      "#fff",
+      "important"
+    );
+  };
+
+  botonProximas.onclick = activarProximas;
+  botonHistorial.onclick = activarHistorial;
+
+  activarProximas();
+}
+    
+}     
 
         
 
