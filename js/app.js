@@ -6557,7 +6557,7 @@ async function abrirReservasNegocio() {
    * BOTÓN PRÓXIMAS
    */
 
-  const botonProximas =
+    const botonProximas =
     document.getElementById(
       "btnReservasProximas"
     );
@@ -6584,53 +6584,68 @@ async function abrirReservasNegocio() {
     contenidoHistorial
   ) {
 
+    function mostrarPestanaReservas(
+      tipo
+    ) {
+
+      const mostrarProximas =
+        tipo === "proximas";
+
+      contenidoProximas.style.display =
+        mostrarProximas
+          ? "grid"
+          : "none";
+
+      contenidoHistorial.style.display =
+        mostrarProximas
+          ? "none"
+          : "grid";
+
+      botonProximas.style.background =
+        mostrarProximas
+          ? "#171923"
+          : "#f1f2f5";
+
+      botonProximas.style.color =
+        mostrarProximas
+          ? "#fff"
+          : "#555b6b";
+
+      botonHistorial.style.background =
+        mostrarProximas
+          ? "#f1f2f5"
+          : "#171923";
+
+      botonHistorial.style.color =
+        mostrarProximas
+          ? "#555b6b"
+          : "#fff";
+    }
+
     botonProximas.onclick =
-  () => {
+      () => {
+        mostrarPestanaReservas(
+          "proximas"
+        );
+      };
 
-    contenidoProximas.style.display =
-      "grid";
+    botonHistorial.onclick =
+      () => {
+        mostrarPestanaReservas(
+          "historial"
+        );
+      };
 
-    contenidoHistorial.style.display =
-      "none";
-
-    botonProximas.style.background =
-      "#171923";
-
-    botonProximas.style.color =
-      "#fff";
-
-    botonHistorial.style.background =
-      "#f1f2f5";
-
-    botonHistorial.style.color =
-      "#555b6b";
-  };
-
-
-botonHistorial.onclick =
-  () => {
-
-    contenidoProximas.style.display =
-      "none";
-
-    contenidoHistorial.style.display =
-      "grid";
-
-    botonHistorial.style.background =
-      "#171923";
-
-    botonHistorial.style.color =
-      "#fff";
-
-    botonProximas.style.background =
-      "#f1f2f5";
-
-    botonProximas.style.color =
-      "#555b6b";
-  };
-
+    /*
+     * ESTADO INICIAL
+     *
+     * Al abrir el modal siempre
+     * comenzamos en PRÓXIMAS.
+     */
+    mostrarPestanaReservas(
+      "proximas"
+    );
   }
-
 }
   
     
