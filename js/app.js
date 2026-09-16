@@ -6197,219 +6197,373 @@ async function abrirReservasNegocio() {
   );
 
   function crearReservaHTML(
-    reserva
+  reserva
+) {
+
+  const estado =
+    String(
+      reserva.estado ||
+      "Pendiente"
+    ).trim();
+
+  const estadoLower =
+    estado.toLowerCase();
+
+  const nombre =
+    reserva.nombre_cliente ||
+    "Cliente sin nombre";
+
+  const fecha =
+    reserva.fecha ||
+    "Fecha no disponible";
+
+  const hora =
+    reserva.hora ||
+    "Hora no disponible";
+
+  const telefono =
+    reserva.telefono_cliente ||
+    "";
+
+  const comentario =
+    reserva.comentario ||
+    "";
+
+  let estadoColor =
+    "#f59e0b";
+
+  let estadoFondo =
+    "#fff7ed";
+
+  if (
+    estadoLower ===
+    "cancelada"
   ) {
 
-    const estado =
-      String(
-        reserva.estado ||
-        "Pendiente"
-      );
+    estadoColor =
+      "#dc2626";
 
-    const nombre =
-      reserva.nombre_cliente ||
-      "Cliente sin nombre";
+    estadoFondo =
+      "#fef2f2";
+  }
 
-    const fecha =
-      reserva.fecha ||
-      "Fecha no disponible";
+  if (
+    estadoLower ===
+    "completada"
+  ) {
 
-    const hora =
-      reserva.hora ||
-      "Hora no disponible";
+    estadoColor =
+      "#16a34a";
 
-    const telefono =
-      reserva.telefono_cliente ||
-      "";
+    estadoFondo =
+      "#f0fdf4";
+  }
 
-    const comentario =
-      reserva.comentario ||
-      "";
+  let botonesAccion = "";
 
-    const estadoLower =
-      estado
-        .trim()
-        .toLowerCase();
+  if (
+    estadoLower ===
+    "pendiente"
+  ) {
 
-    let estadoColor =
-      "#f59e0b";
-
-    let estadoFondo =
-      "#fff7ed";
-
-    if (
-      estadoLower ===
-      "cancelada"
-    ) {
-
-      estadoColor =
-        "#dc2626";
-
-      estadoFondo =
-        "#fef2f2";
-    }
-
-    if (
-      estadoLower ===
-      "completada"
-    ) {
-
-      estadoColor =
-        "#16a34a";
-
-      estadoFondo =
-        "#f0fdf4";
-    }
-
-    return `
+    botonesAccion = `
       <div
         style="
-          background:#fff;
-          border:1px solid #e8eaf0;
-          border-radius:16px;
-          padding:15px;
+          display:flex;
+          gap:8px;
+          margin-top:14px;
         "
       >
 
-        <div
+        <button
+          type="button"
+          onclick="actualizarEstadoReserva(
+            '${reserva.id}',
+            'Confirmada'
+          )"
           style="
-            display:flex;
-            justify-content:space-between;
-            align-items:flex-start;
-            gap:10px;
+            flex:1;
+            border:none;
+            background:#16a34a;
+            color:#fff;
+            border-radius:10px;
+            padding:10px;
+            font-weight:700;
+            cursor:pointer;
           "
         >
+          ✓ Confirmar
+        </button>
 
-          <div>
-
-            <strong
-              style="
-                display:block;
-                font-size:16px;
-                color:#171923;
-              "
-            >
-              ${escaparHTML(
-                nombre
-              )}
-            </strong>
-
-            <div
-              style="
-                margin-top:7px;
-                color:#555b6b;
-                font-size:14px;
-              "
-            >
-              📅 ${escaparHTML(
-                fecha
-              )}
-            </div>
-
-            <div
-              style="
-                margin-top:4px;
-                color:#555b6b;
-                font-size:14px;
-              "
-            >
-              🕐 ${escaparHTML(
-                hora
-              )}
-            </div>
-
-            ${
-              telefono
-                ? `
-                  <div
-                    style="
-                      margin-top:4px;
-                      color:#555b6b;
-                      font-size:14px;
-                    "
-                  >
-                    📞 ${escaparHTML(
-                      telefono
-                    )}
-                  </div>
-                `
-                : ""
-            }
-
-          </div>
-
-          <span
-            style="
-              background:${estadoFondo};
-              color:${estadoColor};
-              padding:6px 10px;
-              border-radius:999px;
-              font-size:12px;
-              font-weight:700;
-              white-space:nowrap;
-            "
-          >
-            ${escaparHTML(
-              estado
-            )}
-          </span>
-
-        </div>
-
-        ${
-          comentario
-            ? `
-              <div
-                style="
-                  margin-top:12px;
-                  padding-top:10px;
-                  border-top:1px solid #eee;
-                  color:#727887;
-                  font-size:13px;
-                "
-              >
-                💬 ${escaparHTML(
-                  comentario
-                )}
-              </div>
-            `
-            : ""
-        }
+        <button
+          type="button"
+          onclick="actualizarEstadoReserva(
+            '${reserva.id}',
+            'Cancelada'
+          )"
+          style="
+            flex:1;
+            border:none;
+            background:#dc2626;
+            color:#fff;
+            border-radius:10px;
+            padding:10px;
+            font-weight:700;
+            cursor:pointer;
+          "
+        >
+          ✕ Cancelar
+        </button>
 
       </div>
     `;
   }
 
-  const htmlProximas =
-    proximas.length
-      ? proximas
-          .map(
-            crearReservaHTML
-          )
-          .join("")
-      : `
-          <div
+  if (
+    estadoLower ===
+    "confirmada"
+  ) {
+
+    botonesAccion = `
+      <div
+        style="
+          margin-top:14px;
+        "
+      >
+
+        <button
+          type="button"
+          onclick="actualizarEstadoReserva(
+            '${reserva.id}',
+            'Completada'
+          )"
+          style="
+            width:100%;
+            border:none;
+            background:#171923;
+            color:#fff;
+            border-radius:10px;
+            padding:10px;
+            font-weight:700;
+            cursor:pointer;
+          "
+        >
+          ✓ Marcar como completada
+        </button>
+
+      </div>
+    `;
+  }
+
+  return `
+    <div
+      style="
+        background:#fff;
+        border:1px solid #e8eaf0;
+        border-radius:16px;
+        padding:15px;
+      "
+    >
+
+      <div
+        style="
+          display:flex;
+          justify-content:space-between;
+          align-items:flex-start;
+          gap:10px;
+        "
+      >
+
+        <div>
+
+          <strong
             style="
-              padding:30px 10px;
-              text-align:center;
-              color:#727887;
+              display:block;
+              font-size:16px;
+              color:#171923;
             "
           >
+            ${escaparHTML(
+              nombre
+            )}
+          </strong>
+
+          <div
+            style="
+              margin-top:7px;
+              color:#555b6b;
+              font-size:14px;
+            "
+          >
+            📅 ${escaparHTML(
+              fecha
+            )}
+          </div>
+
+          <div
+            style="
+              margin-top:4px;
+              color:#555b6b;
+              font-size:14px;
+            "
+          >
+            🕐 ${escaparHTML(
+              hora
+            )}
+          </div>
+
+          ${
+            telefono
+              ? `
+                <div
+                  style="
+                    margin-top:4px;
+                    color:#555b6b;
+                    font-size:14px;
+                  "
+                >
+                  📞 ${escaparHTML(
+                    telefono
+                  )}
+                </div>
+              `
+              : ""
+          }
+
+        </div>
+
+        <span
+          style="
+            background:${estadoFondo};
+            color:${estadoColor};
+            padding:6px 10px;
+            border-radius:999px;
+            font-size:12px;
+            font-weight:700;
+            white-space:nowrap;
+          "
+        >
+          ${escaparHTML(
+            estado
+          )}
+        </span>
+
+      </div>
+
+      ${
+        comentario
+          ? `
             <div
               style="
-                font-size:34px;
-                margin-bottom:8px;
+                margin-top:12px;
+                padding-top:10px;
+                border-top:1px solid #eee;
+                color:#727887;
+                font-size:13px;
               "
             >
-              📅
+              💬 ${escaparHTML(
+                comentario
+              )}
             </div>
+          `
+          : ""
+      }
 
-            <strong>
-              No hay reservas próximas
-            </strong>
-          </div>
-        `;
+      ${botonesAccion}
 
+    </div>
+  `;
+}
+   
+   async function actualizarEstadoReserva(
+  reservaId,
+  nuevoEstado
+) {
+
+  if (
+    !reservaId ||
+    !nuevoEstado
+  ) {
+    return;
+  }
+
+  const nombresEstado = {
+    Confirmada:
+      "confirmar",
+    Cancelada:
+      "cancelar",
+    Completada:
+      "marcar como completada"
+  };
+
+  const accion =
+    nombresEstado[
+      nuevoEstado
+    ] || "actualizar";
+
+  const confirmar =
+    window.confirm(
+      `¿Quieres ${accion} esta reserva?`
+    );
+
+  if (!confirmar) {
+    return;
+  }
+
+  try {
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("Citas")
+        .update({
+          estado:
+            nuevoEstado
+        })
+        .eq(
+          "id",
+          reservaId
+        )
+        .eq(
+          "negocio_id",
+          ReservaYa.negocioActual.id
+        );
+
+    if (error) {
+
+      console.error(
+        "Error actualizando reserva:",
+        error
+      );
+
+      mostrarToast(
+        "No se pudo actualizar la reserva."
+      );
+
+      return;
+    }
+
+    mostrarToast(
+      `Reserva ${nuevoEstado.toLowerCase()}.`
+    );
+
+    await abrirReservasNegocio();
+
+  } catch (error) {
+
+    console.error(
+      "Error inesperado actualizando reserva:",
+      error
+    );
+
+    mostrarToast(
+      "Ocurrió un error al actualizar la reserva."
+    );
+  }
+}
+   
   const htmlHistorial =
     historial.length
       ? historial
