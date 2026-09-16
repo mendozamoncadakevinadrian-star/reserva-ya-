@@ -6617,7 +6617,7 @@ if (
    
 const activarProximas = () => {
 
-  alert("SE ACTIVÓ PRÓXIMAS");
+  
 
     contenidoProximas.style.setProperty(
       "display",
@@ -6630,35 +6630,34 @@ const activarProximas = () => {
       "none",
       "important"
     );
+botonProximas.style.setProperty(
+  "background",
+  "#f1f2f5",
+  "important"
+);
 
-    botonProximas.style.setProperty(
-      "background",
-      "#171923",
-      "important"
-    );
+botonProximas.style.setProperty(
+  "color",
+  "#555b6b",
+  "important"
+);
 
-    botonProximas.style.setProperty(
-      "color",
-      "#fff",
-      "important"
-    );
+botonHistorial.style.setProperty(
+  "background",
+  "#171923",
+  "important"
+);
 
-    botonHistorial.style.setProperty(
-      "background",
-      "#f1f2f5",
-      "important"
-    );
-
-    botonHistorial.style.setProperty(
-      "color",
-      "#555b6b",
-      "important"
-    );
+botonHistorial.style.setProperty(
+  "color",
+  "#fff",
+  "important"
+);
   };
 
   const activarHistorial = () => {
 
-  alert("SE ACTIVÓ HISTORIAL");
+  
 
     contenidoProximas.style.setProperty(
       "display",
@@ -6673,28 +6672,28 @@ const activarProximas = () => {
     );
 
     botonProximas.style.setProperty(
-      "background",
-      "#f1f2f5",
-      "important"
-    );
+  "background",
+  "#171923",
+  "important"
+);
 
-    botonProximas.style.setProperty(
-      "color",
-      "#555b6b",
-      "important"
-    );
+botonProximas.style.setProperty(
+  "color",
+  "#fff",
+  "important"
+);
 
-    botonHistorial.style.setProperty(
-      "background",
-      "#171923",
-      "important"
-    );
+botonHistorial.style.setProperty(
+  "background",
+  "#f1f2f5",
+  "important"
+);
 
-    botonHistorial.style.setProperty(
-      "color",
-      "#fff",
-      "important"
-    );
+botonHistorial.style.setProperty(
+  "color",
+  "#555b6b",
+  "important"
+);
   };
 
   botonProximas.onclick = activarProximas;
