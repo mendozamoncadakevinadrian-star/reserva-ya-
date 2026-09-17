@@ -3755,10 +3755,16 @@ async function confirmarReserva(
 
   }
 
+
   const servicioId =
     document.getElementById(
       "reservationService"
     )?.value;
+
+  const empleadoId =
+    document.getElementById(
+      "reservationEmployee"
+    )?.value || null;
 
   const fecha =
     document.getElementById(
@@ -3781,6 +3787,17 @@ async function confirmarReserva(
 
     mostrarToast(
       "Selecciona un servicio."
+    );
+
+    return;
+
+  }
+
+
+  if (!empleadoId) {
+
+    mostrarToast(
+      "Selecciona un empleado."
     );
 
     return;
@@ -3911,9 +3928,8 @@ async function confirmarReserva(
     La reserva se crea mediante
     la función segura de Supabase.
 
-    Supabase obtiene automáticamente
-    el usuario autenticado mediante
-    auth.uid().
+    Ahora también enviamos el
+    miembro seleccionado.
   */
 
   const {
@@ -3946,7 +3962,7 @@ async function confirmarReserva(
           comentario || null,
 
         p_empleado_id:
-          null
+          empleadoId
 
       }
     );
@@ -3966,13 +3982,6 @@ async function confirmarReserva(
     );
 
 
-    /*
-      Si Supabase rechazó la reserva
-      porque el horario se ocupó,
-      actualizamos los horarios
-      mostrados al usuario.
-    */
-
     await actualizarHorarioSeleccionado(
       id
     );
@@ -3982,12 +3991,6 @@ async function confirmarReserva(
 
   }
 
-
-  /*
-    Supabase puede devolver el
-    resultado de la función RPC
-    como objeto o como arreglo.
-  */
 
   const reservaCreada =
     Array.isArray(data)
@@ -4022,6 +4025,9 @@ async function confirmarReserva(
 
     servicio_id:
       reservaCreada.servicio_id,
+
+    empleado_id:
+      reservaCreada.empleado_id,
 
     negocio:
       negocio?.nombre ||
@@ -4066,11 +4072,6 @@ async function confirmarReserva(
     t("reservationCreated")
   );
 
-
-  /*
-    Actualizamos inmediatamente
-    la pantalla de reservas.
-  */
 
   if (
     document
