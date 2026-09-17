@@ -2769,6 +2769,7 @@ async function iniciarReserva(
       )
       .join("");
 
+
   abrirModal(`
 
     <div>
@@ -2786,6 +2787,7 @@ async function iniciarReserva(
         )}
       </p>
 
+
       <label style="
         display:block;
         font-weight:700;
@@ -2796,6 +2798,11 @@ async function iniciarReserva(
 
       <select
         id="reservationService"
+        onchange="
+          actualizarHorarioSeleccionado(
+            '${negocio.id}'
+          )
+        "
         style="
           width:100%;
           padding:12px;
@@ -2804,6 +2811,7 @@ async function iniciarReserva(
           margin-bottom:16px;
         "
       >
+
         <option value="">
           Selecciona un servicio
         </option>
@@ -2818,6 +2826,38 @@ async function iniciarReserva(
         }
 
       </select>
+
+
+      <label style="
+        display:block;
+        font-weight:700;
+        margin-bottom:7px;
+      ">
+        👤 Empleado
+      </label>
+
+      <select
+        id="reservationEmployee"
+        onchange="
+          actualizarHorarioSeleccionado(
+            '${negocio.id}'
+          )
+        "
+        style="
+          width:100%;
+          padding:12px;
+          border:1px solid #ddd;
+          border-radius:10px;
+          margin-bottom:16px;
+        "
+      >
+
+        <option value="">
+          Cargando empleados...
+        </option>
+
+      </select>
+
 
       <label style="
         display:block;
@@ -2845,6 +2885,7 @@ async function iniciarReserva(
         "
       >
 
+
       <div
         id="reservationScheduleStatus"
         style="
@@ -2852,6 +2893,7 @@ async function iniciarReserva(
           margin-bottom:12px;
         "
       ></div>
+
 
       <label style="
         display:block;
@@ -2874,6 +2916,7 @@ async function iniciarReserva(
         "
       >
 
+
       <div
         id="reservationHours"
         style="
@@ -2884,6 +2927,7 @@ async function iniciarReserva(
           margin-bottom:16px;
         "
       ></div>
+
 
       <label style="
         display:block;
@@ -2906,6 +2950,7 @@ async function iniciarReserva(
         "
       ></textarea>
 
+
       <button
         class="primary-button"
         style="
@@ -2925,8 +2970,108 @@ async function iniciarReserva(
 
   `);
 
-}
 
+  await cargarEmpleadosParaReserva(
+    negocioId
+  );
+
+}
+          
+async function cargarEmpleadosParaReserva(
+  negocioId
+) {
+
+  const selector =
+    document.getElementById(
+      "reservationEmployee"
+    );
+
+  if (!selector) return;
+
+
+  selector.innerHTML = `
+    <option value="">
+      Cargando empleados...
+    </option>
+  `;
+
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.rpc(
+      "obtener_empleados_negocio",
+      {
+        p_negocio_id:
+          negocioId
+      }
+    );
+
+
+  if (error) {
+
+    console.error(
+      "Error cargando empleados para reserva:",
+      error
+    );
+
+    selector.innerHTML = `
+      <option value="">
+        No se pudieron cargar los empleados
+      </option>
+    `;
+
+    return;
+
+  }
+
+
+  const empleados =
+    (data || []).filter(
+      empleado =>
+        empleado.activo === true
+    );
+
+
+  if (!empleados.length) {
+
+    selector.innerHTML = `
+      <option value="">
+        No hay empleados disponibles
+      </option>
+    `;
+
+    return;
+
+  }
+
+
+  selector.innerHTML = `
+    <option value="">
+      Selecciona un empleado
+    </option>
+
+    ${
+      empleados
+        .map(
+          empleado => `
+            <option
+              value="${empleado.miembro_id}"
+            >
+              ${escaparHTML(
+                empleado.nombre ||
+                empleado.email ||
+                "Empleado"
+              )}
+            </option>
+          `
+        )
+        .join("")
+    }
+  `;
+
+}
 
 /* =====================================================
    HORARIO DEL DÍA
@@ -3151,6 +3296,11 @@ async function actualizarHorarioSeleccionado(
       "reservationService"
     )?.value;
 
+  const empleadoId =
+    document.getElementById(
+      "reservationEmployee"
+    )?.value || null;
+
   const status =
     document.getElementById(
       "reservationScheduleStatus"
@@ -3273,9 +3423,7 @@ async function actualizarHorarioSeleccionado(
 
   /*
     Sin servicio todavía no podemos
-    calcular correctamente las horas,
-    porque cada servicio puede durar
-    una cantidad diferente de minutos.
+    calcular correctamente las horas.
   */
 
   if (!servicioId) {
@@ -3310,10 +3458,50 @@ async function actualizarHorarioSeleccionado(
 
 
   /*
-    Ahora Supabase calcula las horas
-    realmente disponibles teniendo en
-    cuenta la duración del servicio,
-    horario del negocio y reservas existentes.
+    Si todavía no hay empleado,
+    esperamos antes de mostrar
+    horarios específicos.
+  */
+
+  if (!empleadoId) {
+
+    if (timeInput) {
+
+      timeInput.value = "";
+
+      timeInput.disabled = true;
+
+    }
+
+    if (hoursContainer) {
+
+      hoursContainer.innerHTML = `
+        <div style="
+          padding:12px;
+          color:#777;
+          font-size:14px;
+          text-align:center;
+        ">
+          Selecciona un empleado para ver
+          los horarios disponibles.
+        </div>
+      `;
+
+    }
+
+    return;
+
+  }
+
+
+  /*
+    Supabase calcula las horas disponibles
+    teniendo en cuenta:
+
+    - duración del servicio
+    - horario del negocio
+    - reservas existentes
+    - empleado seleccionado
   */
 
   const {
@@ -3334,7 +3522,7 @@ async function actualizarHorarioSeleccionado(
           servicioId,
 
         p_empleado_id:
-          null
+          empleadoId
 
       }
     );
@@ -3409,7 +3597,7 @@ async function actualizarHorarioSeleccionado(
         text-align:center;
       ">
         No hay horarios disponibles
-        para este servicio.
+        para este empleado.
       </div>
     `;
 
@@ -3460,6 +3648,8 @@ async function actualizarHorarioSeleccionado(
       .join("");
 
 }
+
+
   
 
 function formatearHoraAMPM(hora) {
