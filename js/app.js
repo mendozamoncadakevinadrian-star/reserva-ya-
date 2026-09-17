@@ -9082,87 +9082,406 @@ async function guardarHorarios() {
    EMPLEADOS
 ===================================================== */
 
-function administrarEmpleados() {
+async function administrarEmpleados() {
+
+  if (!ReservaYa.usuario) {
+
+    mostrarToast(
+      "Debes iniciar sesión."
+    );
+
+    return;
+
+  }
+
+  if (!ReservaYa.negocioActual) {
+
+    await detectarNegocioUsuario();
+
+  }
+
+  if (!ReservaYa.negocioActual) {
+
+    mostrarToast(
+      "No tienes un negocio registrado."
+    );
+
+    return;
+
+  }
+
+  const negocioId =
+    ReservaYa.negocioActual.id;
 
   abrirModal(`
 
-    <div style="
-      text-align:center;
-    ">
+    <div>
 
       <div style="
-        font-size:50px;
-      ">
-        👥
-      </div>
-
-      <h2>
-        Gestión de empleados
-      </h2>
-
-      <p style="
-        color:#727887;
-        line-height:1.5;
-      ">
-        Esta herramienta está preparada
-        para una futura versión de
-        ReservaYa Business.
-      </p>
-
-      <div style="
-        margin-top:18px;
-        padding:15px;
-        border-radius:14px;
-        background:#f8f9fb;
-        text-align:left;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
       ">
 
-        <strong>
-          Próximamente podrás:
-        </strong>
+        <div>
 
-        <div style="
-          margin-top:10px;
-          display:grid;
-          gap:7px;
-          color:#555;
-        ">
+          <span class="eyebrow">
+            RESERVAYA BUSINESS
+          </span>
 
-          <div>
-            👤 Gestionar empleados
-          </div>
-
-          <div>
-            📅 Asignar horarios
-          </div>
-
-          <div>
-            🛠️ Asignar servicios
-          </div>
-
-          <div>
-            📊 Ver rendimiento
-          </div>
+          <h2 style="
+            margin-top:6px;
+          ">
+            👥 Empleados
+          </h2>
 
         </div>
 
       </div>
 
+
       <p style="
-        font-size:12px;
-        color:#999;
-        margin-top:15px;
+        color:#727887;
+        line-height:1.5;
+        margin-top:8px;
       ">
-        Requiere nuevas estructuras de datos
-        en Supabase para funcionar completamente.
+        Gestiona las personas que trabajan
+        en tu negocio.
       </p>
+
+
+      <div style="
+        margin-top:20px;
+        padding:16px;
+        border-radius:16px;
+        background:#f8f9fb;
+      ">
+
+        <strong>
+          Agregar empleado
+        </strong>
+
+        <p style="
+          margin:7px 0 12px;
+          color:#727887;
+          font-size:13px;
+          line-height:1.4;
+        ">
+          Escribe el correo electrónico
+          de una cuenta registrada en ReservaYa.
+        </p>
+
+        <input
+          id="empleadoCorreoInput"
+          type="email"
+          placeholder="Correo del empleado"
+          autocomplete="email"
+          style="
+            width:100%;
+            box-sizing:border-box;
+            padding:13px;
+            border:1px solid var(--border);
+            border-radius:12px;
+            background:white;
+          "
+        >
+
+        <button
+          type="button"
+          class="primary-button"
+          style="
+            width:100%;
+            margin-top:10px;
+          "
+          onclick="agregarEmpleadoDesdeModal('${negocioId}')"
+        >
+          ＋ Agregar empleado
+        </button>
+
+      </div>
+
+
+      <div style="
+        margin-top:24px;
+      ">
+
+        <strong>
+          Empleados del negocio
+        </strong>
+
+        <div
+          id="listaEmpleadosNegocio"
+          style="
+            margin-top:12px;
+          "
+        >
+          <div style="
+            text-align:center;
+            padding:20px;
+            color:#727887;
+          ">
+            Cargando empleados...
+          </div>
+        </div>
+
+      </div>
 
     </div>
 
   `);
 
+  await cargarEmpleadosEnModal(
+    negocioId
+  );
+
 }
 
+async function cargarEmpleadosEnModal(
+  negocioId
+) {
+
+  const contenedor =
+    document.getElementById(
+      "listaEmpleadosNegocio"
+    );
+
+  if (!contenedor) {
+    return;
+  }
+
+  contenedor.innerHTML = `
+    <div style="
+      text-align:center;
+      padding:20px;
+      color:#727887;
+    ">
+      Cargando empleados...
+    </div>
+  `;
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.rpc(
+      "obtener_empleados_negocio",
+      {
+        p_negocio_id: negocioId
+      }
+    );
+
+  if (error) {
+
+    console.error(
+      "Error cargando empleados:",
+      error
+    );
+
+    contenedor.innerHTML = `
+      <div style="
+        padding:16px;
+        border-radius:14px;
+        background:#fff5f5;
+        color:#b42318;
+      ">
+        No se pudieron cargar los empleados.
+      </div>
+    `;
+
+    return;
+
+  }
+
+  const empleados =
+    data || [];
+
+  if (!empleados.length) {
+
+    contenedor.innerHTML = `
+      <div style="
+        padding:18px;
+        border:1px dashed var(--border);
+        border-radius:14px;
+        text-align:center;
+        color:#727887;
+      ">
+        Todavía no hay empleados asignados.
+      </div>
+    `;
+
+    return;
+
+  }
+
+  contenedor.innerHTML =
+    empleados
+      .map(
+        empleado => {
+
+          const nombre =
+            empleado.nombre ||
+            "Usuario";
+
+          const email =
+            empleado.email ||
+            "Sin correo";
+
+          const rol =
+            empleado.rol ||
+            "empleado";
+
+          return `
+
+            <div style="
+              display:flex;
+              align-items:center;
+              justify-content:space-between;
+              gap:12px;
+              padding:14px 0;
+              border-bottom:1px solid var(--border);
+            ">
+
+              <div style="
+                min-width:0;
+              ">
+
+                <strong>
+                  👤 ${escaparHTML(nombre)}
+                </strong>
+
+                <div style="
+                  margin-top:4px;
+                  color:#727887;
+                  font-size:13px;
+                  word-break:break-word;
+                ">
+                  ${escaparHTML(email)}
+                </div>
+
+              </div>
+
+              <span style="
+                flex-shrink:0;
+                padding:5px 9px;
+                border-radius:999px;
+                background:#eef2ff;
+                color:#4f46e5;
+                font-size:12px;
+              ">
+                ${escaparHTML(rol)}
+              </span>
+
+            </div>
+
+          `;
+
+        }
+      )
+      .join("");
+
+}
+
+
+async function agregarEmpleadoDesdeModal(
+  negocioId
+) {
+
+  const input =
+    document.getElementById(
+      "empleadoCorreoInput"
+    );
+
+  if (!input) {
+    return;
+  }
+
+  const correo =
+    input.value.trim();
+
+  if (!correo) {
+
+    mostrarToast(
+      "Escribe el correo del empleado."
+    );
+
+    input.focus();
+
+    return;
+
+  }
+
+  const boton =
+    input.parentElement
+      ?.querySelector(
+        "button"
+      );
+
+  if (boton) {
+
+    boton.disabled = true;
+
+    boton.textContent =
+      "Agregando...";
+
+  }
+
+  const {
+    error
+  } =
+    await supabaseClient.rpc(
+      "agregar_empleado_por_correo",
+      {
+        p_negocio_id: negocioId,
+        p_correo: correo
+      }
+    );
+
+  if (error) {
+
+    console.error(
+      "Error agregando empleado:",
+      error
+    );
+
+    mostrarToast(
+      error.message ||
+      "No se pudo agregar el empleado."
+    );
+
+    if (boton) {
+
+      boton.disabled = false;
+
+      boton.textContent =
+        "＋ Agregar empleado";
+
+    }
+
+    return;
+
+  }
+
+  input.value = "";
+
+  mostrarToast(
+    "Empleado agregado correctamente."
+  );
+
+  if (boton) {
+
+    boton.disabled = false;
+
+    boton.textContent =
+      "＋ Agregar empleado";
+
+  }
+
+  await cargarEmpleadosEnModal(
+    negocioId
+  );
+
+}
 
 /* =====================================================
    ESTADÍSTICAS
