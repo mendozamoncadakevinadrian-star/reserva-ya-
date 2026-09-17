@@ -9271,27 +9271,41 @@ async function cargarEmpleadosEnModal(
       }
     );
 
-  if (error) {
+if (error) {
 
-    console.error(
-      "Error cargando empleados:",
-      error
-    );
+  console.error(
+    "Error cargando empleados:",
+    error
+  );
 
-    contenedor.innerHTML = `
+  contenedor.innerHTML = `
+    <div style="
+      padding:16px;
+      border-radius:14px;
+      background:#fff5f5;
+      color:#b42318;
+      line-height:1.5;
+    ">
+      <strong>
+        Error cargando empleados
+      </strong>
+
       <div style="
-        padding:16px;
-        border-radius:14px;
-        background:#fff5f5;
-        color:#b42318;
+        margin-top:8px;
+        font-size:12px;
+        word-break:break-word;
       ">
-        No se pudieron cargar los empleados.
+        ${escaparHTML(
+          error.message ||
+          "Error desconocido"
+        )}
       </div>
-    `;
+    </div>
+  `;
 
-    return;
+  return;
 
-  }
+}
 
   const empleados =
     data || [];
