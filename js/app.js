@@ -5806,47 +5806,90 @@ async function detectarNegocioUsuario() {
 
   if (!ReservaYa.usuario) {
 
-    ReservaYa.negocioActual =
-      null;
+    ReservaYa.negocioActual = null;
 
     return null;
 
   }
 
+  const usuarioId = ReservaYa.usuario.id;
+
+  // --------------------------------------------------
+  // 1. Primero buscamos si el usuario es propietario
+  // --------------------------------------------------
+
   const {
-    data,
-    error
+    data: negocioPropio,
+    error: errorPropio
   } =
     await supabaseClient
       .from("negocios")
       .select("*")
-      .eq(
-        "usuario_id",
-        ReservaYa.usuario.id
-      )
+      .eq("usuario_id", usuarioId)
       .maybeSingle();
 
-  if (error) {
+  if (errorPropio) {
 
     console.error(
-      "Error buscando negocio:",
-      error
+      "Error buscando negocio propio:",
+      errorPropio
     );
 
+  }
+
+  if (negocioPropio) {
+
     ReservaYa.negocioActual =
-      null;
+      negocioPropio;
+
+    return negocioPropio;
+
+  }
+
+  // --------------------------------------------------
+  // 2. Si no es propietario, buscamos como empleado
+  // --------------------------------------------------
+
+  const {
+    data: negociosEmpleado,
+    error: errorEmpleado
+  } =
+    await supabaseClient.rpc(
+      "obtener_negocios_empleado",
+      {
+        p_usuario_id: usuarioId
+      }
+    );
+
+  if (errorEmpleado) {
+
+    console.error(
+      "Error buscando negocios como empleado:",
+      errorEmpleado
+    );
+
+    ReservaYa.negocioActual = null;
 
     return null;
 
   }
 
-  ReservaYa.negocioActual =
-    data || null;
+  // --------------------------------------------------
+  // 3. Tomamos el primer negocio asignado
+  // --------------------------------------------------
 
-  return data || null;
+  const negocioEmpleado =
+    negociosEmpleado &&
+    negociosEmpleado.length
+      ? negociosEmpleado[0]
+      : null;
+
+  ReservaYa.negocioActual =
+    negocioEmpleado;
+
+  return negocioEmpleado;
 
 }
-
 
 /* =====================================================
    DASHBOARD BUSINESS
