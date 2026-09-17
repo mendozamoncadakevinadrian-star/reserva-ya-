@@ -3456,6 +3456,7 @@ async function confirmarReserva(
     )?.value.trim() ||
     "";
 
+
   if (!servicioId) {
 
     mostrarToast(
@@ -3465,6 +3466,7 @@ async function confirmarReserva(
     return;
 
   }
+
 
   if (!fecha) {
 
@@ -3476,6 +3478,7 @@ async function confirmarReserva(
 
   }
 
+
   if (!hora) {
 
     mostrarToast(
@@ -3486,11 +3489,13 @@ async function confirmarReserva(
 
   }
 
+
   const horario =
     await obtenerHorarioDelDia(
       id,
       fecha
     );
+
 
   if (
     !horario ||
@@ -3504,6 +3509,7 @@ async function confirmarReserva(
     return;
 
   }
+
 
   const apertura =
     horario.hora_apertura
@@ -3521,6 +3527,21 @@ async function confirmarReserva(
         )
       : null;
 
+
+  if (
+    !apertura ||
+    !cierre
+  ) {
+
+    mostrarToast(
+      "El horario del negocio no está configurado correctamente."
+    );
+
+    return;
+
+  }
+
+
   if (
     hora < apertura ||
     hora > cierre
@@ -3534,39 +3555,12 @@ async function confirmarReserva(
 
   }
 
-  /*
-     SEGUNDA COMPROBACIÓN
-     JUSTO ANTES DE INSERTAR.
-  */
-
-  const horasOcupadas =
-    await cargarHorasOcupadas(
-      id,
-      fecha
-    );
-
-  if (
-    horasOcupadas.includes(
-      hora
-    )
-  ) {
-
-    mostrarToast(
-      "Esa hora acaba de ser ocupada. Selecciona otra."
-    );
-
-    await actualizarHorarioSeleccionado(
-      id
-    );
-
-    return;
-
-  }
 
   const servicio =
     await cargarServicioPorId(
       servicioId
     );
+
 
   if (!servicio) {
 
@@ -3578,10 +3572,12 @@ async function confirmarReserva(
 
   }
 
+
   const negocio =
     ReservaYa.negocios.find(
       n => n.id === id
     );
+
 
   const nombreCliente =
     ReservaYa.usuario
@@ -3590,41 +3586,51 @@ async function confirmarReserva(
     ReservaYa.usuario.email ||
     "Cliente";
 
+
+  /*
+    La reserva se crea mediante
+    la función segura de Supabase.
+
+    Supabase obtiene automáticamente
+    el usuario autenticado mediante
+    auth.uid().
+  */
+
   const {
     data,
     error
   } =
-    await supabaseClient
-      .from("Citas")
-      .insert({
+    await supabaseClient.rpc(
+      "crear_reserva",
+      {
 
-        negocio_id:
+        p_negocio_id:
           id,
 
-        servicio_id:
+        p_servicio_id:
           servicioId,
 
-        nombre_cliente:
-          nombreCliente,
-
-        fecha:
+        p_fecha:
           fecha,
 
-        hora:
+        p_hora_inicio:
           hora,
 
-        comentario:
-          comentario,
+        p_nombre_cliente:
+          nombreCliente,
 
-        estado:
-          "Pendiente",
+        p_telefono_cliente:
+          null,
 
-        usuario:
-          ReservaYa.usuario.id
+        p_comentario:
+          comentario || null,
 
-      })
-      .select()
-      .single();
+        p_empleado_id:
+          null
+
+      }
+    );
+
 
   if (error) {
 
@@ -3633,24 +3639,69 @@ async function confirmarReserva(
       error
     );
 
+
     mostrarToast(
+      error.message ||
       "No se pudo crear la reserva."
     );
+
+
+    /*
+      Si Supabase rechazó la reserva
+      porque el horario se ocupó,
+      actualizamos los horarios
+      mostrados al usuario.
+    */
+
+    await actualizarHorarioSeleccionado(
+      id
+    );
+
 
     return;
 
   }
 
+
+  /*
+    Supabase puede devolver el
+    resultado de la función RPC
+    como objeto o como arreglo.
+  */
+
+  const reservaCreada =
+    Array.isArray(data)
+      ? data[0]
+      : data;
+
+
+  if (!reservaCreada) {
+
+    console.error(
+      "Supabase no devolvió la reserva creada."
+    );
+
+
+    mostrarToast(
+      "No se pudo confirmar la reserva."
+    );
+
+
+    return;
+
+  }
+
+
   const reservaLocal = {
 
     id:
-      data.id,
+      reservaCreada.id,
 
     negocio_id:
-      id,
+      reservaCreada.negocio_id,
 
     servicio_id:
-      servicioId,
+      reservaCreada.servicio_id,
 
     negocio:
       negocio?.nombre ||
@@ -3660,32 +3711,45 @@ async function confirmarReserva(
       servicio.nombre,
 
     fecha:
-      fecha,
+      reservaCreada.fecha,
 
     hora:
-      hora,
+      reservaCreada.hora,
+
+    hora_inicio:
+      reservaCreada.hora_inicio,
+
+    hora_fin:
+      reservaCreada.hora_fin,
+
+    duracion_minutos:
+      reservaCreada.duracion_minutos,
 
     comentario:
-      comentario,
+      reservaCreada.comentario,
 
     estado:
-      "Pendiente"
+      reservaCreada.estado
 
   };
+
 
   ReservaYa.reservas.push(
     reservaLocal
   );
 
+
   cerrarModal();
+
 
   mostrarToast(
     t("reservationCreated")
   );
 
+
   /*
-     Actualizamos inmediatamente
-     la pantalla de reservas.
+    Actualizamos inmediatamente
+    la pantalla de reservas.
   */
 
   if (
@@ -3705,6 +3769,7 @@ async function confirmarReserva(
   }
 
 }
+
 
 
 /* =====================================================
