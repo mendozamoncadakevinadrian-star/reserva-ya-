@@ -3146,6 +3146,11 @@ async function actualizarHorarioSeleccionado(
       "reservationDate"
     )?.value;
 
+  const servicioId =
+    document.getElementById(
+      "reservationService"
+    )?.value;
+
   const status =
     document.getElementById(
       "reservationScheduleStatus"
@@ -3160,6 +3165,12 @@ async function actualizarHorarioSeleccionado(
     document.getElementById(
       "reservationHours"
     );
+
+
+  /*
+    Si todavía no hay fecha,
+    limpiamos el selector.
+  */
 
   if (!fecha) {
 
@@ -3180,11 +3191,18 @@ async function actualizarHorarioSeleccionado(
 
   }
 
+
+  /*
+    Primero comprobamos el horario
+    general del negocio.
+  */
+
   const horario =
     await obtenerHorarioDelDia(
       negocioId,
       fecha
     );
+
 
   if (
     !horario ||
@@ -3220,6 +3238,7 @@ async function actualizarHorarioSeleccionado(
 
   }
 
+
   const apertura =
     horario.hora_apertura
       ? horario.hora_apertura.slice(
@@ -3236,18 +3255,6 @@ async function actualizarHorarioSeleccionado(
         )
       : null;
 
-  const ocupadas =
-    await cargarHorasOcupadas(
-      negocioId,
-      fecha
-    );
-
-  const horas =
-    generarHorasDisponibles(
-      apertura,
-      cierre,
-      ocupadas
-    );
 
   if (status) {
 
@@ -3257,80 +3264,203 @@ async function actualizarHorarioSeleccionado(
         font-weight:600;
       ">
         🟢 Abierto:
-        ${apertura}
-        –
-        ${cierre}
+        ${apertura} - ${cierre}
       </span>
     `;
 
   }
 
+
+  /*
+    Sin servicio todavía no podemos
+    calcular correctamente las horas,
+    porque cada servicio puede durar
+    una cantidad diferente de minutos.
+  */
+
+  if (!servicioId) {
+
+    if (timeInput) {
+
+      timeInput.value = "";
+
+      timeInput.disabled = true;
+
+    }
+
+    if (hoursContainer) {
+
+      hoursContainer.innerHTML = `
+        <div style="
+          padding:12px;
+          color:#777;
+          font-size:14px;
+          text-align:center;
+        ">
+          Selecciona un servicio para ver
+          los horarios disponibles.
+        </div>
+      `;
+
+    }
+
+    return;
+
+  }
+
+
+  /*
+    Ahora Supabase calcula las horas
+    realmente disponibles teniendo en
+    cuenta la duración del servicio,
+    horario del negocio y reservas existentes.
+  */
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.rpc(
+      "obtener_horarios_disponibles",
+      {
+
+        p_negocio_id:
+          negocioId,
+
+        p_fecha:
+          fecha,
+
+        p_servicio_id:
+          servicioId,
+
+        p_empleado_id:
+          null
+
+      }
+    );
+
+
+  if (error) {
+
+    console.error(
+      "Error obteniendo horarios disponibles:",
+      error
+    );
+
+
+    if (timeInput) {
+
+      timeInput.value = "";
+
+      timeInput.disabled = true;
+
+    }
+
+    if (hoursContainer) {
+
+      hoursContainer.innerHTML = `
+        <div style="
+          padding:12px;
+          color:#e05252;
+          font-size:14px;
+          text-align:center;
+        ">
+          No se pudieron cargar los horarios.
+        </div>
+      `;
+
+    }
+
+    return;
+
+  }
+
+
+  const horariosDisponibles =
+    Array.isArray(data)
+      ? data
+      : [];
+
+
   if (timeInput) {
 
     timeInput.value = "";
 
-    timeInput.disabled = true;
+    timeInput.disabled =
+      horariosDisponibles.length === 0;
 
   }
+
 
   if (!hoursContainer) {
     return;
   }
 
 
-hoursContainer.innerHTML =
-  horas
-    .map(
-      item => {
+  if (
+    horariosDisponibles.length === 0
+  ) {
 
-        if (item.ocupada) {
+    hoursContainer.innerHTML = `
+      <div style="
+        padding:12px;
+        color:#777;
+        font-size:14px;
+        text-align:center;
+      ">
+        No hay horarios disponibles
+        para este servicio.
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  hoursContainer.innerHTML =
+    horariosDisponibles
+      .map(
+        item => {
+
+          const hora =
+            item.hora_inicio ||
+            item.hora ||
+            "";
+
+
+          if (!hora) {
+            return "";
+          }
+
 
           return `
             <button
               type="button"
-              data-hora="${item.hora}"
-              disabled
+              data-hora="${hora}"
+              onclick="
+                seleccionarHora(
+                  '${hora}'
+                )
+              "
               style="
                 padding:9px 5px;
                 border-radius:9px;
-                border:1px solid #eee;
-                background:#f1f1f1;
-                color:#aaa;
-                text-decoration:line-through;
+                border:1px solid #e7e9ef;
+                background:white;
+                color:#222;
               "
             >
-              ${formatearHoraAMPM(item.hora)}
+              ${formatearHoraAMPM(hora)}
             </button>
           `;
 
         }
-
-        return `
-          <button
-            type="button"
-            data-hora="${item.hora}"
-            onclick="
-              seleccionarHora(
-                '${item.hora}'
-              )
-            "
-            style="
-              padding:9px 5px;
-              border-radius:9px;
-              border:1px solid #e7e9ef;
-              background:white;
-              color:#222;
-            "
-          >
-            ${formatearHoraAMPM(item.hora)}
-          </button>
-        `;
-
-      }
-    )
-    .join("");
+      )
+      .join("");
 
 }
+  
 
 function formatearHoraAMPM(hora) {
 
