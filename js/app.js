@@ -10352,14 +10352,20 @@ async function recuperarContrasena() {
         "https://mendozamoncadakevinadrian-star.github.io/reserva-ya-/"
     }
   );
+   
+if (error) {
+  console.error(
+    "Error enviando recuperación:",
+    error
+  );
 
-  if (error) {
-    console.error("Error enviando recuperación:", error);
-    mostrarToast(
-      "No se pudo enviar el correo de recuperación."
-    );
-    return;
-  }
+  mostrarToast(
+    error.message ||
+    "No se pudo enviar el correo de recuperación."
+  );
+
+  return;
+}
 
   mostrarToast(
     "Correo de recuperación enviado. Revisa tu bandeja de entrada."
