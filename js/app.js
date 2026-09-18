@@ -4750,18 +4750,19 @@ async function mostrarReservas(
       ==================================================
       5. UNIR RESERVAS DE CLIENTE + EMPLEADO
       ==================================================
-    */
-
-    const todasLasReservas = [];
+      */
 
 
-    /*
-      Reservas hechas como cliente
-    */
+const todasLasReservas = [];
 
-    (reservasCliente || [])
-     .forEach(
-       reserva => {
+
+/*
+  Reservas hechas como cliente
+*/
+
+(reservasCliente || [])
+  .forEach(
+    reserva => {
 
       todasLasReservas.push({
 
@@ -4775,20 +4776,25 @@ async function mostrarReservas(
     }
   );
 
-    /*
-      Citas asignadas como empleado
 
-      Evitamos duplicar una reserva
-      si por alguna razón ya aparece
-      en las reservas del usuario.
-    */
+/*
+  Citas asignadas como empleado
 
-    reservasEmpleado
-    .forEach(
-      reservaEmpleado => {
+  Si una misma cita aparece también
+  como reserva del usuario, comprobamos
+  si realmente está asignada a ese usuario
+  como empleado.
 
-      const yaExiste =
-        todasLasReservas.some(
+  En ese caso debe identificarse como
+  CITA POR ATENDER.
+*/
+
+reservasEmpleado
+  .forEach(
+    reservaEmpleado => {
+
+      const indiceExistente =
+        todasLasReservas.findIndex(
           reserva =>
             String(
               reserva.id
@@ -4798,14 +4804,53 @@ async function mostrarReservas(
             )
         );
 
-      if (yaExiste) {
-        return;
-      }
-
       const servicio =
         serviciosEmpleado[
           reservaEmpleado.servicio_id
         ] || null;
+
+
+      if (
+        indiceExistente !== -1
+      ) {
+
+        /*
+          La cita ya existe porque también
+          aparece entre las reservas del usuario.
+
+          Como está asignada al usuario como
+          empleado, la identificamos como
+          cita por atender.
+        */
+
+        todasLasReservas[
+          indiceExistente
+        ] = {
+
+          ...todasLasReservas[
+            indiceExistente
+          ],
+
+          servicios:
+            todasLasReservas[
+              indiceExistente
+            ].servicios ||
+            servicio,
+
+          esReservaCliente: false,
+          esCitaEmpleado: true
+
+        };
+
+        return;
+      }
+
+
+      /*
+        Si no existía entre las reservas
+        del usuario, la agregamos como
+        cita de empleado.
+      */
 
       todasLasReservas.push({
 
