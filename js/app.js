@@ -546,10 +546,18 @@ function iniciarReservaYa() {
 
   cargarDatosDemo();
 
-  actualizarInterfazUsuario();
+  const esRecuperacion =
+    window.location.hash.includes("type=recovery") ||
+    window.location.search.includes("type=recovery");
 
-  // Detectar recuperación de contraseña
-  detectarRecuperacionContrasena();
+  if (esRecuperacion) {
+
+    detectarRecuperacionContrasena();
+
+    return;
+  }
+
+  actualizarInterfazUsuario();
 
 }
 
