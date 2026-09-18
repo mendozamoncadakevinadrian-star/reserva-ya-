@@ -10320,6 +10320,65 @@ async function recuperarContrasena() {
 }
 
 
+async function guardarNuevaContrasena() {
+
+  const nueva = document
+    .getElementById("newPassword")
+    ?.value;
+
+  const confirmar = document
+    .getElementById("confirmNewPassword")
+    ?.value;
+
+  if (!nueva || !confirmar) {
+    mostrarToast("Completa los dos campos.");
+    return;
+  }
+
+  if (nueva.length < 6) {
+    mostrarToast(
+      "La contraseña debe tener al menos 6 caracteres."
+    );
+    return;
+  }
+
+  if (nueva !== confirmar) {
+    mostrarToast("Las contraseñas no coinciden.");
+    return;
+  }
+
+  const { error } =
+    await supabaseClient.auth.updateUser({
+      password: nueva
+    });
+
+  if (error) {
+    console.error(
+      "Error cambiando contraseña:",
+      error
+    );
+
+    mostrarToast(
+      "No se pudo cambiar la contraseña."
+    );
+
+    return;
+  }
+
+  mostrarToast(
+    "Contraseña cambiada correctamente."
+  );
+
+  const resetBox =
+    document.getElementById("resetPasswordBox");
+
+  if (resetBox) {
+    resetBox.style.display = "none";
+  }
+
+  cambiarVista("home");
+}
+
 /* =====================================================
    REGISTRO
 ===================================================== */
