@@ -4999,13 +4999,17 @@ reservasEmpleado
                   5
                 ),
 
-              comentario:
-                reserva.comentario ||
-                "",
+             nombre_cliente:
+               reserva.nombre_cliente ||
+               "",
+
+             comentario:
+               reserva.comentario ||
+               "",
 
               estado:
                 reserva.estado ||
-                "Pendiente",
+                "Pendiente", 
 
               fechaHora
 
