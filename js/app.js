@@ -530,7 +530,6 @@ document.addEventListener(
   iniciarReservaYa
 );
 
-
 function iniciarReservaYa() {
 
   console.log(
@@ -549,6 +548,46 @@ function iniciarReservaYa() {
 
   actualizarInterfazUsuario();
 
+  // Detectar recuperación de contraseña
+  detectarRecuperacionContrasena();
+
+}
+
+function detectarRecuperacionContrasena() {
+
+  const hash = window.location.hash;
+
+  const search = window.location.search;
+
+  const esRecuperacion =
+    hash.includes("type=recovery") ||
+    search.includes("type=recovery");
+
+  if (!esRecuperacion) {
+    return;
+  }
+
+  console.log(
+    "🔐 Enlace de recuperación detectado."
+  );
+
+  const loginBox =
+    document.getElementById("loginBox");
+
+  const resetBox =
+    document.getElementById("resetPasswordBox");
+
+  if (loginBox) {
+    loginBox.style.display = "none";
+  }
+
+  if (resetBox) {
+    resetBox.style.display = "block";
+  }
+
+  mostrarToast(
+    "Puedes crear tu nueva contraseña."
+  );
 }
 
 
