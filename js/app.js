@@ -4896,6 +4896,12 @@ async function mostrarReservas(
 
               negocioId:
                 reserva.negocio_id,
+               
+              esReservaCliente:
+                reserva.esReservaCliente === true,
+
+              esCitaEmpleado:
+                reserva.esCitaEmpleado === true,
 
               negocio:
                 negocio?.nombre ||
