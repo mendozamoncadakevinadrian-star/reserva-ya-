@@ -4442,7 +4442,10 @@ function renderizarFavoritos() {
    RESERVAS
 ===================================================== */
 
-async function mostrarReservas(tipo = "proximas", boton = null) {
+async function mostrarReservas(
+  tipo = "proximas",
+  boton = null
+) {
 
   document
     .querySelectorAll(".reservation-tabs button")
@@ -4490,6 +4493,7 @@ async function mostrarReservas(tipo = "proximas", boton = null) {
 
     contenedor.innerHTML = `
       <div class="empty-state">
+
         <div class="empty-state-icon">
           🔐
         </div>
@@ -4501,6 +4505,7 @@ async function mostrarReservas(tipo = "proximas", boton = null) {
         <p>
           Inicia sesión para consultar tus reservas.
         </p>
+
       </div>
     `;
 
@@ -4518,9 +4523,15 @@ async function mostrarReservas(tipo = "proximas", boton = null) {
 
   try {
 
+    /*
+      ==================================================
+      1. RESERVAS HECHAS POR EL USUARIO COMO CLIENTE
+      ==================================================
+    */
+
     const {
-      data,
-      error
+      data: reservasCliente,
+      error: errorCliente
     } =
       await supabaseClient
         .from("Citas")
@@ -4550,15 +4561,16 @@ async function mostrarReservas(tipo = "proximas", boton = null) {
         );
 
 
-    if (error) {
+    if (errorCliente) {
 
       console.error(
-        "Error cargando reservas:",
-        error
+        "Error cargando reservas del cliente:",
+        errorCliente
       );
 
       contenedor.innerHTML = `
         <div class="empty-state">
+
           <div class="empty-state-icon">
             ⚠️
           </div>
@@ -4570,6 +4582,7 @@ async function mostrarReservas(tipo = "proximas", boton = null) {
           <p>
             Inténtalo nuevamente.
           </p>
+
         </div>
       `;
 
@@ -4578,117 +4591,355 @@ async function mostrarReservas(tipo = "proximas", boton = null) {
     }
 
 
+    /*
+      ==================================================
+      2. COMPROBAR SI EL USUARIO TAMBIÉN ES EMPLEADO
+      ==================================================
+    */
+
+    let reservasEmpleado = [];
+
+    const {
+      data: negociosEmpleado,
+      error: errorNegociosEmpleado
+    } =
+      await supabaseClient.rpc(
+        "obtener_negocios_empleado",
+        {
+          p_usuario_id:
+            ReservaYa.usuario.id
+        }
+      );
+
+
+    if (errorNegociosEmpleado) {
+
+      console.error(
+        "Error comprobando negocios del empleado:",
+        errorNegociosEmpleado
+      );
+
+    }
+
+
+    const negociosAsignados =
+      negociosEmpleado || [];
+
+
+    /*
+      ==================================================
+      3. SI ES EMPLEADO, CARGAR SUS CITAS ASIGNADAS
+      ==================================================
+    */
+
+    if (
+      negociosAsignados.length
+    ) {
+
+      for (
+        const negocio
+        of negociosAsignados
+      ) {
+
+        const {
+          data: citasEmpleado,
+          error: errorCitasEmpleado
+        } =
+          await supabaseClient.rpc(
+            "obtener_mis_citas_empleado",
+            {
+              p_negocio_id:
+                negocio.id
+            }
+          );
+
+
+        if (errorCitasEmpleado) {
+
+          console.error(
+            "Error cargando citas del empleado:",
+            negocio.id,
+            errorCitasEmpleado
+          );
+
+          continue;
+
+        }
+
+
+        if (
+          citasEmpleado &&
+          citasEmpleado.length
+        ) {
+
+          reservasEmpleado =
+            reservasEmpleado.concat(
+              citasEmpleado
+            );
+
+        }
+
+      }
+
+    }
+
+
+    /*
+      ==================================================
+      4. CARGAR SERVICIOS DE LAS CITAS DEL EMPLEADO
+      ==================================================
+    */
+
+    const serviciosEmpleado = {};
+
+
+    if (
+      reservasEmpleado.length
+    ) {
+
+      const idsNegociosEmpleado =
+        negociosAsignados.map(
+          negocio =>
+            negocio.id
+        );
+
+
+      const {
+        data: serviciosData,
+        error: errorServiciosEmpleado
+      } =
+        await supabaseClient
+          .from("servicios")
+          .select(`
+            id,
+            negocio_id,
+            nombre,
+            precio,
+            duracion
+          `)
+          .in(
+            "negocio_id",
+            idsNegociosEmpleado
+          );
+
+
+      if (errorServiciosEmpleado) {
+
+        console.error(
+          "Error cargando servicios del empleado:",
+          errorServiciosEmpleado
+        );
+
+      } else {
+
+        (serviciosData || [])
+          .forEach(
+            servicio => {
+
+              serviciosEmpleado[
+                servicio.id
+              ] = servicio;
+
+            }
+          );
+
+      }
+
+    }
+
+
+    /*
+      ==================================================
+      5. UNIR RESERVAS DE CLIENTE + EMPLEADO
+      ==================================================
+    */
+
+    const todasLasReservas = [];
+
+
+    /*
+      Reservas hechas como cliente
+    */
+
+    (reservasCliente || [])
+      .forEach(
+        reserva => {
+
+          todasLasReservas.push(
+            reserva
+          );
+
+        }
+      );
+
+
+    /*
+      Citas asignadas como empleado
+
+      Evitamos duplicar una reserva
+      si por alguna razón ya aparece
+      en las reservas del usuario.
+    */
+
+    reservasEmpleado
+      .forEach(
+        reservaEmpleado => {
+
+          const yaExiste =
+            todasLasReservas.some(
+              reserva =>
+                String(
+                  reserva.id
+                ) ===
+                String(
+                  reservaEmpleado.id
+                )
+            );
+
+
+          if (yaExiste) {
+            return;
+          }
+
+
+          const servicio =
+            serviciosEmpleado[
+              reservaEmpleado.servicio_id
+            ] || null;
+
+
+          todasLasReservas.push({
+
+            ...reservaEmpleado,
+
+            servicios:
+              servicio
+
+          });
+
+        }
+      );
+
+
+    /*
+      ==================================================
+      6. PREPARAR RESERVAS PARA LA INTERFAZ
+      ==================================================
+    */
+
     const ahora =
       new Date();
 
 
     const reservas =
-      (data || [])
-        .map(reserva => {
+      todasLasReservas
+        .map(
+          reserva => {
 
-          const negocio =
-            ReservaYa.negocios.find(
-              n =>
-                n.id ===
-                reserva.negocio_id
-            );
-
-
-          const horaReserva =
-            String(
-              reserva.hora ||
-              "00:00"
-            ).slice(
-              0,
-              5
-            );
+            const negocio =
+              ReservaYa.negocios.find(
+                n =>
+                  n.id ===
+                  reserva.negocio_id
+              );
 
 
-          const [
-            anio,
-            mes,
-            dia
-          ] =
-            String(
-              reserva.fecha
-            )
-              .split("-")
-              .map(Number);
-
-
-          const [
-            hora,
-            minutos
-          ] =
-            horaReserva
-              .split(":")
-              .map(Number);
-
-
-          const fechaHora =
-            new Date(
-              anio,
-              mes - 1,
-              dia,
-              hora || 0,
-              minutos || 0,
-              0,
-              0
-            );
-
-
-          return {
-
-            id:
-              reserva.id,
-
-            negocioId:
-              reserva.negocio_id,
-
-            negocio:
-              negocio?.nombre ||
-              "Negocio",
-
-            servicio:
-              reserva.servicios
-                ?.nombre ||
-              "Servicio",
-
-            precio:
-              reserva.servicios
-                ?.precio ??
-              null,
-
-            duracion:
-              reserva.servicios
-                ?.duracion ??
-              null,
-
-            fecha:
-              reserva.fecha,
-
-            hora:
+            const horaReserva =
               String(
                 reserva.hora ||
-                ""
+                "00:00"
               ).slice(
                 0,
                 5
-              ),
+              );
 
-            comentario:
-              reserva.comentario ||
-              "",
 
-            estado:
-              reserva.estado ||
-              "Pendiente",
+            const [
+              anio,
+              mes,
+              dia
+            ] =
+              String(
+                reserva.fecha
+              )
+                .split("-")
+                .map(Number);
 
-            fechaHora
 
-          };
+            const [
+              hora,
+              minutos
+            ] =
+              horaReserva
+                .split(":")
+                .map(Number);
 
-        });
+
+            const fechaHora =
+              new Date(
+                anio,
+                mes - 1,
+                dia,
+                hora || 0,
+                minutos || 0,
+                0,
+                0
+              );
+
+
+            return {
+
+              id:
+                reserva.id,
+
+              negocioId:
+                reserva.negocio_id,
+
+              negocio:
+                negocio?.nombre ||
+                "Negocio",
+
+              servicio:
+                reserva.servicios
+                  ?.nombre ||
+                "Servicio",
+
+              precio:
+                reserva.servicios
+                  ?.precio ??
+                null,
+
+              duracion:
+                reserva.servicios
+                  ?.duracion ??
+                null,
+
+              fecha:
+                reserva.fecha,
+
+              hora:
+                String(
+                  reserva.hora ||
+                  ""
+                ).slice(
+                  0,
+                  5
+                ),
+
+              comentario:
+                reserva.comentario ||
+                "",
+
+              estado:
+                reserva.estado ||
+                "Pendiente",
+
+              fechaHora
+
+            };
+
+          }
+        );
 
 
     ReservaYa.reservas =
@@ -4708,6 +4959,12 @@ async function mostrarReservas(tipo = "proximas", boton = null) {
         "[]"
       );
 
+
+    /*
+      ==================================================
+      7. FILTRAR PRÓXIMAS / HISTORIAL
+      ==================================================
+    */
 
     const filtradas =
       reservas.filter(
@@ -4759,6 +5016,12 @@ async function mostrarReservas(tipo = "proximas", boton = null) {
       );
 
 
+    /*
+      ==================================================
+      8. MOSTRAR ESTADO VACÍO
+      ==================================================
+    */
+
     if (!filtradas.length) {
 
       contenedor.innerHTML = `
@@ -4796,16 +5059,22 @@ async function mostrarReservas(tipo = "proximas", boton = null) {
     }
 
 
-   contenedor.innerHTML =
-  filtradas
-    .map(
-      reserva =>
-        crearTarjetaReserva(
-          reserva,
-          tipo
+    /*
+      ==================================================
+      9. MOSTRAR RESERVAS
+      ==================================================
+    */
+
+    contenedor.innerHTML =
+      filtradas
+        .map(
+          reserva =>
+            crearTarjetaReserva(
+              reserva,
+              tipo
+            )
         )
-    )
-    .join("");
+        .join("");
 
 
   } catch (error) {
@@ -4836,6 +5105,8 @@ async function mostrarReservas(tipo = "proximas", boton = null) {
   }
 
 }
+       
+            
 
 /* =========================================================
    RESERVAYA — QUITAR RESERVA DEL HISTORIAL
