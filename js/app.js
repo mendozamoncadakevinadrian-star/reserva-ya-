@@ -3058,20 +3058,25 @@ async function cargarEmpleadosParaReserva(
 
   if (error) {
 
-    console.error(
-      "Error cargando empleados para reserva:",
-      error
-    );
+  console.error(
+    "Error cargando empleados para reserva:",
+    error
+  );
 
-    selector.innerHTML = `
-      <option value="">
-        No se pudieron cargar los empleados
-      </option>
-    `;
+  selector.innerHTML = `
+    <option value="">
+      Error: ${
+        escaparHTML(
+          error.message ||
+          "Error desconocido"
+        )
+      }
+    </option>
+  `;
 
-    return;
+  return;
 
-  }
+}
 
 
   const empleados =
