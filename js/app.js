@@ -3048,7 +3048,7 @@ async function cargarEmpleadosParaReserva(
     error
   } =
     await supabaseClient.rpc(
-      "obtener_empleados_negocio",
+  "obtener_empleados_para_reserva",
       {
         p_negocio_id:
           negocioId
@@ -3078,50 +3078,43 @@ async function cargarEmpleadosParaReserva(
 
 }
 
+const empleados =
+  data || [];
 
-  const empleados =
-    (data || []).filter(
-      empleado =>
-        empleado.activo === true
-    );
-
-
-  if (!empleados.length) {
-
-    selector.innerHTML = `
-      <option value="">
-        No hay empleados disponibles
-      </option>
-    `;
-
-    return;
-
-  }
-
+if (!empleados.length) {
 
   selector.innerHTML = `
     <option value="">
-      Selecciona un empleado
+      No hay empleados disponibles
     </option>
-
-    ${
-      empleados
-        .map(
-          empleado => `
-            <option
-              value="${empleado.miembro_id}"
-            >
-              ${escaparHTML(
-                empleado.nombre ||
-                empleado.email ||
-                "Empleado"
-              )}
-            </option>
-          `
-        )
-        .join("")
-    }
   `;
+
+  return;
+
+}
+
+selector.innerHTML = `
+  <option value="">
+    Selecciona un empleado
+  </option>
+
+  ${
+    empleados
+      .map(
+        empleado => `
+          <option
+            value="${empleado.miembro_id}"
+          >
+            ${escaparHTML(
+              empleado.nombre ||
+              "Empleado"
+            )}
+          </option>
+        `
+      )
+      .join("")
+  }
+`;
 
 }
 
