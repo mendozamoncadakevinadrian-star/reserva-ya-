@@ -6043,24 +6043,6 @@ async function cargarDatosPanelNegocio() {
         negocioId
       );
 
-      supabaseClient
-        .from("Citas")
-        .select("*")
-        .eq(
-          "negocio_id",
-          negocioId
-        ),
-
-      supabaseClient
-        .from("servicios")
-        .select("*")
-        .eq(
-          "negocio_id",
-          negocioId
-        )
-
-    ]);
-
   if (
     citasResponse.error
   ) {
