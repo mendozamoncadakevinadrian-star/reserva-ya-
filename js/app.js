@@ -5970,12 +5970,78 @@ async function cargarDatosPanelNegocio() {
 
   const negocioId =
     ReservaYa.negocioActual.id;
+  let citasResponse;
 
-  const [
-    citasResponse,
-    serviciosResponse
-  ] =
-    await Promise.all([
+  // Comprobar si el usuario es empleado
+  const {
+    data: negociosEmpleado,
+    error: errorNegociosEmpleado
+  } =
+    await supabaseClient.rpc(
+      "obtener_negocios_empleado",
+      {
+        p_usuario_id:
+          ReservaYa.usuario.id
+      }
+    );
+
+  if (errorNegociosEmpleado) {
+
+    console.error(
+      "Error comprobando negocios del empleado:",
+      errorNegociosEmpleado
+    );
+
+  }
+
+  const esEmpleado =
+    (negociosEmpleado || []).some(
+      negocio =>
+        String(negocio.id) ===
+        String(negocioId)
+    );
+
+  if (esEmpleado) {
+
+    // El empleado solamente ve sus propias citas
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.rpc(
+        "obtener_mis_citas_empleado",
+        {
+          p_negocio_id: negocioId
+        }
+      );
+
+    citasResponse = {
+      data,
+      error
+    };
+
+  } else {
+
+    // Propietario/administrador: ve todas las citas
+    citasResponse =
+      await supabaseClient
+        .from("Citas")
+        .select("*")
+        .eq(
+          "negocio_id",
+          negocioId
+        );
+
+  }
+
+  const serviciosResponse =
+    await supabaseClient
+      .from("servicios")
+      .select("*")
+      .eq(
+        "negocio_id",
+        negocioId
+      );
 
       supabaseClient
         .from("Citas")
