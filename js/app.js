@@ -4752,24 +4752,66 @@ async function mostrarReservas(
       ==================================================
       */
 
-
 const todasLasReservas = [];
 
 
 /*
-  Reservas hechas como cliente
+  ==================================================
+  RESERVAS Y CITAS DEL USUARIO
+  ==================================================
 */
 
 (reservasCliente || [])
   .forEach(
     reserva => {
 
+      /*
+        Si usuario = usuario actual,
+        significa que esta persona creó
+        la reserva.
+      */
+
+      const creadaPorMi =
+        String(
+          reserva.usuario
+        ) ===
+        String(
+          ReservaYa.usuario.id
+        );
+
+
+      /*
+        Comprobamos si también está asignada
+        al usuario actual como empleado.
+      */
+
+      const asignadaComoEmpleado =
+        reservasEmpleado.some(
+          cita =>
+            String(
+              cita.id
+            ) ===
+            String(
+              reserva.id
+            )
+        );
+
+
       todasLasReservas.push({
 
         ...reserva,
 
-        esReservaCliente: true,
-        esCitaEmpleado: false
+        /*
+          Si yo la creé, es una reserva mía.
+          Aunque también esté asignada a mí.
+        */
+
+        esReservaCliente:
+          creadaPorMi,
+
+        esCitaEmpleado:
+          !creadaPorMi &&
+          asignadaComoEmpleado
 
       });
 
@@ -4778,23 +4820,17 @@ const todasLasReservas = [];
 
 
 /*
-  Citas asignadas como empleado
-
-  Si una misma cita aparece también
-  como reserva del usuario, comprobamos
-  si realmente está asignada a ese usuario
-  como empleado.
-
-  En ese caso debe identificarse como
-  CITA POR ATENDER.
+  ==================================================
+  CITAS QUE SOLO EXISTEN COMO EMPLEADO
+  ==================================================
 */
 
 reservasEmpleado
   .forEach(
     reservaEmpleado => {
 
-      const indiceExistente =
-        todasLasReservas.findIndex(
+      const yaExiste =
+        todasLasReservas.some(
           reserva =>
             String(
               reserva.id
@@ -4804,53 +4840,31 @@ reservasEmpleado
             )
         );
 
+
+      if (yaExiste) {
+        return;
+      }
+
+
       const servicio =
         serviciosEmpleado[
           reservaEmpleado.servicio_id
         ] || null;
 
 
-      if (
-        indiceExistente !== -1
-      ) {
-
-        /*
-          La cita ya existe porque también
-          aparece entre las reservas del usuario.
-
-          Como está asignada al usuario como
-          empleado, la identificamos como
-          cita por atender.
-        */
-
-        todasLasReservas[
-          indiceExistente
-        ] = {
-
-          ...todasLasReservas[
-            indiceExistente
-          ],
-
-          servicios:
-            todasLasReservas[
-              indiceExistente
-            ].servicios ||
-            servicio,
-
-          esReservaCliente: false,
-          esCitaEmpleado: true
-
-        };
-
-        return;
-      }
-
-
       /*
-        Si no existía entre las reservas
-        del usuario, la agregamos como
-        cita de empleado.
+        Si esta cita no fue creada por mí,
+        entonces es una cita que debo atender.
       */
+
+      const creadaPorMi =
+        String(
+          reservaEmpleado.usuario
+        ) ===
+        String(
+          ReservaYa.usuario.id
+        );
+
 
       todasLasReservas.push({
 
@@ -4859,13 +4873,19 @@ reservasEmpleado
         servicios:
           servicio,
 
-        esReservaCliente: false,
-        esCitaEmpleado: true
+        esReservaCliente:
+          creadaPorMi,
+
+        esCitaEmpleado:
+          !creadaPorMi
 
       });
 
     }
   );
+
+
+
 
 
     /*
