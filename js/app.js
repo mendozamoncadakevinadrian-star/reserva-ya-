@@ -6063,7 +6063,11 @@ async function cargarDatosPanelNegocio() {
   const reservas =
     citasResponse.data ||
     [];
-
+   
+mostrarToast(
+  `Reservas recibidas: ${reservas.length}`
+);
+   
   const servicios =
     serviciosResponse.data ||
     [];
