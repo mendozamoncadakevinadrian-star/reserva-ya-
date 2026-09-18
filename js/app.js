@@ -4760,16 +4760,20 @@ async function mostrarReservas(
     */
 
     (reservasCliente || [])
-      .forEach(
-        reserva => {
+     .forEach(
+       reserva => {
 
-          todasLasReservas.push(
-            reserva
-          );
+      todasLasReservas.push({
 
-        }
-      );
+        ...reserva,
 
+        esReservaCliente: true,
+        esCitaEmpleado: false
+
+      });
+
+    }
+  );
 
     /*
       Citas asignadas como empleado
@@ -4780,43 +4784,43 @@ async function mostrarReservas(
     */
 
     reservasEmpleado
-      .forEach(
-        reservaEmpleado => {
+    .forEach(
+      reservaEmpleado => {
 
-          const yaExiste =
-            todasLasReservas.some(
-              reserva =>
-                String(
-                  reserva.id
-                ) ===
-                String(
-                  reservaEmpleado.id
-                )
-            );
+      const yaExiste =
+        todasLasReservas.some(
+          reserva =>
+            String(
+              reserva.id
+            ) ===
+            String(
+              reservaEmpleado.id
+            )
+        );
 
+      if (yaExiste) {
+        return;
+      }
 
-          if (yaExiste) {
-            return;
-          }
+      const servicio =
+        serviciosEmpleado[
+          reservaEmpleado.servicio_id
+        ] || null;
 
+      todasLasReservas.push({
 
-          const servicio =
-            serviciosEmpleado[
-              reservaEmpleado.servicio_id
-            ] || null;
+        ...reservaEmpleado,
 
+        servicios:
+          servicio,
 
-          todasLasReservas.push({
+        esReservaCliente: false,
+        esCitaEmpleado: true
 
-            ...reservaEmpleado,
+      });
 
-            servicios:
-              servicio
-
-          });
-
-        }
-      );
+    }
+  );
 
 
     /*
@@ -5201,9 +5205,39 @@ function crearTarjetaReserva(
       reserva.fecha
     );
 
+  const esCitaEmpleado =
+    reserva.esCitaEmpleado === true;
+
+  const etiquetaTipo =
+    esCitaEmpleado
+      ? "CITA POR ATENDER"
+      : "RESERVA REALIZADA POR TI";
+
+  const iconoTipo =
+    esCitaEmpleado
+      ? "👨‍💼"
+      : "👤";
+
   return `
 
     <article class="reservation-card">
+
+      <div class="reservation-card-type ${
+        esCitaEmpleado
+          ? "employee"
+          : "client"
+      }">
+
+        <span>
+          ${iconoTipo}
+        </span>
+
+        <strong>
+          ${etiquetaTipo}
+        </strong>
+
+      </div>
+
 
       <div class="reservation-card-header">
 
@@ -5214,6 +5248,7 @@ function crearTarjetaReserva(
           </div>
 
           <div>
+
             <div class="reservation-business-label">
               NEGOCIO
             </div>
@@ -5230,24 +5265,29 @@ function crearTarjetaReserva(
                 reserva.servicio
               )}
             </div>
+
           </div>
 
         </div>
+
 
         <span class="reservation-status ${
           cancelada
             ? "cancelled"
             : "pending"
         }">
+
           ${escaparHTML(
             estado
           )}
+
         </span>
 
       </div>
 
 
       <div class="reservation-details">
+
 
         <div class="reservation-detail">
 
@@ -5256,10 +5296,15 @@ function crearTarjetaReserva(
           </span>
 
           <div>
-            <small>Fecha</small>
+
+            <small>
+              Fecha
+            </small>
+
             <strong>
               ${fechaBonita}
             </strong>
+
           </div>
 
         </div>
@@ -5272,12 +5317,17 @@ function crearTarjetaReserva(
           </span>
 
           <div>
-            <small>Hora</small>
+
+            <small>
+              Hora
+            </small>
+
             <strong>
               ${escaparHTML(
                 reserva.hora
               )}
             </strong>
+
           </div>
 
         </div>
@@ -5293,12 +5343,17 @@ function crearTarjetaReserva(
                 </span>
 
                 <div>
-                  <small>Duración</small>
+
+                  <small>
+                    Duración
+                  </small>
+
                   <strong>
                     ${Number(
                       reserva.duracion
                     )} min
                   </strong>
+
                 </div>
 
               </div>
@@ -5317,12 +5372,17 @@ function crearTarjetaReserva(
                 </span>
 
                 <div>
-                  <small>Precio</small>
+
+                  <small>
+                    Precio
+                  </small>
+
                   <strong>
                     ${formatearPrecio(
                       reserva.precio
                     )}
                   </strong>
+
                 </div>
 
               </div>
@@ -5330,7 +5390,38 @@ function crearTarjetaReserva(
             : ""
         }
 
+
       </div>
+
+
+      ${
+        esCitaEmpleado
+          ? `
+            <div class="reservation-client-info">
+
+              <span>
+                👤
+              </span>
+
+              <div>
+
+                <small>
+                  Cliente
+                </small>
+
+                <strong>
+                  ${escaparHTML(
+                    reserva.nombre_cliente ||
+                    "Cliente"
+                  )}
+                </strong>
+
+              </div>
+
+            </div>
+          `
+          : ""
+      }
 
 
       ${
@@ -5343,12 +5434,17 @@ function crearTarjetaReserva(
               </span>
 
               <div>
-                <small>Comentario</small>
+
+                <small>
+                  Comentario
+                </small>
+
                 <p>
                   ${escaparHTML(
                     reserva.comentario
                   )}
                 </p>
+
               </div>
 
             </div>
@@ -5359,33 +5455,36 @@ function crearTarjetaReserva(
 
       <div class="reservation-actions">
 
-  <button
-    class="secondary-button"
-    onclick="
-      verDetallesReserva(
-        '${reserva.id}'
-      )
-    "
-  >
-    👁️ Ver detalles
-  </button>
 
-  ${
-    tipo === "historial"
-      ? `
         <button
-          class="secondary-button reservation-delete-button"
+          class="secondary-button"
           onclick="
-            eliminarDelHistorial(
+            verDetallesReserva(
               '${reserva.id}'
             )
           "
         >
-          🗑️ Quitar
+          👁️ Ver detalles
         </button>
-      `
-      : ""
-  }
+
+
+        ${
+          tipo === "historial"
+            ? `
+              <button
+                class="secondary-button reservation-delete-button"
+                onclick="
+                  eliminarDelHistorial(
+                    '${reserva.id}'
+                  )
+                "
+              >
+                🗑️ Quitar
+              </button>
+            `
+            : ""
+        }
+
 
         ${
           !cancelada &&
@@ -5404,6 +5503,7 @@ function crearTarjetaReserva(
             `
             : ""
         }
+
 
       </div>
 
