@@ -10249,19 +10249,19 @@ async function iniciarSesion() {
 
   if (error) {
 
-    console.error(
-      "Error iniciando sesión:",
-      error
-    );
+  console.error(
+    "Error iniciando sesión:",
+    error
+  );
 
-    mostrarToast(
-      "No se pudo iniciar sesión."
-    );
+  mostrarToast(
+    error.message || "No se pudo iniciar sesión."
+  );
 
-    return;
+  return;
 
-  }
-
+}
+   
   ReservaYa.usuario =
     data.user;
 
