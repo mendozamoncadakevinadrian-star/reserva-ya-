@@ -10289,6 +10289,36 @@ async function iniciarSesion() {
 
 }
 
+async function recuperarContrasena() {
+
+  const email = document.getElementById("loginEmail")?.value.trim();
+
+  if (!email) {
+    mostrarToast("Escribe primero tu correo electrónico.");
+    return;
+  }
+
+  const { error } = await supabaseClient.auth.resetPasswordForEmail(
+    email,
+    {
+      redirectTo:
+        "https://mendozamoncadakevinadrian-star.github.io/reserva-ya-/"
+    }
+  );
+
+  if (error) {
+    console.error("Error enviando recuperación:", error);
+    mostrarToast(
+      "No se pudo enviar el correo de recuperación."
+    );
+    return;
+  }
+
+  mostrarToast(
+    "Correo de recuperación enviado. Revisa tu bandeja de entrada."
+  );
+}
+
 
 /* =====================================================
    REGISTRO
