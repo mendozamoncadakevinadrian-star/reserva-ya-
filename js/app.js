@@ -13307,7 +13307,11 @@ function finalizarSwipeNegocio(event) {
 
 }
 
-async function actualizarEstadoReserva(reservaId, nuevoEstado) {
+async function actualizarEstadoReserva(
+  reservaId,
+  nuevoEstado
+) {
+
   if (!ReservaYa.usuario) {
     mostrarToast("Debes iniciar sesión.");
     return;
@@ -13329,24 +13333,49 @@ async function actualizarEstadoReserva(reservaId, nuevoEstado) {
     "Completada"
   ];
 
-  if (!estadosPermitidos.includes(nuevoEstado)) {
-    mostrarToast("Estado no válido.");
+  if (
+    !estadosPermitidos.includes(
+      nuevoEstado
+    )
+  ) {
+    mostrarToast(
+      "Estado no válido."
+    );
     return;
   }
 
-  const negocioId = ReservaYa.negocioActual.id;
+  const negocioId =
+    ReservaYa.negocioActual.id;
 
-  const { error } = await supabaseClient
-    .from("Citas")
-    .update({
-      estado: nuevoEstado
-    })
-    .eq("id", reservaId)
-    .eq("negocio_id", negocioId);
+
+  /*
+    =========================================
+    ACTUALIZAR EN SUPABASE
+    =========================================
+  */
+
+  const {
+    error
+  } =
+    await supabaseClient
+      .from("Citas")
+      .update({
+        estado: nuevoEstado
+      })
+      .eq(
+        "id",
+        reservaId
+      )
+      .eq(
+        "negocio_id",
+        negocioId
+      );
+
 
   if (error) {
+
     console.error(
-      "Error actualizando estado de reserva:",
+      "Error actualizando estado:",
       error
     );
 
@@ -13357,15 +13386,49 @@ async function actualizarEstadoReserva(reservaId, nuevoEstado) {
     return;
   }
 
-  mostrarToast(
-    nuevoEstado === "Confirmada"
-      ? "Reserva confirmada."
-      : nuevoEstado === "Cancelada"
-        ? "Reserva cancelada."
-        : nuevoEstado === "Completada"
-          ? "Reserva marcada como completada."
-          : "Reserva actualizada."
-  );
+
+  /*
+    =========================================
+    MENSAJE
+    =========================================
+  */
+
+  if (
+    nuevoEstado ===
+    "Confirmada"
+  ) {
+
+    mostrarToast(
+      "✓ Reserva confirmada."
+    );
+
+  } else if (
+    nuevoEstado ===
+    "Cancelada"
+  ) {
+
+    mostrarToast(
+      "Reserva cancelada."
+    );
+
+  } else if (
+    nuevoEstado ===
+    "Completada"
+  ) {
+
+    mostrarToast(
+      "✓ Reserva completada."
+    );
+
+  }
+
+
+  /*
+    =========================================
+    ACTUALIZAR PANEL
+    =========================================
+  */
 
   await abrirReservasNegocio();
+
 }
