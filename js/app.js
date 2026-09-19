@@ -7464,13 +7464,52 @@ mostrarToast(`Reservas cargadas: ${lista.length}`);
    
    
    
-  const htmlHistorial =
+  let htmlHistorial = "";
+
+try {
+
+  htmlHistorial =
     historial.length
       ? historial
           .map(
             crearReservaHTML
           )
           .join("")
+      : `
+          <div
+            style="
+              padding:30px 10px;
+              text-align:center;
+              color:#727887;
+            "
+          >
+            <div
+              style="
+                font-size:34px;
+                margin-bottom:8px;
+              "
+            >
+              📚
+            </div>
+
+            <strong>
+              No hay historial
+            </strong>
+          </div>
+        `;
+
+} catch (error) {
+
+  mostrarToast(
+    `Error historial: ${
+      error.message ||
+      "Error desconocido"
+    }`
+  );
+
+  return;
+
+}
       : `
           <div
             style="
