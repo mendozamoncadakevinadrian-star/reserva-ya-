@@ -7263,13 +7263,17 @@ async function abrirReservasNegocio() {
     SEPARAR PRÓXIMAS E HISTORIAL
     ==================================================
   */
-  const {
-    data: historialOcultoData,
-    error: historialOcultoError
-  } = await supabaseClient
-    .from("historial_reservas_oculto")
-    .select("reserva_id")
-    .eq("negocio_id", negocioId);
+   
+ const {
+  data: historialOcultoData,
+  error: historialOcultoError
+} =
+  await supabaseClient.rpc(
+    "obtener_historial_reservas_oculto",
+    {
+      p_negocio_id: negocioId
+    }
+  );
 
   if (historialOcultoError) {
     console.error(
