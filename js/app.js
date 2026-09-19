@@ -6905,6 +6905,17 @@ async function abrirReservasNegocio() {
           ascending: true
         }
       );
+   
+   if (error) {
+  mostrarToast(
+    `Error: ${error.message}`
+  );
+  return;
+}
+
+mostrarToast(
+  `Consulta OK: ${reservas?.length || 0}`
+);
 
   if (error) {
 
