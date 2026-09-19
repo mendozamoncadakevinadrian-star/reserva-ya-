@@ -2977,25 +2977,53 @@ async function iniciarReserva(
 
 
       <label style="
-        display:block;
-        font-weight:700;
-        margin-bottom:7px;
-      ">
-        💬 Comentario
-      </label>
+  display:block;
+  font-weight:700;
+  margin-bottom:7px;
+">
+  💬 Comentario
+</label>
 
-      <textarea
-        id="reservationComment"
-        rows="3"
-        placeholder="¿Algo que quieras comentar?"
-        style="
-          width:100%;
-          padding:12px;
-          border:1px solid #ddd;
-          border-radius:10px;
-          resize:vertical;
-        "
-      ></textarea>
+<textarea
+  id="reservationComment"
+  rows="3"
+  placeholder="¿Algo que quieras comentar?"
+  style="
+    width:100%;
+    padding:12px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    resize:vertical;
+  "
+></textarea>
+
+<div style="height:14px;"></div>
+
+<label style="
+  display:block;
+  font-weight:700;
+  margin-bottom:7px;
+">
+  📱 Teléfono
+</label>
+
+<input
+  type="tel"
+  id="reservationPhone"
+  placeholder="Tu número de teléfono"
+  inputmode="tel"
+  style="
+    width:100%;
+    padding:12px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    box-sizing:border-box;
+  "
+>
+
+<br><br>
+
+<button
 
 
       <button
@@ -4007,7 +4035,7 @@ async function confirmarReserva(
           nombreCliente,
 
         p_telefono_cliente:
-          null,
+          telefono,
 
         p_comentario:
           comentario || null,
