@@ -6422,170 +6422,152 @@ async function detectarNegocioUsuario() {
 
 async function cargarDatosPanelNegocio() {
 
-  if (
-    !ReservaYa.usuario
-  ) {
-
+  if (!ReservaYa.usuario) {
     return;
-
   }
 
-  if (
-    !ReservaYa.negocioActual
-  ) {
-
+  if (!ReservaYa.negocioActual) {
     await detectarNegocioUsuario();
-
   }
 
-  if (
-    !ReservaYa.negocioActual
-  ) {
-
+  if (!ReservaYa.negocioActual) {
     return;
-
   }
 
   const negocioId =
     ReservaYa.negocioActual.id;
+
   let citasResponse;
 
-  // Comprobar si el usuario es empleado
+  /*
+    =========================================
+    DETECTAR ROL DEL USUARIO
+    =========================================
+  */
 
-   let rolUsuario = null;
+  let rolUsuario = null;
 
-/*
-  =========================================
-  DETECTAR ROL DEL USUARIO EN LA EMPRESA
-  =========================================
-*/
+  if (
+    ReservaYa.negocioActual.empresa_id
+  ) {
 
-if (
-  ReservaYa.negocioActual.empresa_id
-) {
+    const {
+      data: miembro,
+      error: errorMiembro
+    } =
+      await supabaseClient
+        .from("empresa_miembros")
+        .select(
+          "rol, activo"
+        )
+        .eq(
+          "empresa_id",
+          ReservaYa.negocioActual.empresa_id
+        )
+        .eq(
+          "usuario_id",
+          ReservaYa.usuario.id
+        )
+        .eq(
+          "activo",
+          true
+        )
+        .maybeSingle();
 
-  const {
-    data: miembro,
-    error: errorMiembro
-  } =
-    await supabaseClient
-      .from("empresa_miembros")
-      .select(
-        "rol, activo"
-      )
-      .eq(
-        "empresa_id",
-        ReservaYa.negocioActual.empresa_id
-      )
-      .eq(
-        "usuario_id",
-        ReservaYa.usuario.id
-      )
-      .eq(
-        "activo",
-        true
-      )
-      .maybeSingle();
+    if (errorMiembro) {
 
-  if (errorMiembro) {
+      console.error(
+        "Error obteniendo rol del usuario:",
+        errorMiembro
+      );
 
-    console.error(
-      "Error obteniendo rol del usuario:",
-      errorMiembro
-    );
+    } else if (miembro) {
 
-  } else if (miembro) {
+      rolUsuario =
+        miembro.rol;
 
-    rolUsuario =
-      miembro.rol;
+    }
 
   }
 
-}
+  /*
+    =========================================
+    ROLES
+    =========================================
+  */
 
-/*
-  =========================================
-  ROLES
-  =========================================
-*/
+  const esEmpleado =
+    rolUsuario === "empleado";
 
-const esEmpleado =
-  rolUsuario ===
-  "empleado";
+  const esAdministrador =
+    rolUsuario === "administrador";
 
-const esAdministrador =
-  rolUsuario ===
-  "administrador";
-
-const esPropietario =
-  rolUsuario ===
-  "propietario";
-
-if (esEmpleado) {
+  const esPropietario =
+    rolUsuario === "propietario";
 
   /*
     =========================================
-    EMPLEADO
+    CARGAR CITAS SEGÚN ROL
     =========================================
-    Solo carga las citas asignadas
-    a este empleado.
   */
 
-  const {
-    data,
-    error
-  } =
-    await supabaseClient.rpc(
-      "obtener_mis_citas_empleado",
-      {
-        p_negocio_id:
-          negocioId
-      }
-    );
+  if (esEmpleado) {
 
-  citasResponse = {
-    data:
-      data || [],
-    error
-  };
-
-} else if (
-  esPropietario ||
-  esAdministrador
-) {
-
-  /*
-    =========================================
-    PROPIETARIO / ADMINISTRADOR
-    =========================================
-    Puede gestionar las reservas
-    del negocio.
-  */
-
-  citasResponse =
-    await supabaseClient
-      .from("Citas")
-      .select("*")
-      .eq(
-        "negocio_id",
-        negocioId
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.rpc(
+        "obtener_mis_citas_empleado",
+        {
+          p_negocio_id:
+            negocioId
+        }
       );
 
-} else {
+    citasResponse = {
+      data:
+        data || [],
+      error
+    };
+
+  } else if (
+    esPropietario ||
+    esAdministrador
+  ) {
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("Citas")
+        .select("*")
+        .eq(
+          "negocio_id",
+          negocioId
+        );
+
+    citasResponse = {
+      data,
+      error
+    };
+
+  } else {
+
+    citasResponse = {
+      data: [],
+      error: null
+    };
+
+  }
 
   /*
     =========================================
-    SIN ROL ADMINISTRATIVO
+    SERVICIOS
     =========================================
   */
 
-  citasResponse = {
-    data: [],
-    error: null
-  };
-
-}
-   
   const serviciosResponse =
     await supabaseClient
       .from("servicios")
@@ -6595,9 +6577,13 @@ if (esEmpleado) {
         negocioId
       );
 
-  if (
-    citasResponse.error
-  ) {
+  /*
+    =========================================
+    ERRORES
+    =========================================
+  */
+
+  if (citasResponse.error) {
 
     console.error(
       "Error cargando citas Business:",
@@ -6612,107 +6598,132 @@ if (esEmpleado) {
 
   }
 
-  const reservas =
-    citasResponse.data ||
-    [];
-   
+  if (serviciosResponse.error) {
 
-);
-   
+    console.error(
+      "Error cargando servicios Business:",
+      serviciosResponse.error
+    );
+
+  }
+
+  const reservas =
+    citasResponse.data || [];
+
   const servicios =
-    serviciosResponse.data ||
-    [];
+    serviciosResponse.data || [];
+
+  /*
+    =========================================
+    FECHA ACTUAL
+    =========================================
+  */
 
   const ahoraReservas =
-  new Date();
+    new Date();
 
-const totalReservas =
-  reservas.filter(
-    reserva => {
+  /*
+    =========================================
+    RESERVAS ACTIVAS
+    =========================================
+  */
 
-      const estado =
-        String(
-          reserva.estado || ""
-        ).toLowerCase();
+  const totalReservas =
+    reservas.filter(
+      reserva => {
 
-      if (
-        estado === "cancelada" ||
-        estado === "completada"
-      ) {
-        return false;
-      }
+        const estado =
+          String(
+            reserva.estado || ""
+          ).toLowerCase();
 
-      if (!reserva.fecha) {
-        return false;
-      }
+        if (
+          estado === "cancelada" ||
+          estado === "completada"
+        ) {
+          return false;
+        }
 
-      const partesFecha =
-        String(reserva.fecha)
-          .split("-")
-          .map(Number);
+        if (!reserva.fecha) {
+          return false;
+        }
 
-      if (
-        partesFecha.length !== 3 ||
-        partesFecha.some(
-          numero =>
-            Number.isNaN(numero)
-        )
-      ) {
-        return false;
-      }
+        const partesFecha =
+          String(
+            reserva.fecha
+          )
+            .split("-")
+            .map(Number);
 
-      const horaNormalizada =
-        String(
-          reserva.hora || "00:00"
-        )
-          .trim()
-          .replace(".", ":");
+        if (
+          partesFecha.length !== 3 ||
+          partesFecha.some(
+            numero =>
+              Number.isNaN(numero)
+          )
+        ) {
+          return false;
+        }
 
-      const partesHora =
-        horaNormalizada
-          .split(":")
-          .map(Number);
+        const horaNormalizada =
+          String(
+            reserva.hora || "00:00"
+          )
+            .trim()
+            .replace(".", ":");
 
-      const horas =
-        Number.isNaN(
-          partesHora[0]
-        )
-          ? 0
-          : partesHora[0];
+        const partesHora =
+          horaNormalizada
+            .split(":")
+            .map(Number);
 
-      const minutos =
-        Number.isNaN(
-          partesHora[1]
-        )
-          ? 0
-          : partesHora[1];
+        const horas =
+          Number.isNaN(
+            partesHora[0]
+          )
+            ? 0
+            : partesHora[0];
 
-      const fechaHoraReserva =
-        new Date(
-          partesFecha[0],
-          partesFecha[1] - 1,
-          partesFecha[2],
-          horas,
-          minutos,
-          0,
-          0
+        const minutos =
+          Number.isNaN(
+            partesHora[1]
+          )
+            ? 0
+            : partesHora[1];
+
+        const fechaHoraReserva =
+          new Date(
+            partesFecha[0],
+            partesFecha[1] - 1,
+            partesFecha[2],
+            horas,
+            minutos,
+            0,
+            0
+          );
+
+        if (
+          Number.isNaN(
+            fechaHoraReserva.getTime()
+          )
+        ) {
+          return false;
+        }
+
+        return (
+          fechaHoraReserva >=
+          ahoraReservas
         );
 
-      if (
-        Number.isNaN(
-          fechaHoraReserva.getTime()
-        )
-      ) {
-        return false;
       }
+    ).length;
 
-      return (
-        fechaHoraReserva >=
-        ahoraReservas
-      );
+  /*
+    =========================================
+    CLIENTES ÚNICOS
+    =========================================
+  */
 
-    }
-  ).length;
   const clientesUnicos =
     new Set(
       reservas
@@ -6726,43 +6737,57 @@ const totalReservas =
   const totalClientes =
     clientesUnicos.size;
 
+  /*
+    =========================================
+    ESTADÍSTICAS
+    =========================================
+  */
+
   const pendientes =
     reservas.filter(
-      r =>
-        ![
-          "Cancelada",
-          "Completada"
-        ].includes(
-          String(
-            r.estado
-          )
-        )
+      reserva =>
+        String(
+          reserva.estado || ""
+        ).toLowerCase() ===
+        "pendiente"
     ).length;
 
   const completadas =
     reservas.filter(
-      r =>
+      reserva =>
         String(
-          r.estado
+          reserva.estado || ""
         ).toLowerCase() ===
         "completada"
     ).length;
 
   const canceladas =
     reservas.filter(
-      r =>
+      reserva =>
         String(
-          r.estado
+          reserva.estado || ""
         ).toLowerCase() ===
         "cancelada"
     ).length;
+
+  /*
+    =========================================
+    INGRESOS
+    =========================================
+  */
 
   const ingresos =
     calcularIngresos(
       reservas,
       servicios
     );
-   
+
+  /*
+    =========================================
+    GALERÍA
+    =========================================
+  */
+
   const {
     data: fotosGaleria,
     error: errorFotosGaleria
@@ -6776,7 +6801,9 @@ const totalReservas =
       )
       .order(
         "orden",
-        { ascending: true }
+        {
+          ascending: true
+        }
       );
 
   if (errorFotosGaleria) {
@@ -6795,7 +6822,17 @@ const totalReservas =
           Number(a.orden) -
           Number(b.orden)
       )
-      .slice(0, 4);
+      .slice(
+        0,
+        4
+      );
+
+  /*
+    =========================================
+    ESTADÍSTICAS DEL PANEL
+    =========================================
+  */
+
   actualizarElemento(
     "statReservations",
     totalReservas
@@ -6841,6 +6878,12 @@ const totalReservas =
     )
   );
 
+  /*
+    =========================================
+    INFORMACIÓN DEL NEGOCIO
+    =========================================
+  */
+
   actualizarElemento(
     "businessName",
     ReservaYa.negocioActual.nombre
@@ -6851,45 +6894,106 @@ const totalReservas =
     ReservaYa.negocioActual.descripcion ||
       "Administra tu negocio desde ReservaYa."
   );
-const businessInfoName = document.getElementById("businessInfoName");
-const businessInfoAddress = document.getElementById("businessInfoAddress");
-const businessInfoPhone = document.getElementById("businessInfoPhone");
-const businessInfoDescription = document.getElementById("businessInfoDescription");
 
-if (businessInfoName) {
-  businessInfoName.value = ReservaYa.negocioActual.nombre || "";
-}
+  /*
+    =========================================
+    FORMULARIO DEL NEGOCIO
+    =========================================
+  */
 
-if (businessInfoAddress) {
-  businessInfoAddress.value =
-    ReservaYa.negocioActual.direccion ||
-    ReservaYa.negocioActual.ubicacion ||
-    "";
-}
-   
-if (businessInfoPhone) {
-  businessInfoPhone.value = ReservaYa.negocioActual.telefono || "";
-}
+  const businessInfoName =
+    document.getElementById(
+      "businessInfoName"
+    );
 
-if (businessInfoDescription) {
-  businessInfoDescription.value = ReservaYa.negocioActual.descripcion || "";
-}
+  const businessInfoAddress =
+    document.getElementById(
+      "businessInfoAddress"
+    );
+
+  const businessInfoPhone =
+    document.getElementById(
+      "businessInfoPhone"
+    );
+
+  const businessInfoDescription =
+    document.getElementById(
+      "businessInfoDescription"
+    );
+
+  if (businessInfoName) {
+
+    businessInfoName.value =
+      ReservaYa.negocioActual.nombre ||
+      "";
+
+  }
+
+  if (businessInfoAddress) {
+
+    businessInfoAddress.value =
+      ReservaYa.negocioActual.direccion ||
+      ReservaYa.negocioActual.ubicacion ||
+      "";
+
+  }
+
+  if (businessInfoPhone) {
+
+    businessInfoPhone.value =
+      ReservaYa.negocioActual.telefono ||
+      "";
+
+  }
+
+  if (businessInfoDescription) {
+
+    businessInfoDescription.value =
+      ReservaYa.negocioActual.descripcion ||
+      "";
+
+  }
+
+  /*
+    =========================================
+    RESUMEN
+    =========================================
+  */
 
   renderizarResumenBusiness(
     reservas,
     servicios
   );
-   
+
+  /*
+    =========================================
+    PULSE
+    =========================================
+  */
+
   renderizarPulse(
     reservas,
     servicios
   );
 
+  /*
+    =========================================
+    PORTADA
+    =========================================
+  */
+
   mostrarVistaPortadaNegocio();
 
+  /*
+    =========================================
+    GALERÍA
+    =========================================
+  */
+
   mostrarGaleriaNegocio();
-  
+
 }
+        
 
 async function guardarInformacionNegocio() {
 
