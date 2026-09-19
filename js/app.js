@@ -6451,67 +6451,141 @@ async function cargarDatosPanelNegocio() {
   let citasResponse;
 
   // Comprobar si el usuario es empleado
+
+   let rolUsuario = null;
+
+/*
+  =========================================
+  DETECTAR ROL DEL USUARIO EN LA EMPRESA
+  =========================================
+*/
+
+if (
+  ReservaYa.negocioActual.empresa_id
+) {
+
   const {
-    data: negociosEmpleado,
-    error: errorNegociosEmpleado
+    data: miembro,
+    error: errorMiembro
+  } =
+    await supabaseClient
+      .from("empresa_miembros")
+      .select(
+        "rol, activo"
+      )
+      .eq(
+        "empresa_id",
+        ReservaYa.negocioActual.empresa_id
+      )
+      .eq(
+        "usuario_id",
+        ReservaYa.usuario.id
+      )
+      .eq(
+        "activo",
+        true
+      )
+      .maybeSingle();
+
+  if (errorMiembro) {
+
+    console.error(
+      "Error obteniendo rol del usuario:",
+      errorMiembro
+    );
+
+  } else if (miembro) {
+
+    rolUsuario =
+      miembro.rol;
+
+  }
+
+}
+
+/*
+  =========================================
+  ROLES
+  =========================================
+*/
+
+const esEmpleado =
+  rolUsuario ===
+  "empleado";
+
+const esAdministrador =
+  rolUsuario ===
+  "administrador";
+
+const esPropietario =
+  rolUsuario ===
+  "propietario";
+
+if (esEmpleado) {
+
+  /*
+    =========================================
+    EMPLEADO
+    =========================================
+    Solo carga las citas asignadas
+    a este empleado.
+  */
+
+  const {
+    data,
+    error
   } =
     await supabaseClient.rpc(
-      "obtener_negocios_empleado",
+      "obtener_mis_citas_empleado",
       {
-        p_usuario_id:
-          ReservaYa.usuario.id
+        p_negocio_id:
+          negocioId
       }
     );
 
-  if (errorNegociosEmpleado) {
+  citasResponse = {
+    data:
+      data || [],
+    error
+  };
 
-    console.error(
-      "Error comprobando negocios del empleado:",
-      errorNegociosEmpleado
-    );
+} else if (
+  esPropietario ||
+  esAdministrador
+) {
 
-  }
+  /*
+    =========================================
+    PROPIETARIO / ADMINISTRADOR
+    =========================================
+    Puede gestionar las reservas
+    del negocio.
+  */
 
-  const esEmpleado =
-    (negociosEmpleado || []).some(
-      negocio =>
-        String(negocio.id) ===
-        String(negocioId)
-    );
-
-  if (esEmpleado) {
-
-    // El empleado solamente ve sus propias citas
-    const {
-      data,
-      error
-    } =
-      await supabaseClient.rpc(
-        "obtener_mis_citas_empleado",
-        {
-          p_negocio_id: negocioId
-        }
+  citasResponse =
+    await supabaseClient
+      .from("Citas")
+      .select("*")
+      .eq(
+        "negocio_id",
+        negocioId
       );
 
-    citasResponse = {
-      data,
-      error
-    };
+} else {
 
-  } else {
+  /*
+    =========================================
+    SIN ROL ADMINISTRATIVO
+    =========================================
+  */
 
-    // Propietario/administrador: ve todas las citas
-    citasResponse =
-      await supabaseClient
-        .from("Citas")
-        .select("*")
-        .eq(
-          "negocio_id",
-          negocioId
-        );
+  citasResponse = {
+    data: [],
+    error: null
+  };
 
-  }
-
+}
+   
   const serviciosResponse =
     await supabaseClient
       .from("servicios")
@@ -6542,8 +6616,7 @@ async function cargarDatosPanelNegocio() {
     citasResponse.data ||
     [];
    
-mostrarToast(
-  `Reservas recibidas: ${reservas.length}`
+
 );
    
   const servicios =
