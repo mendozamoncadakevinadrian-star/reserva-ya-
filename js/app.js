@@ -8411,25 +8411,12 @@ if (
 
   }
 
-
-  botonProximas.onclick = function() {
-
-  window.reservasNegocioPestana =
-    "proximas";
-
-  activarProximas();
-
-};
+botonProximas.onclick =
+  activarProximas;
 
 
-botonHistorial.onclick = function() {
-
-  window.reservasNegocioPestana =
-    "historial";
-
-  activarHistorial();
-
-};
+botonHistorial.onclick =
+  activarHistorial;
 
   /*
   ==================================================
