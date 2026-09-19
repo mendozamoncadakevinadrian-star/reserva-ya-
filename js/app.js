@@ -7494,6 +7494,8 @@ mostrarToast(`Reservas cargadas: ${lista.length}`);
           </div>
         `;
 
+mostrarToast("Preparando ventana de reservas...");
+   
   abrirModal(`
 
     <div>
