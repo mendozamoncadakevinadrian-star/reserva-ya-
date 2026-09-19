@@ -13386,23 +13386,19 @@ async function actualizarEstadoReserva(
   */
 
   const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("Citas")
-      .update({
-        estado: nuevoEstado
-      })
-      .eq(
-        "id",
-        reservaId
-      )
-      .eq(
-        "negocio_id",
-        negocioId
-      )
-      .select();
+  data,
+  error
+} =
+  await supabaseClient.rpc(
+    "actualizar_estado_reserva",
+    {
+      p_reserva_id:
+        reservaId,
+
+      p_nuevo_estado:
+        nuevoEstado
+    }
+  );
 
   if (error) {
 
@@ -13424,25 +13420,6 @@ async function actualizarEstadoReserva(
     =========================================
   */
 
- if (!data) {
-
-  mostrarToast(
-    "UPDATE ejecutado, pero Supabase no devolvió la fila."
-  );
-
-} else {
-
-  console.log(
-    "Estado actualizado:",
-    data
-  );
-
-} 
-   
-  console.log(
-    "Estado actualizado:",
-    data.estado
-  );
 
   /*
     =========================================
