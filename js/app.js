@@ -13306,3 +13306,66 @@ function finalizarSwipeNegocio(event) {
   );
 
 }
+
+async function actualizarEstadoReserva(reservaId, nuevoEstado) {
+  if (!ReservaYa.usuario) {
+    mostrarToast("Debes iniciar sesión.");
+    return;
+  }
+
+  if (!ReservaYa.negocioActual) {
+    await detectarNegocioUsuario();
+  }
+
+  if (!ReservaYa.negocioActual) {
+    mostrarToast("No se encontró el negocio.");
+    return;
+  }
+
+  const estadosPermitidos = [
+    "Pendiente",
+    "Confirmada",
+    "Cancelada",
+    "Completada"
+  ];
+
+  if (!estadosPermitidos.includes(nuevoEstado)) {
+    mostrarToast("Estado no válido.");
+    return;
+  }
+
+  const negocioId = ReservaYa.negocioActual.id;
+
+  const { error } = await supabaseClient
+    .from("Citas")
+    .update({
+      estado: nuevoEstado
+    })
+    .eq("id", reservaId)
+    .eq("negocio_id", negocioId);
+
+  if (error) {
+    console.error(
+      "Error actualizando estado de reserva:",
+      error
+    );
+
+    mostrarToast(
+      "No se pudo actualizar la reserva."
+    );
+
+    return;
+  }
+
+  mostrarToast(
+    nuevoEstado === "Confirmada"
+      ? "Reserva confirmada."
+      : nuevoEstado === "Cancelada"
+        ? "Reserva cancelada."
+        : nuevoEstado === "Completada"
+          ? "Reserva marcada como completada."
+          : "Reserva actualizada."
+  );
+
+  await abrirReservasNegocio();
+}
