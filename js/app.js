@@ -8412,25 +8412,42 @@ if (
   }
 
 
-  botonProximas.onclick =
-    activarProximas;
+  botonProximas.onclick = function() {
 
-
-  botonHistorial.onclick =
-    activarHistorial;
-
-
-  /*
-    ==================================================
-    INICIAR EN PRÓXIMAS
-    ==================================================
-  */
+  window.reservasNegocioPestana =
+    "proximas";
 
   activarProximas();
 
-}
+};
 
-        
+
+botonHistorial.onclick = function() {
+
+  window.reservasNegocioPestana =
+    "historial";
+
+  activarHistorial();
+
+};
+
+  /*
+  ==================================================
+  INICIAR EN LA PESTAÑA CORRESPONDIENTE
+  ==================================================
+*/
+
+if (
+  window.reservasNegocioPestana === "historial"
+) {
+
+  activarHistorial();
+
+} else {
+
+  activarProximas();
+
+}      
 
     
 /* =====================================================
