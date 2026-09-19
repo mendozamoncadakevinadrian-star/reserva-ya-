@@ -7299,7 +7299,10 @@ async function abrirReservasNegocio() {
 
   const ahora =
     new Date();
-
+   
+  const pestanaReservasActual =
+    window.reservasNegocioPestana ||
+    "proximas";
 
   /*
     ==================================================
@@ -8454,18 +8457,39 @@ if (
 
   }
 
-botonProximas.onclick =
-  activarProximas;
+botonProximas.onclick = function() {
+
+  window.reservasNegocioPestana =
+    "proximas";
+
+  activarProximas();
+
+};
 
 
-botonHistorial.onclick =
-  activarHistorial;
+botonHistorial.onclick = function() {
 
-  /*
+  window.reservasNegocioPestana =
+    "historial";
+
+  activarHistorial();
+
+};
+   
+/*
   ==================================================
-  INICIAR EN PRÓXIMAS
+  INICIAR EN LA PESTAÑA ANTERIOR
   ==================================================
 */
+
+if (
+  pestanaReservasActual ===
+  "historial"
+) {
+
+  activarHistorial();
+
+} else {
 
   activarProximas();
 
