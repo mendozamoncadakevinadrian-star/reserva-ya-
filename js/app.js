@@ -6441,9 +6441,17 @@ async function cargarDatosPanelNegocio() {
 
   /*
     =========================================
-    DETECTAR ROL DEL USUARIO
+    IDENTIFICAR ROL / ACCESO
     =========================================
   */
+
+  const esPropietario =
+    String(
+      ReservaYa.negocioActual.usuario_id
+    ) ===
+    String(
+      ReservaYa.usuario.id
+    );
 
   let rolUsuario = null;
 
@@ -6490,28 +6498,53 @@ async function cargarDatosPanelNegocio() {
 
   }
 
-  /*
-    =========================================
-    ROLES
-    =========================================
-  */
+  const esAdministrador =
+    rolUsuario ===
+    "administrador";
 
   const esEmpleado =
-    rolUsuario === "empleado";
-
-  const esAdministrador =
-    rolUsuario === "administrador";
-
-  const esPropietario =
-    rolUsuario === "propietario";
+    rolUsuario ===
+    "empleado";
 
   /*
     =========================================
-    CARGAR CITAS SEGÚN ROL
+    CARGAR CITAS SEGÚN ACCESO
     =========================================
   */
 
-  if (esEmpleado) {
+  if (esPropietario || esAdministrador) {
+
+    /*
+      PROPIETARIO / ADMINISTRADOR
+
+      Ven todas las reservas del negocio.
+    */
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("Citas")
+        .select("*")
+        .eq(
+          "negocio_id",
+          negocioId
+        );
+
+    citasResponse = {
+      data:
+        data || [],
+      error
+    };
+
+  } else if (esEmpleado) {
+
+    /*
+      EMPLEADO
+
+      Solo ve sus citas asignadas.
+    */
 
     const {
       data,
@@ -6531,29 +6564,11 @@ async function cargarDatosPanelNegocio() {
       error
     };
 
-  } else if (
-    esPropietario ||
-    esAdministrador
-  ) {
-
-    const {
-      data,
-      error
-    } =
-      await supabaseClient
-        .from("Citas")
-        .select("*")
-        .eq(
-          "negocio_id",
-          negocioId
-        );
-
-    citasResponse = {
-      data,
-      error
-    };
-
   } else {
+
+    /*
+      SIN ACCESO ADMINISTRATIVO
+    */
 
     citasResponse = {
       data: [],
@@ -6577,12 +6592,6 @@ async function cargarDatosPanelNegocio() {
         negocioId
       );
 
-  /*
-    =========================================
-    ERRORES
-    =========================================
-  */
-
   if (citasResponse.error) {
 
     console.error(
@@ -6598,29 +6607,13 @@ async function cargarDatosPanelNegocio() {
 
   }
 
-  if (serviciosResponse.error) {
-
-    console.error(
-      "Error cargando servicios Business:",
-      serviciosResponse.error
-    );
-
-  }
-
   const reservas =
-    citasResponse.data || [];
+    citasResponse.data ||
+    [];
 
   const servicios =
-    serviciosResponse.data || [];
-
-  /*
-    =========================================
-    FECHA ACTUAL
-    =========================================
-  */
-
-  const ahoraReservas =
-    new Date();
+    serviciosResponse.data ||
+    [];
 
   /*
     =========================================
@@ -6637,82 +6630,9 @@ async function cargarDatosPanelNegocio() {
             reserva.estado || ""
           ).toLowerCase();
 
-        if (
-          estado === "cancelada" ||
-          estado === "completada"
-        ) {
-          return false;
-        }
-
-        if (!reserva.fecha) {
-          return false;
-        }
-
-        const partesFecha =
-          String(
-            reserva.fecha
-          )
-            .split("-")
-            .map(Number);
-
-        if (
-          partesFecha.length !== 3 ||
-          partesFecha.some(
-            numero =>
-              Number.isNaN(numero)
-          )
-        ) {
-          return false;
-        }
-
-        const horaNormalizada =
-          String(
-            reserva.hora || "00:00"
-          )
-            .trim()
-            .replace(".", ":");
-
-        const partesHora =
-          horaNormalizada
-            .split(":")
-            .map(Number);
-
-        const horas =
-          Number.isNaN(
-            partesHora[0]
-          )
-            ? 0
-            : partesHora[0];
-
-        const minutos =
-          Number.isNaN(
-            partesHora[1]
-          )
-            ? 0
-            : partesHora[1];
-
-        const fechaHoraReserva =
-          new Date(
-            partesFecha[0],
-            partesFecha[1] - 1,
-            partesFecha[2],
-            horas,
-            minutos,
-            0,
-            0
-          );
-
-        if (
-          Number.isNaN(
-            fechaHoraReserva.getTime()
-          )
-        ) {
-          return false;
-        }
-
         return (
-          fechaHoraReserva >=
-          ahoraReservas
+          estado !== "cancelada" &&
+          estado !== "completada"
         );
 
       }
@@ -6739,7 +6659,7 @@ async function cargarDatosPanelNegocio() {
 
   /*
     =========================================
-    ESTADÍSTICAS
+    ESTADOS
     =========================================
   */
 
@@ -6894,12 +6814,6 @@ async function cargarDatosPanelNegocio() {
     ReservaYa.negocioActual.descripcion ||
       "Administra tu negocio desde ReservaYa."
   );
-
-  /*
-    =========================================
-    FORMULARIO DEL NEGOCIO
-    =========================================
-  */
 
   const businessInfoName =
     document.getElementById(
