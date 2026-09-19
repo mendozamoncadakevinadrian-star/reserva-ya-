@@ -8420,22 +8420,11 @@ botonHistorial.onclick =
 
   /*
   ==================================================
-  INICIAR EN LA PESTAÑA CORRESPONDIENTE
+  INICIAR EN PRÓXIMAS
   ==================================================
 */
 
-if (
-  window.reservasNegocioPestana === "historial"
-) {
-
-  activarHistorial();
-
-} else {
-
   activarProximas();
-
-}      
-
     
 /* =====================================================
    INGRESOS
