@@ -3826,6 +3826,12 @@ async function confirmarReserva(
       "reservationComment"
     )?.value.trim() ||
     "";
+   
+   const telefono =
+  document.getElementById(
+    "reservationPhone"
+  )?.value.trim() ||
+  "";
 
 
   if (!servicioId) {
