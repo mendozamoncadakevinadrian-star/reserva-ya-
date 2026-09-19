@@ -5283,6 +5283,55 @@ function eliminarDelHistorial(id) {
 
 }
 
+async function ocultarReservaHistorialNegocio(id) {
+
+  if (!id) return;
+
+  const confirmar =
+    confirm(
+      "¿Quieres quitar esta reserva del historial del negocio?\n\n" +
+      "La reserva no se borrará de ReservaYa ni de los registros."
+    );
+
+  if (!confirmar) return;
+
+  if (!ReservaYa.usuario) {
+    mostrarToast("Debes iniciar sesión.");
+    return;
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.rpc(
+      "ocultar_reserva_historial",
+      {
+        p_reserva_id: id
+      }
+    );
+
+  if (error) {
+    console.error(
+      "Error ocultando reserva del historial:",
+      error
+    );
+
+    mostrarToast(
+      "No se pudo quitar la reserva."
+    );
+
+    return;
+  }
+
+  mostrarToast(
+    "Reserva retirada del historial."
+  );
+
+  await abrirReservasNegocio();
+}
+
+
 /* =====================================================
    TARJETA RESERVA
 ===================================================== */
@@ -7214,7 +7263,28 @@ async function abrirReservasNegocio() {
     SEPARAR PRÓXIMAS E HISTORIAL
     ==================================================
   */
+  const {
+    data: historialOcultoData,
+    error: historialOcultoError
+  } = await supabaseClient
+    .from("historial_reservas_oculto")
+    .select("reserva_id")
+    .eq("negocio_id", negocioId);
 
+  if (historialOcultoError) {
+    console.error(
+      "Error cargando historial oculto:",
+      historialOcultoError
+    );
+  }
+
+  const historialOcultoIds =
+    new Set(
+      (historialOcultoData || [])
+        .map(item => String(item.reserva_id))
+    );
+
+   
   const proximas = [];
 
   const historial = [];
@@ -7256,14 +7326,22 @@ async function abrirReservasNegocio() {
         proximas.push(
           reserva
         );
+         
+} else {
 
-      } else {
+  if (
+    !historialOcultoIds.has(
+      String(reserva.id)
+    )
+  ) {
 
-        historial.push(
-          reserva
-        );
+    historial.push(
+      reserva
+    );
 
-      }
+  }
+
+}
 
     }
   );
@@ -7486,6 +7564,49 @@ async function abrirReservasNegocio() {
           "
         >
           ✓ Marcar como completada
+        </button>
+
+      `;
+
+    }
+     
+         /*
+      ----------------------------------------------
+      QUITAR DEL HISTORIAL
+      ----------------------------------------------
+    */
+
+    const fechaReserva =
+      obtenerFechaReserva(reserva);
+
+    const esHistorial =
+      fechaReserva < new Date() ||
+      cancelada ||
+      completada;
+
+    if (esHistorial) {
+
+      botones += `
+
+        <button
+          type="button"
+          onclick="
+            ocultarReservaHistorialNegocio(
+              '${reserva.id}'
+            )
+          "
+          style="
+            width:100%;
+            border:1px solid #fecaca;
+            background:#fff;
+            color:#dc2626;
+            border-radius:10px;
+            padding:11px 12px;
+            font-weight:700;
+            cursor:pointer;
+          "
+        >
+          🗑️ Quitar del historial
         </button>
 
       `;
