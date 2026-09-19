@@ -7278,12 +7278,21 @@ async function abrirReservasNegocio() {
     );
   }
 
-  const historialOcultoIds =
-    new Set(
-      (historialOcultoData || [])
-        .map(item => String(item.reserva_id))
-    );
+const historialOcultoIds =
+  new Set(
+    (historialOcultoData || [])
+      .map(item => String(item.reserva_id))
+  );
 
+if (
+  historialOcultoError
+) {
+
+  mostrarToast(
+    "Error leyendo historial oculto."
+  );
+
+}
    
   const proximas = [];
 
