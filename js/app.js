@@ -7487,102 +7487,123 @@ if (
     let botones = "";
 
 
-    if (
-      !cancelada &&
-      !completada &&
-      !confirmada
-    ) {
+/*
+  ----------------------------------------------
+  BOTONES DE RESERVAS PRÓXIMAS
+  ----------------------------------------------
+*/
 
-      botones = `
-
-        <button
-          type="button"
-          onclick="
-            actualizarEstadoReserva(
-              '${reserva.id}',
-              'Confirmada'
-            )
-          "
-          style="
-            flex:1;
-            border:none;
-            background:#16a34a;
-            color:#fff;
-            border-radius:10px;
-            padding:11px 12px;
-            font-weight:700;
-            cursor:pointer;
-          "
-        >
-          ✓ Confirmar
-        </button>
+const esHistorialReserva =
+  obtenerFechaReserva(reserva) < new Date() ||
+  cancelada ||
+  completada;
 
 
-        <button
-          type="button"
-          onclick="
-            actualizarEstadoReserva(
-              '${reserva.id}',
-              'Cancelada'
-            )
-          "
-          style="
-            flex:1;
-            border:1px solid #fecaca;
-            background:#fff;
-            color:#dc2626;
-            border-radius:10px;
-            padding:11px 12px;
-            font-weight:700;
-            cursor:pointer;
-          "
-        >
-          ✕ Cancelar
-        </button>
+/*
+  RESERVA PENDIENTE
+  Solo mostrar Confirmar / Cancelar
+  si NO está en historial.
+*/
 
-      `;
+if (
+  !esHistorialReserva &&
+  !cancelada &&
+  !completada &&
+  !confirmada
+) {
 
-    }
+  botones = `
+
+    <button
+      type="button"
+      onclick="
+        actualizarEstadoReserva(
+          '${reserva.id}',
+          'Confirmada'
+        )
+      "
+      style="
+        flex:1;
+        border:none;
+        background:#16a34a;
+        color:#fff;
+        border-radius:10px;
+        padding:11px 12px;
+        font-weight:700;
+        cursor:pointer;
+      "
+    >
+      ✓ Confirmar
+    </button>
 
 
-    /*
-      ----------------------------------------------
-      RESERVA CONFIRMADA
-      ----------------------------------------------
-    */
+    <button
+      type="button"
+      onclick="
+        actualizarEstadoReserva(
+          '${reserva.id}',
+          'Cancelada'
+        )
+      "
+      style="
+        flex:1;
+        border:1px solid #fecaca;
+        background:#fff;
+        color:#dc2626;
+        border-radius:10px;
+        padding:11px 12px;
+        font-weight:700;
+        cursor:pointer;
+      "
+    >
+      ✕ Cancelar
+    </button>
 
-    if (
-      confirmada
-    ) {
+  `;
 
-      botones = `
+}
 
-        <button
-          type="button"
-          onclick="
-            actualizarEstadoReserva(
-              '${reserva.id}',
-              'Completada'
-            )
-          "
-          style="
-            width:100%;
-            border:none;
-            background:#171923;
-            color:#fff;
-            border-radius:10px;
-            padding:11px 12px;
-            font-weight:700;
-            cursor:pointer;
-          "
-        >
-          ✓ Marcar como completada
-        </button>
 
-      `;
+/*
+  ----------------------------------------------
+  RESERVA CONFIRMADA
+  Solo permitir completar si está en Próximas.
+  ----------------------------------------------
+*/
 
-    }
-     
+if (
+  !esHistorialReserva &&
+  confirmada
+) {
+
+  botones = `
+
+    <button
+      type="button"
+      onclick="
+        actualizarEstadoReserva(
+          '${reserva.id}',
+          'Completada'
+        )
+      "
+      style="
+        width:100%;
+        border:none;
+        background:#171923;
+        color:#fff;
+        border-radius:10px;
+        padding:11px 12px;
+        font-weight:700;
+        cursor:pointer;
+      "
+    >
+      ✓ Marcar como completada
+    </button>
+
+  `;
+
+}
+
          /*
       ----------------------------------------------
       QUITAR DEL HISTORIAL
