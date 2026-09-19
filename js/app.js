@@ -6621,23 +6621,99 @@ async function cargarDatosPanelNegocio() {
     =========================================
   */
 
-  const totalReservas =
-    reservas.filter(
-      reserva => {
+const ahoraReservas =
+  new Date();
 
-        const estado =
-          String(
-            reserva.estado || ""
-          ).toLowerCase();
+const totalReservas =
+  reservas.filter(
+    reserva => {
 
-        return (
-          estado !== "cancelada" &&
-          estado !== "completada"
+      const estado =
+        String(
+          reserva.estado || ""
+        ).toLowerCase();
+
+      if (
+        estado === "cancelada" ||
+        estado === "completada"
+      ) {
+        return false;
+      }
+
+      if (!reserva.fecha) {
+        return false;
+      }
+
+      const partesFecha =
+        String(
+          reserva.fecha
+        )
+          .split("-")
+          .map(Number);
+
+      if (
+        partesFecha.length !== 3 ||
+        partesFecha.some(
+          numero =>
+            Number.isNaN(numero)
+        )
+      ) {
+        return false;
+      }
+
+      const horaNormalizada =
+        String(
+          reserva.hora || "00:00"
+        )
+          .trim()
+          .replace(".", ":");
+
+      const partesHora =
+        horaNormalizada
+          .split(":")
+          .map(Number);
+
+      const horas =
+        Number.isNaN(
+          partesHora[0]
+        )
+          ? 0
+          : partesHora[0];
+
+      const minutos =
+        Number.isNaN(
+          partesHora[1]
+        )
+          ? 0
+          : partesHora[1];
+
+      const fechaHoraReserva =
+        new Date(
+          partesFecha[0],
+          partesFecha[1] - 1,
+          partesFecha[2],
+          horas,
+          minutos,
+          0,
+          0
         );
 
+      if (
+        Number.isNaN(
+          fechaHoraReserva.getTime()
+        )
+      ) {
+        return false;
       }
-    ).length;
 
+      return (
+        fechaHoraReserva >=
+        ahoraReservas
+      );
+
+    }
+  ).length;
+ 
   /*
     =========================================
     CLIENTES ÚNICOS
