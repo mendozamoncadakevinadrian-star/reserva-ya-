@@ -7510,29 +7510,7 @@ try {
   return;
 
 }
-      : `
-          <div
-            style="
-              padding:30px 10px;
-              text-align:center;
-              color:#727887;
-            "
-          >
-            <div
-              style="
-                font-size:34px;
-                margin-bottom:8px;
-              "
-            >
-              📚
-            </div>
-
-            <strong>
-              No hay historial
-            </strong>
-          </div>
-        `;
-
+          
 mostrarToast("ANTES DE ABRIR MODAL");
    
   abrirModal(`
