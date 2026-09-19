@@ -2955,3 +2955,46 @@ body {
   }
 
 }
+/* =========================================
+   IDENTIFICADOR DE RESERVA / CITA
+   ========================================= */
+
+.reservation-card-type {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 8px 12px;
+  margin-bottom: 14px;
+  border-radius: 10px;
+  box-sizing: border-box;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.reservation-card-type span {
+  font-size: 17px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.reservation-card-type strong {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Reserva realizada por el usuario */
+.reservation-card-type.client {
+  background: #eef2ff;
+  color: #3730a3;
+  border: 1px solid #c7d2fe;
+}
+
+/* Cita que debe atender el empleado */
+.reservation-card-type.employee {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
