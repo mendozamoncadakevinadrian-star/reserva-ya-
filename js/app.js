@@ -6865,6 +6865,8 @@ async function guardarInformacionNegocio() {
 
 
 async function abrirReservasNegocio() {
+  
+   mostrarToast("Abriendo reservas...");
 
   if (
     !ReservaYa.usuario ||
