@@ -5328,9 +5328,52 @@ async function ocultarReservaHistorialNegocio(id) {
     "Reserva retirada del historial."
   );
 
-  await abrirReservasNegocio();
-}
+  /*
+    Mantener abierta la pestaña Historial
+    después de recargar las reservas.
+  */
 
+  const historial =
+    document.getElementById(
+      "contenidoReservasHistorial"
+    );
+
+  const proximas =
+    document.getElementById(
+      "contenidoReservasProximas"
+    );
+
+  if (
+    historial &&
+    proximas
+  ) {
+
+    await abrirReservasNegocio();
+
+    setTimeout(() => {
+
+      const botonHistorial =
+        document.getElementById(
+          "btnReservasHistorial"
+        );
+
+      if (
+        botonHistorial
+      ) {
+
+        botonHistorial.click();
+
+      }
+
+    }, 50);
+
+  } else {
+
+    await abrirReservasNegocio();
+
+  }
+
+}
 
 /* =====================================================
    TARJETA RESERVA
