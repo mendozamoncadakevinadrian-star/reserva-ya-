@@ -6924,7 +6924,8 @@ async function abrirReservasNegocio() {
     Array.isArray(reservas)
       ? reservas
       : [];
-
+   
+mostrarToast(`Reservas cargadas: ${lista.length}`);
   /*
    * Convierte fecha + hora de Citas
    * en una fecha real.
