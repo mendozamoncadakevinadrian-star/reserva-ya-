@@ -13372,15 +13372,12 @@ async function actualizarEstadoReserva(
       nuevoEstado
     )
   ) {
-    mostrarToast(
-      "Estado no válido."
-    );
+    mostrarToast("Estado no válido.");
     return;
   }
 
   const negocioId =
     ReservaYa.negocioActual.id;
-
 
   /*
     =========================================
@@ -13389,6 +13386,7 @@ async function actualizarEstadoReserva(
   */
 
   const {
+    data,
     error
   } =
     await supabaseClient
@@ -13403,8 +13401,9 @@ async function actualizarEstadoReserva(
       .eq(
         "negocio_id",
         negocioId
-      );
-
+      )
+      .select("id, estado")
+      .maybeSingle();
 
   if (error) {
 
@@ -13420,6 +13419,30 @@ async function actualizarEstadoReserva(
     return;
   }
 
+  /*
+    =========================================
+    VERIFICAR QUE SUPABASE SÍ CAMBIÓ
+    =========================================
+  */
+
+  if (!data) {
+
+    console.error(
+      "No se encontró la reserva para actualizar:",
+      reservaId
+    );
+
+    mostrarToast(
+      "No se pudo encontrar la reserva."
+    );
+
+    return;
+  }
+
+  console.log(
+    "Estado actualizado:",
+    data.estado
+  );
 
   /*
     =========================================
@@ -13456,10 +13479,9 @@ async function actualizarEstadoReserva(
 
   }
 
-
   /*
     =========================================
-    ACTUALIZAR PANEL
+    RECARGAR RESERVAS
     =========================================
   */
 
