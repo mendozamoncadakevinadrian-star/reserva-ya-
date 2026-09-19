@@ -13424,20 +13424,21 @@ async function actualizarEstadoReserva(
     =========================================
   */
 
-  if (!data) {
+ if (!data) {
 
-    console.error(
-      "No se encontró la reserva para actualizar:",
-      reservaId
-    );
+  mostrarToast(
+    "UPDATE ejecutado, pero Supabase no devolvió la fila."
+  );
 
-    mostrarToast(
-      "No se pudo encontrar la reserva."
-    );
+} else {
 
-    return;
-  }
+  console.log(
+    "Estado actualizado:",
+    data
+  );
 
+} 
+   
   console.log(
     "Estado actualizado:",
     data.estado
