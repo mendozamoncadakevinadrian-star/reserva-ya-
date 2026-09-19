@@ -13402,8 +13402,7 @@ async function actualizarEstadoReserva(
         "negocio_id",
         negocioId
       )
-      .select("id, estado")
-      .maybeSingle();
+      .select();
 
   if (error) {
 
