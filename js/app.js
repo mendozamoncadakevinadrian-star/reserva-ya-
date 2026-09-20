@@ -5369,10 +5369,8 @@ async function ocultarReservaHistorialNegocio(id) {
 
   } else {
 
-await abrirReservasNegocio(
-  "historial"
-);
-
+ await abrirReservasNegocio();
+     
   }
 
 }
@@ -7158,10 +7156,7 @@ async function guardarInformacionNegocio() {
   mostrarToast("Información del negocio actualizada.");
 }
 
-
-async function abrirReservasNegocio(
-  pestanaInicial = "proximas"
-) {
+async function abrirReservasNegocio() {
 
   if (
     !ReservaYa.usuario ||
@@ -8465,21 +8460,13 @@ if (
      activarHistorial;
 /*
   ==================================================
-  INICIAR PESTAÑA
+  INICIAR EN PRÓXIMAS
   ==================================================
 */
 
-if (
-  pestanaInicial === "historial"
-) {
+activarProximas();
 
-  activarHistorial();
-
-} else {
-
-  activarProximas();
-
-}
+}  
 
 /* =====================================================
    INGRESOS
