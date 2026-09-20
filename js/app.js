@@ -7666,7 +7666,8 @@ if (
           type="button"
           onclick="
             ocultarReservaHistorialNegocio(
-              '${reserva.id}'
+             '${reserva.id}',
+             this
             )
           "
           style="
