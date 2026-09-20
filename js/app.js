@@ -6581,47 +6581,39 @@ alert(
 );
 
   if (
-    ReservaYa.negocioActual.empresa_id
+  ReservaYa.negocioActual.empresa_id
+) {
+
+  const {
+    data: miembro,
+    error: errorMiembro
+  } =
+    await supabaseClient.rpc(
+      "obtener_mi_rol_empresa",
+      {
+        p_empresa_id:
+          ReservaYa.negocioActual.empresa_id
+      }
+    );
+
+  if (errorMiembro) {
+
+    console.error(
+      "Error obteniendo rol del usuario:",
+      errorMiembro
+    );
+
+  } else if (
+    miembro &&
+    miembro.length
   ) {
 
-    const {
-      data: miembro,
-      error: errorMiembro
-    } =
-      await supabaseClient
-        .from("empresa_miembros")
-        .select(
-          "rol, activo"
-        )
-        .eq(
-          "empresa_id",
-          ReservaYa.negocioActual.empresa_id
-        )
-        .eq(
-          "usuario_id",
-          ReservaYa.usuario.id
-        )
-        .eq(
-          "activo",
-          true
-        )
-        .maybeSingle();
-
-    if (errorMiembro) {
-
-      console.error(
-        "Error obteniendo rol del usuario:",
-        errorMiembro
-      );
-
-    } else if (miembro) {
-
-      rolUsuario =
-        miembro.rol;
-
-    }
+    rolUsuario =
+      miembro[0].rol;
 
   }
+
+}
 
   const esAdministrador =
     rolUsuario ===
