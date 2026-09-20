@@ -7332,35 +7332,64 @@ async function abrirReservasNegocio() {
   data: historialOcultoData,
   error: historialOcultoError
 } =
-  await supabaseClient.rpc(
-    "obtener_historial_reservas_oculto",
-    {
-      p_negocio_id: negocioId
-    }
+ 
+  let historialOcultoData = [];
+let historialOcultoError = null;
+
+const esEmpleadoReservaYa =
+  ReservaYa.negocioActual &&
+  String(
+    ReservaYa.negocioActual.usuario_id
+  ) !==
+  String(
+    ReservaYa.usuario?.id
   );
 
+if (!esEmpleadoReservaYa) {
+
+  const resultadoHistorial =
+    await supabaseClient.rpc(
+      "obtener_historial_reservas_oculto",
+      {
+        p_negocio_id: negocioId
+      }
+    );
+
+  historialOcultoData =
+    resultadoHistorial.data || [];
+
+  historialOcultoError =
+    resultadoHistorial.error;
+
   if (historialOcultoError) {
+
     console.error(
       "Error cargando historial oculto:",
       historialOcultoError
     );
+
   }
+
+}
 
 const historialOcultoIds =
   new Set(
-    (historialOcultoData || [])
-      .map(item => String(item.reserva_id))
+    historialOcultoData
+      .map(
+        item =>
+          String(
+            item.reserva_id
+          )
+      )
   );
 
-if (
-  historialOcultoError
-) {
+if (historialOcultoError) {
 
   mostrarToast(
     "Error leyendo historial oculto."
   );
 
-}
+} 
    
   const proximas = [];
 
