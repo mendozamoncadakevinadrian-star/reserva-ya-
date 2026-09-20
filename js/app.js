@@ -6618,6 +6618,13 @@ async function cargarDatosPanelNegocio() {
   const esEmpleado =
     rolUsuario ===
     "empleado";
+   
+   aplicarPermisosPanelNegocio(
+     esPropietario,
+     esAdministrador,
+     esEmpleado
+   );
+   
 
   /*
     =========================================
@@ -13842,5 +13849,87 @@ async function actualizarEstadoReserva(
   */
 
   await abrirReservasNegocio();
+
+}
+
+function aplicarPermisosPanelNegocio(
+  esPropietario,
+  esAdministrador,
+  esEmpleado
+) {
+
+  const acciones =
+    document.querySelector(
+      ".business-actions"
+    );
+
+  if (!acciones) return;
+
+  /*
+    Propietario y administrador:
+    acceso completo.
+  */
+
+  if (
+    esPropietario ||
+    esAdministrador
+  ) {
+
+    acciones.style.display =
+      "";
+
+    return;
+  }
+
+  /*
+    Empleado:
+    solo acceso operativo.
+  */
+
+  if (esEmpleado) {
+
+    acciones.style.display =
+      "";
+
+    const botones =
+      acciones.querySelectorAll(
+        "button"
+      );
+
+    botones.forEach(
+      boton => {
+
+        const texto =
+          boton.textContent
+            .toLowerCase();
+
+        /*
+          El empleado NO administra:
+          servicios
+          horarios
+          estadísticas
+        */
+
+        if (
+          texto.includes(
+            "servicios"
+          ) ||
+          texto.includes(
+            "horarios"
+          ) ||
+          texto.includes(
+            "estadísticas"
+          )
+        ) {
+
+          boton.style.display =
+            "none";
+
+        }
+
+      }
+    );
+
+  }
 
 }
