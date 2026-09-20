@@ -7300,10 +7300,7 @@ async function abrirReservasNegocio() {
   const ahora =
     new Date();
    
-  const pestanaReservasActual =
-    window.reservasNegocioPestana ||
-    "proximas";
-
+  
   /*
     ==================================================
     SEPARAR PRÓXIMAS E HISTORIAL
@@ -8456,26 +8453,13 @@ if (
     );
 
   }
-
-botonProximas.onclick = function() {
-
-  window.reservasNegocioPestana =
-    "proximas";
-
-  activarProximas();
-
-};
-
-
-botonHistorial.onclick = function() {
-
-  window.reservasNegocioPestana =
-    "historial";
-
-  activarHistorial();
-
-};
    
+   botonProximas.onclick =
+     activarProximas;
+
+   botonHistorial.onclick =
+     activarHistorial;
+
   /*
     ==================================================
     INICIAR EN PRÓXIMAS
