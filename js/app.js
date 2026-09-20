@@ -6566,7 +6566,19 @@ async function cargarDatosPanelNegocio() {
       ReservaYa.usuario.id
     );
 
-  let rolUsuario = null;
+let rolUsuario = null;
+
+alert(
+  "DEBUG\n\n" +
+  "Negocio: " +
+  (ReservaYa.negocioActual?.nombre || "NINGUNO") +
+  "\n\n" +
+  "empresa_id: " +
+  (ReservaYa.negocioActual?.empresa_id || "NO LLEGA") +
+  "\n\n" +
+  "usuario: " +
+  (ReservaYa.usuario?.id || "NO LLEGA")
+);
 
   if (
     ReservaYa.negocioActual.empresa_id
