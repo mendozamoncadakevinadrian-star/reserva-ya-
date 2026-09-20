@@ -54,6 +54,8 @@ const ReservaYa = {
 
   negocioActual: null,
 
+  rolUsuario: null,
+
   categoriaActual: "",
 
   negocios: [],
@@ -6568,7 +6570,7 @@ async function cargarDatosPanelNegocio() {
 
 let rolUsuario = null;
 
-
+ReservaYa.rolUsuario = null;
 
   if (
   ReservaYa.negocioActual.empresa_id
@@ -6600,7 +6602,9 @@ let rolUsuario = null;
 
     rolUsuario =
       miembro[0].rol;
-
+     
+    ReservaYa.rolUsuario =
+      rolUsuario;
   }
 
 }
