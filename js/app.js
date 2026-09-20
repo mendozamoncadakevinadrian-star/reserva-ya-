@@ -7546,6 +7546,13 @@ if (
     const duracion =
       reserva.servicios?.duracion;
 
+     
+     const puedeGestionarReservas =
+        
+  String(ReservaYa.negocioActual?.usuario_id) ===
+    String(ReservaYa.usuario?.id) ||
+  ReservaYa.rolUsuario === "administrador";
+
 
     /*
       ----------------------------------------------
@@ -7575,6 +7582,7 @@ const esHistorialReserva =
 */
 
 if (
+  puedeGestionarReservas &&
   !esHistorialReserva &&
   !cancelada &&
   !completada &&
@@ -7639,12 +7647,13 @@ if (
   Solo permitir completar si está en Próximas.
   ----------------------------------------------
 */
-
+     
 if (
+  puedeGestionarReservas &&
   !esHistorialReserva &&
   confirmada
 ) {
-
+   
   botones = `
 
     <button
@@ -7687,8 +7696,11 @@ if (
       cancelada ||
       completada;
 
-    if (esHistorial) {
-
+    if (
+      puedeGestionarReservas &&
+      esHistorial
+    ) {
+ 
       botones += `
 
         <button
