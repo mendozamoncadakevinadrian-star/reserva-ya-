@@ -5327,52 +5327,50 @@ async function ocultarReservaHistorialNegocio(id) {
   mostrarToast(
     "Reserva retirada del historial."
   );
-
-  /*
+   
+    /*
     Mantener abierta la pestaña Historial
-    después de recargar las reservas.
+    sin mostrar el parpadeo.
   */
 
-  const historial =
+  const overlay =
     document.getElementById(
-      "contenidoReservasHistorial"
+      "modalOverlay"
     );
 
-  const proximas =
-    document.getElementById(
-      "contenidoReservasProximas"
-    );
+  if (overlay) {
 
-  if (
-    historial &&
-    proximas
-  ) {
+    overlay.style.visibility =
+      "hidden";
 
-    await abrirReservasNegocio();
-
-    setTimeout(() => {
-
-      const botonHistorial =
-        document.getElementById(
-          "btnReservasHistorial"
-        );
-
-      if (
-        botonHistorial
-      ) {
-
-        botonHistorial.click();
-
-      }
-
-    }, 50);
-
-  } else {
-
- await abrirReservasNegocio();
-     
   }
 
+  await abrirReservasNegocio();
+
+  setTimeout(() => {
+
+    const botonHistorial =
+      document.getElementById(
+        "btnReservasHistorial"
+      );
+
+    if (
+      botonHistorial
+    ) {
+
+      botonHistorial.click();
+
+    }
+
+    if (overlay) {
+
+      overlay.style.visibility =
+        "visible";
+
+    }
+
+  }, 50); 
+   
 }
 
 /* =====================================================
