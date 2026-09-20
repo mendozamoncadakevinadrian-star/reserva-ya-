@@ -13858,6 +13858,10 @@ function aplicarPermisosPanelNegocio(
   esEmpleado
 ) {
 
+   mostrarToast(
+  `Propietario: ${esPropietario} | Admin: ${esAdministrador} | Empleado: ${esEmpleado}`
+);
+
   const acciones =
     document.querySelector(
       ".business-actions"
