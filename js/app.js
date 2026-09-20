@@ -5283,7 +5283,7 @@ function eliminarDelHistorial(id) {
 
 }
 
-async function ocultarReservaHistorialNegocio(id) {
+async function ocultarReservaHistorialNegocio(id, boton) {
 
   if (!id) return;
 
