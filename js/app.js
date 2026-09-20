@@ -5369,7 +5369,9 @@ async function ocultarReservaHistorialNegocio(id) {
 
   } else {
 
-    await abrirReservasNegocio();
+await abrirReservasNegocio(
+  "historial"
+);
 
   }
 
@@ -7157,7 +7159,9 @@ async function guardarInformacionNegocio() {
 }
 
 
-async function abrirReservasNegocio() {
+async function abrirReservasNegocio(
+  pestanaInicial = "proximas"
+) {
 
   if (
     !ReservaYa.usuario ||
@@ -8459,15 +8463,22 @@ if (
 
    botonHistorial.onclick =
      activarHistorial;
+/*
+  ==================================================
+  INICIAR PESTAÑA
+  ==================================================
+*/
 
-  /*
-    ==================================================
-    INICIAR EN PRÓXIMAS
-    ==================================================
-  */
+if (
+  pestanaInicial === "historial"
+) {
+
+  activarHistorial();
+
+} else {
 
   activarProximas();
-   
+
 }
 
 /* =====================================================
