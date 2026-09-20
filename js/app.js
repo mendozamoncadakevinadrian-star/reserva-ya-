@@ -5327,49 +5327,72 @@ async function ocultarReservaHistorialNegocio(id, boton) {
   mostrarToast(
     "Reserva retirada del historial."
   );
-
-  /*
-    Mantener abierta la pestaña Historial
-    sin mostrar el parpadeo.
+   
+     /*
+    Quitar la tarjeta actual sin recargar
+    todo el modal.
   */
 
-  const overlay =
-    document.getElementById(
-      "modalOverlay"
-    );
+  if (boton) {
 
-  if (overlay) {
+    const tarjeta =
+      boton.closest("article");
 
-    overlay.style.visibility =
-      "hidden";
+    if (tarjeta) {
+      tarjeta.remove();
+    }
 
   }
 
-  await abrirReservasNegocio();
+  const historial =
+    document.getElementById(
+      "contenidoReservasHistorial"
+    );
 
-  setTimeout(() => {
+  const botonHistorial =
+    document.getElementById(
+      "btnReservasHistorial"
+    );
 
-    const botonHistorial =
-      document.getElementById(
-        "btnReservasHistorial"
+  if (
+    historial &&
+    botonHistorial
+  ) {
+
+    const cantidad =
+      historial.querySelectorAll(
+        "article"
+      ).length;
+
+    const contador =
+      botonHistorial.querySelector(
+        "span"
       );
 
-    if (
-      botonHistorial
-    ) {
+    if (contador) {
 
-      botonHistorial.click();
-
-    }
-
-    if (overlay) {
-
-      overlay.style.visibility =
-        "visible";
+      contador.textContent =
+        `(${cantidad})`;
 
     }
 
-  }, 50);
+    if (cantidad === 0) {
+
+      historial.innerHTML = `
+        <div
+          style="
+            padding:30px 15px;
+            text-align:center;
+            color:#777;
+          "
+        >
+          📚 No hay historial.
+        </div>
+      `;
+
+    }
+
+  }
 
 }
 
