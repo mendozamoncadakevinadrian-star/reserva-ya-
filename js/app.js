@@ -13869,6 +13869,30 @@ function aplicarPermisosPanelNegocio(
 
   if (!acciones) return;
 
+   acciones.insertAdjacentHTML(
+  "beforebegin",
+  `
+    <div
+      id="debugRolReservaYa"
+      style="
+        padding:12px;
+        margin-bottom:15px;
+        border-radius:12px;
+        background:#fff3cd;
+        color:#664d03;
+        font-weight:600;
+      "
+    >
+      DEBUG →
+      Propietario: ${esPropietario}
+      |
+      Administrador: ${esAdministrador}
+      |
+      Empleado: ${esEmpleado}
+    </div>
+  `
+);
+
   /*
     Propietario y administrador:
     acceso completo.
