@@ -6568,17 +6568,7 @@ async function cargarDatosPanelNegocio() {
 
 let rolUsuario = null;
 
-alert(
-  "DEBUG\n\n" +
-  "Negocio: " +
-  (ReservaYa.negocioActual?.nombre || "NINGUNO") +
-  "\n\n" +
-  "empresa_id: " +
-  (ReservaYa.negocioActual?.empresa_id || "NO LLEGA") +
-  "\n\n" +
-  "usuario: " +
-  (ReservaYa.usuario?.id || "NO LLEGA")
-);
+
 
   if (
   ReservaYa.negocioActual.empresa_id
@@ -13873,29 +13863,7 @@ function aplicarPermisosPanelNegocio(
 
   if (!acciones) return;
 
-   acciones.insertAdjacentHTML(
-  "beforebegin",
-  `
-    <div
-      id="debugRolReservaYa"
-      style="
-        padding:12px;
-        margin-bottom:15px;
-        border-radius:12px;
-        background:#fff3cd;
-        color:#664d03;
-        font-weight:600;
-      "
-    >
-      DEBUG →
-      Propietario: ${esPropietario}
-      |
-      Administrador: ${esAdministrador}
-      |
-      Empleado: ${esEmpleado}
-    </div>
-  `
-);
+   
 
   /*
     Propietario y administrador:
