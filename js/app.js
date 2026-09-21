@@ -640,15 +640,12 @@ function cargarDatosLocales() {
 async function cargarDatosDemo() {
 
   const {
-    data,
-    error
-  } = await supabaseClient
-    .from("negocios")
-    .select("*")
-    .order("nombre", {
-      ascending: true
-    });
+  data,
+  error
+} = await supabaseClient
+  .rpc("obtener_negocios_publicos");
 
+   
   if (error) {
 
     console.error(
