@@ -670,15 +670,12 @@ async function cargarDatosDemo() {
   ===================================================== */
 
   const {
-    data: fotos,
-    error: errorFotos
-  } = await supabaseClient
-    .from("negocio_fotos")
-    .select("*")
-    .order("orden", {
-      ascending: true
-    });
+  data: fotos,
+  error: errorFotos
+} = await supabaseClient
+  .rpc("obtener_fotos_publicas_negocio");
 
+   
   if (errorFotos) {
 
     console.error(
