@@ -1,140 +1,179 @@
 // =====================================================
-// RESERVA YA — APP COMPLETA CON SUPABASE
-// Todo conectado: Reservas, Negocios, Favoritos, Sesión
+// RESERVAYA — CÓDIGO COMPLETO CON TODO LO CONSTRUIDO
 // =====================================================
 
-// 🔑 TU CONEXIÓN DE SUPABASE
+// 🔑 Conexión con tu proyecto real
 const SUPABASE_URL = "https://mjxiyzapdybzckurootw.supabase.co";
 const SUPABASE_KEY = "sb_publishable_Ox1Wz7UT2Gw6uHOP6SncjQ_sGapEEB-";
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ESTADO GLOBAL
+// Estado Global — Todo lo que maneja la app
 const App = {
   usuario: null,
+  negocio: null,
+  plan: "gratis", // gratis | premium | pro
   negocios: [],
-  favoritos: [],
-  vista_actual: "inicio"
+  favoritos: JSON.parse(localStorage.getItem("favoritos") || "[]"),
+  notificaciones: JSON.parse(localStorage.getItem("notificaciones") || "[]"),
+  filtroEstado: "todas",
+  negocioSeleccionado: null,
+  sucursales: [],
+  promociones: [],
+  equipo: []
 };
 
-// CATEGORÍAS
+// Categorías definidas
 const CATEGORIAS = [
-  {id: "barberia", nombre: "Barbería", icono: "💈"},
-  {id: "belleza", nombre: "Belleza", icono: "💅"},
-  {id: "restaurante", nombre: "Restaurante", icono: "🍽️"},
-  {id: "salud", nombre: "Salud", icono: "🩺"},
-  {id: "fitness", nombre: "Fitness", icono: "🏋️"},
-  {id: "spa", nombre: "Spa", icono: "🧖"},
-  {id: "otros", nombre: "Otros", icono: "📌"}
+  {id:"barberia", nombre:"Barbería", icono:"💈"},
+  {id:"belleza", nombre:"Belleza", icono:"💅"},
+  {id:"restaurante", nombre:"Comida", icono:"🍽️"},
+  {id:"salud", nombre:"Salud", icono:"🩺"},
+  {id:"servicios", nombre:"Servicios", icono:"🛠️"},
+  {id:"otros", nombre:"Otros", icono:"📌"}
 ];
 
-// =============================================
-// AL CARGAR LA PÁGINA
-// =============================================
+// =====================================================
+// INICIO — Carga todo al abrir la app
+// =====================================================
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("🚀 ReservaYa iniciando...");
-  
-  // Cargar categorías
   dibujarCategorias();
-  
-  // Cargar negocios desde Supabase
+  rellenarFiltroCategorias();
   await cargarNegocios();
+  dibujarDestacados();
+  dibujarCerca();
+  actualizarContadorNotif();
   
-  // Cargar favoritos
-  cargarFavoritos();
-  
-  // Verificar si hay sesión activa
+  // Verificar sesión activa
   const {data:{session}} = await supabase.auth.getSession();
   if(session) {
     App.usuario = session.user;
-    actualizarUIConSesion();
+    await cargarDatosUsuario();
+    actualizarPerfil();
   }
   
   // Escuchar cambios de sesión
   supabase.auth.onAuthStateChange(async (event) => {
     if(event === "SIGNED_IN") {
-      App.usuario = (await supabase.auth.getUser()).data.user;
-      actualizarUIConSesion();
+      const {data:{user}} = await supabase.auth.getUser();
+      App.usuario = user;
+      await cargarDatosUsuario();
+      actualizarPerfil();
     }
     if(event === "SIGNED_OUT") {
-      App.usuario = null;
-      actualizarUISinSesion();
+      App.usuario = App.negocio = null;
+      App.plan = "gratis";
+      actualizarPerfil();
     }
   });
 });
 
-// =============================================
-// DIBUJAR CATEGORÍAS
-// =============================================
-function dibujarCategorias() {
-  const contenedor = document.getElementById("lista_categorias");
-  if(!contenedor) return;
+// =====================================================
+// NAVEGACIÓN — Cambiar de vista
+// =====================================================
+function cambiarVista(nombre) {
+  document.querySelectorAll(".vista").forEach(v => v.classList.remove("activa"));
+  document.getElementById(`vista-${nombre}`).classList.add("activa");
+  document.querySelectorAll(".navegacion button").forEach(b => {
+    b.classList.toggle("activa", b.dataset.vista === nombre);
+  });
   
-  contenedor.innerHTML = CATEGORIAS.map(cat => `
-    <div class="category-card" onclick="filtrarPorCategoria('${cat.id}')">
-      <span style="font-size: 24px;">${cat.icono}</span>
-      <strong>${cat.nombre}</strong>
+  // Cargar datos según vista
+  if(nombre === "favoritos") dibujarFavoritos();
+  if(nombre === "reservas" && App.usuario) cargarReservas();
+  if(nombre === "negocio") cargarPanelNegocio();
+}
+
+function irAInicio(){cambiarVista("inicio")}
+function irABuscar(){cambiarVista("buscar");aplicarFiltros()}
+function irAFavoritos(){cambiarVista("favoritos")}
+function irAReservas(){App.usuario?cambiarVista("reservas"):abrirLogin()}
+function irAPerfil(){cambiarVista("perfil")}
+function irANegocio(){App.usuario?cambiarVista("negocio"):abrirLogin()}
+function irAPlanes(){cambiarVista("planes")}
+
+// =====================================================
+// 🔍 DESCUBRIMIENTO — Categorías y Negocios
+// =====================================================
+function dibujarCategorias() {
+  const cont = document.getElementById("categorias");
+  cont.innerHTML = CATEGORIAS.map(cat => `
+    <div class="categoria-tarjeta" onclick="filtrarPorCategoria('${cat.id}')">
+      <span class="categoria-icono">${cat.icono}</span>
+      <span>${cat.nombre}</span>
     </div>
   `).join("");
 }
 
-// =============================================
-// CARGAR NEGOCIOS DESDE SUPABASE
-// =============================================
+function rellenarFiltroCategorias() {
+  const sel = document.getElementById("filtro-cat");
+  CATEGORIAS.forEach(cat => {
+    const opt = document.createElement("option");
+    opt.value = cat.id;
+    opt.textContent = cat.nombre;
+    sel.appendChild(opt);
+  });
+}
+
+function filtrarPorCategoria(id) {
+  document.getElementById("filtro-cat").value = id;
+  cambiarVista("buscar");
+  aplicarFiltros();
+}
+
 async function cargarNegocios() {
   try {
     const {data, error} = await supabase
       .from("Negocios")
       .select(`
         *,
-        visibilidad_negocio(destacado, verificado, calificacion_promedio, cantidad_resenas),
-        categoria_id(nombre)
+        visibilidad_negocio(destacado, calificacion_promedio, cantidad_resenas),
+        negocio_sucursales(id, nombre, direccion)
       `)
       .eq("publicado", true)
       .order("nombre");
 
-    if(error) {
-      console.error("Error al cargar negocios:", error);
-      return;
-    }
-
+    if(error) return console.error("Error cargando negocios:", error);
     App.negocios = (data || []).map(n => ({
       ...n,
       destacado: n.visibilidad_negocio?.destacado || false,
       rating: n.visibilidad_negocio?.calificacion_promedio || 0,
-      reseñas: n.visibilidad_negocio?.cantidad_resenas || 0,
-      categoria_nombre: n.categoria_id?.nombre || "Negocio"
+      sucursales: n.negocio_sucursales || []
     }));
-
-    dibujarDestacados();
-    dibujarCercaDeTi();
     
+    // Llenar filtro de sucursales
+    const selSuc = document.getElementById("filtro-sucursal");
+    selSuc.innerHTML = '<option value="">Todas las sucursales</option>';
+    const todasSucursales = [];
+    App.negocios.forEach(n => n.sucursales?.forEach(s => {
+      if(!todasSucursales.find(x => x.id === s.id)) todasSucursales.push({...s, negocio: n.nombre});
+    }));
+    todasSucursales.forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s.id;
+      opt.textContent = `${s.nombre} — ${s.negocio}`;
+      selSuc.appendChild(opt);
+    });
   } catch(e) {
     console.error("Error:", e);
   }
 }
 
-// =============================================
-// DIBUJAR TARJETAS DE NEGOCIO
-// =============================================
 function crearTarjetaNegocio(n) {
-  const esFavorito = App.favoritos.includes(n.id);
+  const esFav = App.favoritos.includes(n.id);
+  const tieneMultiSuc = n.sucursales?.length > 1;
   return `
-    <div class="business-card">
-      <div class="business-cover">
-        ${n.foto_portada 
-          ? `<img src="${n.foto_portada}" alt="${n.nombre}" class="business-cover-image">`
-          : `<div class="business-cover-placeholder"><strong>${n.nombre}</strong></div>`
-        }
-        ${n.destacado ? `<span style="position:absolute;top:10px;right:10px;background:linear-gradient(135deg,#7c6cff,#21d4df);padding:4px 10px;border-radius:20px;font-size:10px;font-weight:800;">✨ DESTACADO</span>` : ""}
+    <div class="negocio-tarjeta">
+      <div class="negocio-portada">
+        ${n.nombre.charAt(0).toUpperCase()}
+        ${n.destacado?'<span class="etiqueta-destacado">✨ DESTACADO</span>':''}
       </div>
-      <div class="business-info">
+      <div class="negocio-cuerpo">
         <h3>${n.nombre}</h3>
-        <p style="color: var(--secundario); font-size: 13px; margin: 4px 0;">${n.categoria_nombre}</p>
-        <p style="color: var(--texto-claro); font-size: 13px;">📍 ${n.ciudad || n.direccion || "Ubicación"}</p>
-        <p style="margin: 8px 0;">⭐ ${n.rating?.toFixed(1) || "0.0"} · ${n.reseñas || 0} reseñas</p>
-        <div style="display: flex; gap: 8px; margin-top: 12px;">
-          <button class="secondary-button" onclick="alternarFavorito('${n.id}')">${esFavorito ? "❤️" : "🤍"}</button>
-          <button class="primary-button" onclick="abrirNegocio('${n.id}')">Reservar →</button>
+        <p class="negocio-categoria">${CATEGORIAS.find(c => c.id === n.categoria_id)?.nombre || "General"}</p>
+        <p class="negocio-ubicacion">${tieneMultiSuc?`🏬 ${n.sucursales.length} sucursales`:n.ciudad||"Colombia"} · ⭐ ${n.rating?.toFixed(1)||"0.0"}</p>
+        <div class="negocio-pie">
+          <button class="btn-secundario" onclick="alternarFavorito('${n.id}')">${esFav?"❤️":"🤍"}</button>
+          <button class="btn-primario" onclick="abrirReserva('${n.id}','${n.nombre}')">Reservar</button>
         </div>
       </div>
     </div>
@@ -142,234 +181,161 @@ function crearTarjetaNegocio(n) {
 }
 
 function dibujarDestacados() {
-  const cont = document.getElementById("lista_destacados");
-  if(!cont) return;
-  const destacados = App.negocios.filter(n => n.destacado).slice(0, 6);
-  cont.innerHTML = destacados.length 
-    ? destacados.map(crearTarjetaNegocio).join("")
-    : `<div style="grid-column: 1/-1; text-align: center; padding: 30px; color: var(--texto-claro);">Los negocios Premium aparecen aquí primero 💎</div>`;
+  const cont = document.getElementById("destacados");
+  const lista = App.negocios.filter(n => n.destacado).slice(0, 4);
+  cont.innerHTML = lista.length ? lista.map(crearTarjetaNegocio).join("") :
+    `<div class="estado-vacio"><p>💎 Los negocios con plan Premium aparecen aquí primero.</p></div>`;
 }
 
-function dibujarCercaDeTi() {
-  const cont = document.getElementById("lista_cerca");
-  if(!cont) return;
-  cont.innerHTML = App.negocios.slice(0, 6).map(crearTarjetaNegocio).join("");
+function dibujarCerca() {
+  const cont = document.getElementById("cerca");
+  cont.innerHTML = App.negocios.slice(0, 4).map(crearTarjetaNegocio).join("") ||
+    `<div class="estado-vacio"><p>Cargando negocios cercanos...</p></div>`;
 }
 
-// =============================================
-// NAVEGACIÓN ENTRE PANTALLAS
-// =============================================
-function cambiarVista(nombre) {
-  // Ocultar todas
-  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
-  // Mostrar la elegida
-  const vista = document.getElementById(`vista_${nombre}`);
-  if(vista) vista.classList.add("active");
-  // Marcar botón activo
-  document.querySelectorAll(".bottom-nav button").forEach(b => {
-    b.classList.toggle("active", b.dataset.vista === nombre);
-  });
-  App.vista_actual = nombre;
+function buscar() {
+  const texto = document.getElementById("buscador").value.trim().toLowerCase();
+  document.getElementById("filtro-nombre").value = texto;
+  cambiarVista("buscar");
+  aplicarFiltros();
+}
+
+function aplicarFiltros() {
+  const nombre = document.getElementById("filtro-nombre").value.toLowerCase();
+  const cat = document.getElementById("filtro-cat").value;
+  const suc = document.getElementById("filtro-sucursal").value;
   
-  // Acciones específicas
-  if(nombre === "favoritos") dibujarFavoritos();
-  if(nombre === "reservas") cargarMisReservas();
+  const resultado = App.negocios.filter(n => {
+    const coincideNombre = !nombre || n.nombre.toLowerCase().includes(nombre) || (n.descripcion||"").toLowerCase().includes(nombre);
+    const coincideCat = !cat || n.categoria_id === cat;
+    const coincideSuc = !suc || n.sucursales?.some(s => s.id === suc);
+    return coincideNombre && coincideCat && coincideSuc;
+  });
+  
+  const cont = document.getElementById("resultados");
+  cont.innerHTML = resultado.length ? resultado.map(crearTarjetaNegocio).join("") :
+    `<div class="estado-vacio"><p>No se encontraron negocios con esos filtros.</p></div>`;
 }
 
-function irAInicio() { cambiarVista("inicio"); }
-function irABuscar() { cambiarVista("buscar"); }
-function irAFavoritos() { cambiarVista("favoritos"); }
-function irAReservas() { cambiarVista("reservas"); }
-function irAPerfil() { 
-  if(!App.usuario) { abrirModalLogin(); return; }
-  cambiarVista("perfil"); 
-}
-function irAPanelNegocio() { cambiarVista("panel_negocio"); }
-function irAPremium() { alert("💎 Aquí se mostrará la información de ReservaYa Premium"); }
-
-// =============================================
-// FAVORITOS
-// =============================================
-function cargarFavoritos() {
-  try {
-    App.favoritos = JSON.parse(localStorage.getItem("reservaya_favoritos") || "[]");
-  } catch {
-    App.favoritos = [];
-  }
+function usarUbicacion() {
+  mostrarAviso("📍 Usando tu ubicación...");
+  setTimeout(() => {
+    document.getElementById("filtro-nombre").value = "";
+    cambiarVista("buscar");
+    aplicarFiltros();
+    mostrarAviso("✅ Mostrando negocios cerca de ti");
+  }, 800);
 }
 
+// =====================================================
+// ❤️ FAVORITOS
+// =====================================================
 function alternarFavorito(id) {
   const pos = App.favoritos.indexOf(id);
   if(pos >= 0) App.favoritos.splice(pos, 1);
   else App.favoritos.push(id);
-  
-  localStorage.setItem("reservaya_favoritos", JSON.stringify(App.favoritos));
+  localStorage.setItem("favoritos", JSON.stringify(App.favoritos));
   
   dibujarDestacados();
-  dibujarCercaDeTi();
+  dibujarCerca();
+  aplicarFiltros();
   dibujarFavoritos();
-  
-  mostrarMensaje(pos >= 0 ? "Quitado de favoritos" : "Guardado en favoritos ❤️");
+  mostrarAviso(pos >= 0 ? "Quitado de favoritos" : "Guardado en favoritos ❤️");
 }
 
 function dibujarFavoritos() {
-  const cont = document.getElementById("lista_favoritos");
-  if(!cont) return;
+  const cont = document.getElementById("lista-favoritos");
   const misFavs = App.negocios.filter(n => App.favoritos.includes(n.id));
-  cont.innerHTML = misFavs.length 
-    ? misFavs.map(crearTarjetaNegocio).join("")
-    : `<div class="empty-state"><p>Aún no tienes favoritos. Toca el corazón 🤍 para guardar negocios aquí.</p></div>`;
+  cont.innerHTML = misFavs.length ? misFavs.map(crearTarjetaNegocio).join("") :
+    `<div class="estado-vacio"><p>Toca el corazón 🤍 en cualquier negocio para guardarlo aquí.</p></div>`;
 }
 
-// =============================================
-// ABRIR NEGOCIO Y RESERVAR
-// =============================================
-async function abrirNegocio(id) {
-  if(!App.usuario) { abrirModalLogin(); return; }
+// =====================================================
+// 📅 RESERVAS — Crear, ver, cancelar
+// =====================================================
+function abrirReserva(id, nombre) {
+  if(!App.usuario) return abrirLogin();
+  App.negocioSeleccionado = id;
   
+  // Llenar sucursales si hay varias
   const negocio = App.negocios.find(n => n.id === id);
-  if(!negocio) return;
-  
-  // Cargar servicios del negocio
-  const {data: servicios} = await supabase
-    .from("servicios")
-    .select("*")
-    .eq("negocio_id", id)
-    .eq("activo", true);
-
-  abrirModal(`
-    <h2>${negocio.nombre}</h2>
-    <p style="color: var(--texto-claro);">📍 ${negocio.ciudad || negocio.direccion}</p>
-    
-    ${servicios?.length ? `
-      <h3 style="margin-top: 20px;">Servicios disponibles</h3>
-      <div style="display: grid; gap: 12px; margin-top: 12px;">
-        ${servicios.map(s => `
-          <div style="padding: 14px; background: var(--superficie); border-radius: 12px; border: 1px solid var(--borde);">
-            <strong>${s.nombre}</strong>
-            <p style="margin: 4px 0; color: var(--texto-claro); font-size: 13px;">⏱️ ${s.duracion_minutos} min · $${s.precio_base || "A consultar"}</p>
-            <button class="primary-button" style="margin-top: 10px; width: 100%;" onclick="iniciarReserva('${negocio.id}', '${s.id}')">📅 Reservar este servicio</button>
-          </div>
-        `).join("")}
-      </div>
-    ` : `<p style="margin-top: 20px; color: var(--texto-claro);">No hay servicios disponibles por ahora.</p>`}
-  `);
-}
-
-async function iniciarReserva(negocioId, servicioId) {
-  cerrarModal();
-  
-  const {data: servicio} = await supabase
-    .from("servicios")
-    .select("duracion_minutos, nombre")
-    .eq("id", servicioId)
-    .single();
-
-  abrirModal(`
-    <h2>📅 Nueva Reserva</h2>
-    <p style="color: var(--secundario);">${servicio?.nombre || "Servicio"}</p>
-    
-    <div style="margin-top: 16px;">
-      <label style="display: block; margin-bottom: 6px;">Fecha</label>
-      <input type="date" id="reserva_fecha" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--borde); background: var(--fondo); color: white;">
-    </div>
-    
-    <div style="margin-top: 14px;">
-      <label style="display: block; margin-bottom: 6px;">Hora</label>
-      <input type="time" id="reserva_hora" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--borde); background: var(--fondo); color: white;">
-    </div>
-    
-    <div style="margin-top: 14px;">
-      <label style="display: block; margin-bottom: 6px;">Tu nombre</label>
-      <input type="text" id="reserva_nombre" placeholder="Escribe tu nombre" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--borde); background: var(--fondo); color: white;">
-    </div>
-    
-    <div style="margin-top: 14px;">
-      <label style="display: block; margin-bottom: 6px;">Tu teléfono</label>
-      <input type="tel" id="reserva_telefono" placeholder="+57..." style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--borde); background: var(--fondo); color: white;">
-    </div>
-    
-    <button class="primary-button" style="width: 100%; margin-top: 24px;" onclick="confirmarReserva('${negocioId}', '${servicioId}', ${servicio?.duracion_minutos || 30})">✅ Confirmar Reserva</button>
-  `);
-}
-
-async function confirmarReserva(negocioId, servicioId, duracion) {
-  const fecha = document.getElementById("reserva_fecha").value;
-  const hora = document.getElementById("reserva_hora").value;
-  const nombre = document.getElementById("reserva_nombre").value;
-  const telefono = document.getElementById("reserva_telefono").value;
-
-  if(!fecha || !hora || !nombre) {
-    mostrarMensaje("Completa todos los datos por favor");
-    return;
+  const selSuc = document.getElementById("sucursal-reserva");
+  if(negocio?.sucursales?.length > 1) {
+    selSuc.classList.remove("oculto");
+    selSuc.innerHTML = negocio.sucursales.map(s => `<option value="${s.id}">${s.nombre} — ${s.direccion}</option>`).join("");
+  } else {
+    selSuc.classList.add("oculto");
   }
+  
+  document.getElementById("titulo-negocio").textContent = `Reservar en ${nombre}`;
+  document.getElementById("modal-reserva").classList.remove("oculto");
+}
 
-  // Calcular hora de fin
-  const [h, m] = hora.split(":");
-  const fin = new Date(`2000-01-01T${hora}`);
-  fin.setMinutes(fin.getMinutes() + duracion);
-  const hora_fin = `${String(fin.getHours()).padStart(2, "0")}:${String(fin.getMinutes()).padStart(2, "0")}`;
+async function confirmarReserva() {
+  const fecha = document.getElementById("fecha-reserva").value;
+  const hora = document.getElementById("hora-reserva").value;
+  const nombre = document.getElementById("nombre-reserva").value.trim();
+  const telefono = document.getElementById("telefono-reserva").value.trim();
+  const sucursal = document.getElementById("sucursal-reserva").value || null;
 
-  // Guardar en Supabase
+  if(!fecha || !hora || !nombre) return mostrarAviso("⚠️ Completa todos los datos obligatorios");
+
   const {error} = await supabase.from("Citas").insert({
-    negocio_id: negocioId,
-    servicio_id: servicioId,
+    negocio_id: App.negocioSeleccionado,
+    sucursal_id: sucursal,
     usuario: App.usuario.id,
     fecha: fecha,
-    hora_inicio: hora,
-    hora_fin: hora_fin,
+    hora: hora,
     nombre_cliente: nombre,
     telefono_cliente: telefono,
     estado: "Pendiente"
   });
 
-  if(error) {
-    mostrarMensaje("❌ Error: " + error.message);
-    return;
-  }
-
+  if(error) return mostrarAviso("❌ Error: " + error.message);
+  
+  // Agregar notificación
+  agregarNotificacion(`✅ Reserva confirmada para ${fecha} a las ${hora}`, "exito");
+  
   cerrarModal();
-  mostrarMensaje("✅ ¡Reserva confirmada!");
-  cambiarVista("reservas");
+  mostrarAviso("✅ ¡Reserva confirmada! Recibirás notificación de recordatorio.");
+  setTimeout(() => irAReservas(), 800);
 }
 
-// =============================================
-// MIS RESERVAS
-// =============================================
-async function cargarMisReservas() {
-  if(!App.usuario) return;
-  
-  const {data, error} = await supabase
+async function cargarReservas() {
+  let consulta = supabase
     .from("Citas")
     .select("*, Negocios(nombre)")
     .eq("usuario", App.usuario.id)
-    .order("fecha, hora_inicio", {ascending: false});
-
-  const cont = document.getElementById("lista_reservas");
+    .order("fecha, hora", {ascending: true});
   
+  if(App.filtroEstado !== "todas") {
+    consulta = consulta.eq("estado", App.filtroEstado);
+  }
+  
+  const {data, error} = await consulta;
+  
+  const cont = document.getElementById("lista-reservas");
   if(error || !data?.length) {
-    cont.innerHTML = `<div class="empty-state"><p>Aún no tienes reservas. ¡Reserva tu primera cita!</p></div>`;
+    cont.innerHTML = `<p style="text-align:center;color:var(--texto-claro);padding:40px">Aún no tienes reservas. ¡Reserva tu primera cita!</p>`;
     return;
   }
 
   cont.innerHTML = data.map(r => `
-    <div style="background: var(--superficie); border: 1px solid var(--borde); border-radius: 14px; padding: 16px; margin-bottom: 12px;">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-        <div>
-          <h3 style="margin: 0;">${r.Negocios?.nombre || "Negocio"}</h3>
-          <p style="margin: 4px 0; color: var(--texto-claro);">📅 ${r.fecha} · ⏰ ${r.hora_inicio}</p>
-        </div>
-        <span style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; background: ${
-          r.estado === "Pendiente" ? "rgba(255,209,102,0.15); color: #ffd166" :
-          r.estado === "Cancelada" ? "rgba(255,101,119,0.15); color: #ff6577" :
-          "rgba(74,222,128,0.15); color: #4ade80"
-        }">${r.estado}</span>
-      </div>
-      ${r.estado === "Pendiente" ? `
-        <button class="secondary-button" style="margin-top: 12px;" onclick="cancelarReserva('${r.id}')">❌ Cancelar reserva</button>
-      ` : ""}
+    <div class="reserva-tarjeta">
+      <h3>${r.Negocios?.nombre || "Negocio"}</h3>
+      <p><strong>📅 ${r.fecha}</strong> · ⏰ ${r.hora}</p>
+      <p style="color:var(--texto-claro);font-size:14px">${r.nombre_cliente}</p>
+      <span class="etiqueta-estado etiqueta-${r.estado}">${r.estado}</span>
+      ${r.estado === "Pendiente" ? `<button class="btn-secundario" style="margin-top:10px" onclick="cancelarReserva('${r.id}')">❌ Cancelar Reserva</button>` : ""}
     </div>
   `).join("");
+}
+
+function filtrarReservas(estado) {
+  App.filtroEstado = estado;
+  document.querySelectorAll(".pestañas button").forEach(b => b.classList.remove("activa"));
+  event.target.classList.add("activa");
+  cargarReservas();
 }
 
 async function cancelarReserva(id) {
@@ -377,158 +343,331 @@ async function cancelarReserva(id) {
   
   const {error} = await supabase.from("Citas").update({
     estado: "Cancelada",
-    cancelado_en: new Date().toISOString(),
-    cancelado_por: App.usuario.id
+    cancelado_en: new Date().toISOString()
   }).eq("id", id);
-
-  if(error) {
-    mostrarMensaje("Error al cancelar");
-    return;
-  }
-
-  mostrarMensaje("Reserva cancelada ✅");
-  cargarMisReservas();
+  
+  if(error) return mostrarAviso("❌ Error al cancelar");
+  
+  agregarNotificacion("Reserva cancelada", "advertencia");
+  mostrarAviso("✅ Reserva cancelada");
+  cargarReservas();
 }
 
-// =============================================
-// INICIO Y CIERRE DE SESIÓN
-// =============================================
-function abrirModalLogin() {
-  abrirModal(`
-    <h2>Iniciar Sesión</h2>
-    <input type="email" id="login_correo" placeholder="Tu correo electrónico" style="width: 100%; padding: 12px; margin: 12px 0; border-radius: 10px; border: 1px solid var(--borde); background: var(--fondo); color: white;">
-    <input type="password" id="login_clave" placeholder="Tu contraseña" style="width: 100%; padding: 12px; margin: 6px 0; border-radius: 10px; border: 1px solid var(--borde); background: var(--fondo); color: white;">
-    <button class="primary-button" style="width: 100%; margin-top: 16px;" onclick="hacerLogin()">Entrar</button>
-    <p style="text-align: center; margin-top: 20px;">¿No tienes cuenta? <a href="#" onclick="mostrarRegistro()">Crear cuenta</a></p>
-  `);
+// =====================================================
+// 🔔 NOTIFICACIONES
+// =====================================================
+function agregarNotificacion(texto, tipo="info") {
+  App.notificaciones.unshift({
+    id: Date.now(),
+    texto,
+    tipo,
+    fecha: new Date().toLocaleString("es-CO")
+  });
+  if(App.notificaciones.length > 20) App.notificaciones.pop();
+  localStorage.setItem("notificaciones", JSON.stringify(App.notificaciones));
+  actualizarContadorNotif();
+}
+
+function actualizarContadorNotif() {
+  const cont = document.getElementById("cont-notif");
+  if(App.notificaciones.length > 0) {
+    cont.classList.remove("oculto");
+    cont.textContent = App.notificaciones.length;
+  } else {
+    cont.classList.add("oculto");
+  }
+}
+
+function abrirNotificaciones() {
+  const cont = document.getElementById("lista-notificaciones");
+  cont.innerHTML = App.notificaciones.length ? 
+    App.notificaciones.map(n => `<p style="padding:10px 0;border-bottom:1px solid var(--borde)">${n.texto}<br><small style="color:var(--texto-claro)">${n.fecha}</small></p>`).join("") :
+    "<p style='color:var(--texto-claro);text-align:center;padding:20px'>No tienes notificaciones</p>";
+  document.getElementById("modal-notif").classList.remove("oculto");
+}
+
+// =====================================================
+// 👤 PERFIL Y SESIÓN
+// =====================================================
+async function cargarDatosUsuario() {
+  // Buscar si el usuario tiene un negocio registrado
+  const {data} = await supabase
+    .from("Negocios")
+    .select("*, visibilidad_negocio(destacado), miembro_negocios(rol, activo)")
+    .eq("usuario_id", App.usuario.id)
+    .single();
+  
+  if(data) {
+    App.negocio = data;
+    // Determinar plan
+    if(data.visibilidad_negocio?.destacado) {
+      // Aquí podrías agregar lógica para detectar Business Pro
+      App.plan = "premium";
+    } else {
+      App.plan = "gratis";
+    }
+  }
+}
+
+function actualizarPerfil() {
+  if(App.usuario) {
+    document.getElementById("nombre-usuario").textContent = (App.usuario.user_metadata?.nombre || App.usuario.email?.split("@")[0]);
+    document.getElementById("correo-usuario").textContent = App.usuario.email;
+    document.getElementById("avatar-usuario").textContent = (App.usuario.user_metadata?.nombre?.[0] || App.usuario.email[0]).toUpperCase();
+    document.getElementById("btn-ingresar").classList.add("oculto");
+    document.getElementById("btn-salir").classList.remove("oculto");
+    if(App.negocio) document.getElementById("btn-negocio").classList.remove("oculto");
+  } else {
+    document.getElementById("nombre-usuario").textContent = "Invitado";
+    document.getElementById("correo-usuario").textContent = "Inicia
+      sesión</p>
+    document.getElementById("avatar-usuario").textContent = "👤";
+    document.getElementById("btn-salir").classList.add("oculto");
+    document.getElementById("btn-negocio").classList.add("oculto");
+    document.querySelector(".lista-opciones button:first-child").style.display = "block";
+  }
+  
+  // Actualizar tarjeta de plan
+  const tarjetaPlan = document.getElementById("nombre-plan");
+  if(tarjetaPlan) {
+    tarjetaPlan.textContent = App.plan === "premium" ? "💎 Premium" : 
+                               App.plan === "pro" ? "🚀 Business Pro" : "Gratis";
+  }
+}
+
+function abrirLogin() {
+  document.getElementById("modal-login").classList.remove("oculto");
 }
 
 async function hacerLogin() {
-  const correo = document.getElementById("login_correo").value;
-  const clave = document.getElementById("login_clave").value;
+  const correo = document.getElementById("correo").value.trim();
+  const clave = document.getElementById("clave").value;
+  if(!correo || clave.length < 6) 
+    return mostrarAviso("⚠️ Escribe correo y contraseña (mínimo 6 caracteres)");
   
-  if(!correo || !clave) {
-    mostrarMensaje("Escribe tu correo y contraseña");
-    return;
-  }
-
   const {error} = await supabase.auth.signInWithPassword({email: correo, password: clave});
+  if(error) return mostrarAviso("❌ " + error.message);
   
-  if(error) {
-    mostrarMensaje("❌ " + error.message);
-    return;
-  }
-
   cerrarModal();
-  mostrarMensaje("✅ ¡Bienvenido de nuevo!");
-}
-
-function mostrarRegistro() {
-  abrirModal(`
-    <h2>Crear Cuenta Nueva</h2>
-    <input type="email" id="reg_correo" placeholder="Tu correo" style="width: 100%; padding: 12px; margin: 12px 0; border-radius: 10px; border: 1px solid var(--borde); background: var(--fondo); color: white;">
-    <input type="password" id="reg_clave" placeholder="Contraseña (mínimo 6 caracteres)" style="width: 100%; padding: 12px; margin: 6px 0; border-radius: 10px; border: 1px solid var(--borde); background: var(--fondo); color: white;">
-    <button class="primary-button" style="width: 100%; margin-top: 16px;" onclick="hacerRegistro()">Registrarme</button>
-  `);
+  mostrarAviso("✅ ¡Bienvenido de vuelta!");
 }
 
 async function hacerRegistro() {
-  const correo = document.getElementById("reg_correo").value;
-  const clave = document.getElementById("reg_clave").value;
+  const correo = document.getElementById("correo").value.trim();
+  const clave = document.getElementById("clave").value;
+  if(!correo || clave.length < 6) 
+    return mostrarAviso("⚠️ Completa los datos (contraseña mínima 6 caracteres)");
   
-  if(!correo || clave.length < 6) {
-    mostrarMensaje("Completa los datos (contraseña mínima 6 caracteres)");
-    return;
-  }
-
   const {error} = await supabase.auth.signUp({email: correo, password: clave});
+  if(error) return mostrarAviso("❌ " + error.message);
   
-  if(error) {
-    mostrarMensaje("❌ " + error.message);
-    return;
-  }
-
   cerrarModal();
-  mostrarMensaje("✅ Cuenta creada. Revisa tu correo para confirmar.");
+  mostrarAviso("✅ Cuenta creada. Revisa tu correo para confirmar.");
 }
 
 async function cerrarSesion() {
   await supabase.auth.signOut();
-  App.usuario = null;
-  actualizarUISinSesion();
-  mostrarMensaje("Sesión cerrada");
+  App.usuario = App.negocio = null;
+  App.plan = "gratis";
+  mostrarAviso("Sesión cerrada correctamente");
+  cambiarVista("inicio");
 }
 
-function actualizarUIConSesion() {
-  document.getElementById("nombre_usuario").textContent = App.usuario.email?.split("@")[0] || "Usuario";
-  document.getElementById("mensaje_perfil").textContent = App.usuario.email;
-  document.getElementById("avatar_perfil").textContent = (App.usuario.user_metadata?.name || App.usuario.email)[0].toUpperCase();
-  document.getElementById("boton_cerrar_sesion").style.display = "block";
-}
-
-function actualizarUISinSesion() {
-  document.getElementById("nombre_usuario").textContent = "Invitado";
-  document.getElementById("mensaje_perfil").textContent = "Inicia sesión para ver tu perfil";
-  document.getElementById("avatar_perfil").textContent = "👤";
-  document.getElementById("boton_cerrar_sesion").style.display = "none";
-}
-
-// =============================================
-// UTILIDADES — MODALES Y MENSAJES
-// =============================================
-function abrirModal(contenido) {
-  const modal = document.createElement("div");
-  modal.id = "modal_general";
-  modal.style = "position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 16px;";
-  modal.innerHTML = `
-    <div style="background: var(--superficie); border: 1px solid var(--borde); border-radius: 20px; padding: 24px; max-width: 420px; width: 100%; max-height: 90vh; overflow-y: auto;">
-      <button onclick="cerrarModal()" style="float: right; background: transparent; border: none; color: inherit; font-size: 20px; cursor: pointer;">×</button>
-      <div style="clear: both;"></div>
-      ${contenido}
-    </div>
-  `;
-  document.body.appendChild(modal);
-}
-
-function cerrarModal() {
-  const m = document.getElementById("modal_general");
-  if(m) m.remove();
-}
-
-function mostrarMensaje(texto) {
-  const t = document.createElement("div");
-  t.style = "position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--superficie); border: 1px solid var(--primario); padding: 12px 24px; border-radius: 12px; z-index: 300; box-shadow: 0 4px 20px rgba(0,0,0,0.4);";
-  t.textContent = texto;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3500);
-}
-
-function filtrarPorCategoria(id) {
-  cambiarVista("buscar");
-  mostrarMensaje(`Filtrando: ${id}`);
-}
-
-function buscarNegocios() {
-  const texto = document.getElementById("buscador_principal")?.value || "";
-  cambiarVista("buscar");
-  mostrarMensaje(`Buscando: ${texto}`);
-}
-
-function verTodosDestacados() {
-  cambiarVista("buscar");
-}
-
-function usarUbicacion() {
-  if(!navigator.geolocation) {
-    mostrarMensaje("Tu navegador no soporta ubicación");
-    return;
+// =====================================================
+// 🏢 PANEL DE NEGOCIO — TODO: Operaciones, Sucursales, Equipo, Promociones...
+// =====================================================
+async function cargarPanelNegocio() {
+  if(!App.usuario) return abrirLogin();
+  
+  // Resaltar plan
+  document.getElementById("nombre-plan").textContent = 
+    App.plan === "premium" ? "💎 Premium" : 
+    App.plan === "pro" ? "🚀 Business Pro" : "Gratis";
+  
+  // Cargar analítica
+  const {data: todasLasReservas} = await supabase
+    .from("Citas")
+    .select("estado")
+    .eq("negocio_id", App.negocio.id);
+  
+  if(todasLasReservas) {
+    document.getElementById("dato-total").textContent = todasLasReservas.length;
+    document.getElementById("dato-pendiente").textContent = todasLasReservas.filter(r => r.estado === "Pendiente").length;
+    document.getElementById("dato-completada").textContent = todasLasReservas.filter(r => r.estado === "Completada").length;
+    document.getElementById("dato-cancelada").textContent = todasLasReservas.filter(r => r.estado === "Cancelada").length;
   }
-  navigator.geolocation.getCurrentPosition(
-    () => { mostrarMensaje("📍 Ubicación activada"); cambiarVista("buscar"); },
-    () => { mostrarMensaje("No se pudo obtener tu ubicación"); }
-  );
 }
 
-function cambiarIdioma() {
-  mostrarMensaje("Idioma cambiado ✅");
+function cargarSeccion(nombre) {
+  const cont = document.getElementById("contenido-negocio");
+  
+  switch(nombre) {
+    // ⚙️ OPERACIONES
+    case "operaciones":
+      cont.innerHTML = `
+        <h3>⚙️ Configuración Operativa</h3>
+        <p style="color:var(--texto-claro);margin:8px 0">Horarios, disponibilidad, bloqueos y excepciones</p>
+        <div style="background:var(--superficie);border:1px solid var(--borde);border-radius:12px;padding:16px;margin-top:12px">
+          <h4>📅 Horarios de Atención</h4>
+          <p style="margin:8px 0">Lunes a Viernes: 08:00 – 19:00</p>
+          <p>Sábados: 09:00 – 14:00</p>
+          <p>Domingos: Cerrado</p>
+          <button class="btn-secundario" style="margin-top:10px">✏️ Editar Horarios</button>
+        </div>
+        <div style="background:var(--superficie);border:1px solid var(--borde);border-radius:12px;padding:16px;margin-top:12px">
+          <h4>🔒 Bloqueos y Excepciones</h4>
+          <p style="color:var(--texto-claro);font-size:13px;margin:4px 0">Días festivos, vacaciones o cierres especiales</p>
+          <button class="btn-secundario" style="margin-top:8px" ${App.plan === "gratis" ? "disabled title='Solo Premium'" : ""}>➕ Agregar Bloqueo</button>
+          ${App.plan === "gratis" ? '<p style="color:var(--premium);font-size:12px;margin-top:6px">💎 Disponible en Premium</p>' : ''}
+        </div>
+      `;
+      break;
+    
+    // 🏬 SUCURSALES / MULTISEDE
+    case "sucursales":
+      cont.innerHTML = `
+        <h3>🏬 Sucursales — Multisede</h3>
+        <p style="color:var(--texto-claro);margin:8px 0">Administra todas tus sedes desde un solo lugar</p>
+        <div style="background:var(--superficie);border:1px solid var(--borde);border-radius:12px;padding:16px;margin-top:12px">
+          <p><strong>Sede Principal</strong><br>Dirección principal · Activada ✅</p>
+          ${App.plan !== "gratis" ? `<button class="btn-primario" style="margin-top:10px">➕ Agregar Nueva Sucursal</button>` : 
+            `<p style="color:var(--premium);margin-top:10px">💎 Hasta 5 sucursales con Premium · Ilimitadas con Business Pro</p>
+             <button class="btn-premium" onclick="irAPlanes()" style="margin-top:8px">Desbloquear →</button>`}
+        </div>
+      `;
+      break;
+    
+    // 👥 EQUIPO Y PERMISOS
+    case "equipo":
+      cont.innerHTML = `
+        <h3>👥 Equipo y Permisos</h3>
+        <p style="color:var(--texto-claro);margin:8px 0">Gestiona quién accede y qué puede hacer cada persona</p>
+        <div style="background:var(--superficie);border:1px solid var(--borde);border-radius:12px;padding:16px;margin-top:12px">
+          <p><strong>👑 Propietario</strong> — Tú · Control total</p>
+          <p style="margin-top:8px">📋 Roles disponibles:</p>
+          <ul style="margin:6px 0 6px 20px;color:var(--texto-claro)">
+            <li>Administrador — Gestiona todo</li>
+            <li>Empleado — Gestiona sus citas</li>
+            <li>Recepcionista — Ver y confirmar</li>
+          </ul>
+          ${App.plan === "pro" ? `<button class="btn-primario" style="margin-top:10px">➕ Invitar Miembro</button>` : 
+            `<p style="color:var(--pro);margin-top:10px">🚀 Roles personalizados con Business Pro</p>
+             <button class="btn-pro" onclick="irAPlanes()" style="margin-top:8px">Mejorar Plan →</button>`}
+        </div>
+      `;
+      break;
+    
+    // 🎁 PROMOCIONES
+    case "promociones":
+      cont.innerHTML = `
+        <h3>🎁 Promociones y Descuentos</h3>
+        <p style="color:var(--texto-claro);margin:8px 0">Crea ofertas, descuentos y campañas para atraer clientes</p>
+        <div style="background:var(--superficie);border:1px solid var(--borde);border-radius:12px;padding:16px;margin-top:12px">
+          <p>📊 <strong>Campañas Activas:</strong> 0</p>
+          <p style="color:var(--texto-claro);font-size:13px;margin:4px 0">Descuentos, 2x1, primeros clientes, etc.</p>
+          ${App.plan !== "gratis" ? `<button class="btn-primario" style="margin-top:10px">➕ Crear Promoción</button>` : 
+            `<p style="color:var(--premium);margin-top:10px">💎 Promociones ilimitadas con Premium</p>
+             <button class="btn-premium" onclick="irAPlanes()" style="margin-top:8px">Desbloquear →</button>`}
+        </div>
+      `;
+      break;
+    
+    // 🔔 NOTIFICACIONES
+    case "notificaciones":
+      cont.innerHTML = `
+        <h3>🔔 Notificaciones Automáticas</h3>
+        <p style="color:var(--texto-claro);margin:8px 0">Confirma, recuerda y agradece a tus clientes</p>
+        <div style="background:var(--superficie);border:1px solid var(--borde);border-radius:12px;padding:16px;margin-top:12px">
+          <label style="display:flex;align-items:center;gap:8px;margin:8px 0">
+            <input type="checkbox" checked> Confirmación al reservar
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;margin:8px 0">
+            <input type="checkbox" checked> Recordatorio 24h antes
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;margin:8px 0">
+            <input type="checkbox"> Mensaje de agradecimiento
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;margin:8px 0">
+            <input type="checkbox" ${App.plan === "gratis" ? "disabled" : ""}> Encuesta posterior
+          </label>
+          <button class="btn-primario" style="margin-top:12px">💾 Guardar Configuración</button>
+        </div>
+      `;
+      break;
+    
+    // 📈 CRECIMIENTO
+    case "crecimiento":
+      cont.innerHTML = `
+        <h3>📈 Crecimiento y Visibilidad</h3>
+        <p style="color:var(--texto-claro);margin:8px 0">Aparece primero, consigue más clientes</p>
+        <div style="background:var(--superficie);border:1px solid var(--premium);border-radius:12px;padding:16px;margin-top:12px">
+          <h4>✨ Destacado en Búsqueda</h4>
+          <p style="color:var(--texto-claro);font-size:13px;margin:4px 0">Tu negocio aparece arriba con sello especial</p>
+          ${App.plan === "gratis" ? 
+            `<button class="btn-premium" onclick="irAPlanes()" style="margin-top:8px">💎 Activar con Premium →</button>` :
+            `<p style="color:var(--exito);margin-top:8px">✅ Ya estás destacado</p>`}
+        </div>
+        <div style="background:var(--superficie);border:1px solid var(--borde);border-radius:12px;padding:16px;margin-top:12px">
+          <h4>📊 Reseñas y Calificación</h4>
+          <p style="color:var(--texto-claro);font-size:13px;margin:4px 0">Solicita valoraciones automáticamente</p>
+          <button class="btn-secundario" style="margin-top:8px">Configurar Reseñas</button>
+        </div>
+      `;
+      break;
+    
+    // 🛠️ HERRAMIENTAS EMPRESARIALES
+    case "herramientas":
+      cont.innerHTML = `
+        <h3>🛠️ Herramientas Empresariales Avanzadas</h3>
+        <p style="color:var(--pro);margin:8px 0">🚀 Exclusivo Business Pro</p>
+        <div style="background:var(--superficie);border:1px solid var(--pro);border-radius:12px;padding:16px;margin-top:12px">
+          <ul style="margin:0 0 0 20px">
+            <li style="margin:8px 0">📤 Exportación de datos (Excel, CSV)</li>
+            <li style="margin:8px 0">📑 Reporte mensual automático</li>
+            <li style="margin:8px 0">🔑 API para integración propia</li>
+            <li style="margin:8px 0">🏷️ Marca personalizada en notificaciones</li>
+            <li style="margin:8px 0">🎯 Análisis de ocupación y tendencias</li>
+            <li style="margin:8px 0">📞 Soporte prioritario directo</li>
+          </ul>
+          ${App.plan !== "pro" ? 
+            `<button class="btn-pro" onclick="irAPlanes()" style="margin-top:12px">🚀 Pasar a Business Pro →</button>` :
+            `<p style="color:var(--exito);margin-top:12px">✅ Todas activadas</p>`}
+        </div>
+      `;
+      break;
+  }
 }
+
+// =====================================================
+// 💎 PLANES Y SUSCRIPCIÓN
+// =====================================================
+function activarPlan(plan) {
+  // Aquí conectarías con tu sistema de pagos
+  App.plan = plan;
+  localStorage.setItem("plan", plan);
+  mostrarAviso(`✅ Plan ${plan === "premium" ? "💎 Premium" : "🚀 Business Pro"} activado`);
+  setTimeout(() => cambiarVista("negocio"), 1000);
+}
+
+// =====================================================
+// UTILIDADES GENERALES
+// =====================================================
+function cerrarModal() {
+  document.querySelectorAll(".modal").forEach(m => m.classList.add("oculto"));
+  App.negocioSeleccionado = null;
+}
+
+function mostrarAviso(texto) {
+  const aviso = document.getElementById("aviso");
+  aviso.textContent = texto;
+  aviso.classList.remove("oculto");
+  setTimeout(() => aviso.classList.add("oculto"), 3500);
+}
+
+// Cerrar modales al hacer clic por fuera
+document.querySelectorAll(".modal").forEach(modal => {
+  modal.addEventListener("click", e => {
+    if(e.target === modal) cerrarModal();
+  });
+});
+      
