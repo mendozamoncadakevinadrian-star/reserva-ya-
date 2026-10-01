@@ -3,226 +3,216 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ReservaYa — Tu reserva en un clic</title>
-  <link rel="stylesheet" href="app.css">
-  <!-- Supabase JS -->
+  <title>ReservaYa — Tu cita ideal, a un clic</title>
+  
+  <!-- ✅ CORREGIDO: Busca dentro de las carpetas -->
+  <link rel="stylesheet" href="css/app.css">
+  
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <!-- Barra Superior -->
-  <header class="topbar">
-    <a href="#" class="brand" onclick="cambiarVista('home')">
-      <div class="brand-logo">R</div>
-      <span>ReservaYa</span>
-    </a>
-    <div class="header-actions">
-      <select id="languageSelector" onchange="cambiarIdioma(this.value)" style="background:transparent;border:0;color:inherit;cursor:pointer;">
-        <option value="es">🇪🇸</option>
-        <option value="en">🇺🇸</option>
-        <option value="pt">🇧🇷</option>
-        <option value="fr">🇫🇷</option>
-        <option value="de">🇩🇪</option>
-        <option value="it">🇮🇹</option>
-      </select>
-      <button class="icon-button" id="loginBtn" onclick="mostrarLogin()">👤</button>
-    </div>
-  </header>
 
-  <!-- VISTA: INICIO -->
-  <main id="view-home" class="view active">
-    <section class="hero">
-      <div class="hero-content">
-        <span class="eyebrow">Encuentra · Reserva · Disfruta</span>
-        <h1>Tu cita ideal, a un clic de distancia</h1>
-        <p>Descubre los mejores negocios de tu ciudad y reserva al instante. Sin llamadas, sin esperas.</p>
-        <div class="main-search">
-          <input type="text" id="globalSearch" placeholder="Buscar negocios, servicios o ciudades..." oninput="buscarGlobal(this.value)" onkeydown="if(event.key==='Enter')ejecutarBusqueda()">
-          <button onclick="ejecutarBusqueda()">🔍 Buscar</button>
-          <div id="searchSuggestions" class="search-suggestions hidden"></div>
-        </div>
-        <div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:8px;">
-          <button class="secondary-button" onclick="usarUbicacion()">📍 Cerca de mí</button>
-          <button class="secondary-button" onclick="cambiarVista('favorites')">♥ Favoritos</button>
-          <button class="secondary-button" onclick="cambiarVista('reservations')">📅 Mis reservas</button>
-        </div>
-      </div>
-    </section>
+<!-- BARRA SUPERIOR -->
+<header class="topbar">
+  <a href="#" class="brand">
+    <div class="brand-logo">R</div>
+    ReservaYa
+  </a>
+  <div class="header-actions">
+    <select id="selector_idioma" onchange="cambiarIdioma()">
+      <option value="es">🇪🇸</option>
+      <option value="en">🇺🇸</option>
+    </select>
+    <button class="icon-button" id="boton_perfil" onclick="irAPerfil()">👤</button>
+  </div>
+</header>
 
-    <!-- Categorías -->
-    <section class="section">
-      <div class="section-heading">
-        <h2>Categorías</h2>
-      </div>
-      <div id="categoryGrid" class="category-grid"></div>
-    </section>
-
-    <!-- Destacados -->
-    <section class="section">
-      <div class="section-heading">
-        <h2>✨ Destacados</h2>
-        <button class="secondary-button" onclick="cambiarVista('search')">Ver todos →</button>
-      </div>
-      <div id="featuredBusinesses" class="business-grid"></div>
-    </section>
-
-    <!-- Cercanos -->
-    <section class="section">
-      <div class="section-heading">
-        <h2>📍 Cerca de ti</h2>
-        <button class="secondary-button" onclick="usarUbicacion()">Usar mi ubicación →</button>
-      </div>
-      <div id="nearbyBusinesses" class="business-grid"></div>
-    </section>
-  </main>
-
-  <!-- VISTA: BUSCAR -->
-  <main id="view-search" class="view">
-    <section class="section">
-      <div class="page-header">
-        <h1>🔍 Buscar</h1>
-      </div>
-      <div class="filters">
-        <input type="text" id="searchInput" placeholder="Nombre, ciudad o servicio..." oninput="filtrarNegocios()">
-        <select id="categoryFilter" onchange="filtrarNegocios()">
-          <option value="">Todas las categorías</option>
-        </select>
-      </div>
-      <div id="searchResults" class="business-grid" style="margin-top:20px;"></div>
-    </section>
-  </main>
-
-  <!-- VISTA: FAVORITOS -->
-  <main id="view-favorites" class="view">
-    <section class="section">
-      <div class="page-header">
-        <h1>♥ Mis Favoritos</h1>
-      </div>
-      <div id="favoritesList" class="business-grid"></div>
-    </section>
-  </main>
-
-  <!-- VISTA: RESERVAS -->
-  <main id="view-reservations" class="view">
-    <section class="section">
-      <div class="page-header">
-        <h1>📅 Mis Reservas</h1>
-      </div>
-      <div class="reservation-tabs">
-        <button class="active" onclick="filtrarReservas('todas')">Todas</button>
-        <button onclick="filtrarReservas('pendientes')">Pendientes</button>
-        <button onclick="filtrarReservas('pasadas')">Pasadas</button>
-      </div>
-      <div id="reservationsList" class="reservation-list" style="margin-top:20px;"></div>
-    </section>
-  </main>
-
-  <!-- VISTA: PERFIL -->
-  <main id="view-profile" class="view">
-    <section class="section">
-      <div class="profile-card">
-        <div class="profile-avatar" id="profileAvatar">👤</div>
-        <h2 id="profileName">Invitado</h2>
-        <p id="profileEmail">Inicia sesión para ver tu perfil</p>
-        <div class="settings-list" style="margin-top:24px;">
-          <button onclick="cambiarIdioma(ReservaYa.idioma)">🌐 Idioma: <span id="currentLang">Español</span></button>
-          <button id="businessDashboardBtn" class="hidden" onclick="cambiarVista('business')">🏢 Panel de Negocio</button>
-          <button id="premiumBtn" class="hidden" onclick="abrirPremium()">💎 ReservaYa Premium</button>
-          <button id="logoutBtn" class="hidden" onclick="cerrarSesion()">🚪 Cerrar sesión</button>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- VISTA: PANEL DE NEGOCIO -->
-  <main id="view-business" class="view">
-    <section class="business-dashboard">
-      <div class="page-header">
-        <h1>🏢 Panel de Negocio</h1>
-        <button onclick="cambiarVista('profile')" class="secondary-button">Volver</button>
+<!-- VISTA INICIO -->
+<section id="vista_inicio" class="view active">
+  <div class="hero">
+    <div class="hero-content">
+      <p class="eyebrow">Encuentra · Reserva · Disfruta</p>
+      <h1>Tu cita ideal, a un clic de distancia</h1>
+      <p>Descubre los mejores negocios de tu ciudad y reserva al instante. Sin llamadas, sin esperas.</p>
+      
+      <div class="main-search">
+        <input type="text" id="buscador_principal" placeholder="Buscar negocios, servicios o ciudad...">
+        <button onclick="buscarNegocios()">🔍 Buscar</button>
       </div>
       
-      <!-- Estadísticas -->
-      <div class="stats-grid" style="margin-top:20px;">
-        <div class="stat-card">
-          <p>Pendientes</p>
-          <h3 id="statPending">0</h3>
-        </div>
-        <div class="stat-card">
-          <p>Completadas</p>
-          <h3 id="statCompleted">0</h3>
-        </div>
-        <div class="stat-card">
-          <p>Canceladas</p>
-          <h3 id="statCancelled">0</h3>
-        </div>
-        <div class="stat-card">
-          <p>Ingresos</p>
-          <h3 id="statRevenue">$0</h3>
-        </div>
-      </div>
-
-      <!-- Acciones -->
-      <div class="business-actions">
-        <button onclick="gestionarServicios()">🛠️ Servicios</button>
-        <button onclick="gestionarHorarios()">🕐 Horarios</button>
-        <button onclick="gestionarNegocio()">⚙️ Negocio</button>
-        <button onclick="gestionarNotificaciones()">📱 WhatsApp</button>
-        <button id="premiumFeatureBtn" class="premium-banner" style="grid-column:span 3;" onclick="abrirPremium()">💎 Desbloquear Premium</button>
-      </div>
-    </section>
-  </main>
-
-  <!-- MODAL: Login -->
-  <div id="loginModal" class="modal-overlay hidden">
-    <div class="modal">
-      <button onclick="cerrarModal('loginModal')" style="float:right;border:0;background:transparent;color:inherit;cursor:pointer;">✕</button>
-      <h2 style="margin-top:0;">Iniciar Sesión</h2>
-      <div id="loginBox">
-        <input type="email" id="authEmail" placeholder="Correo electrónico" style="margin:12px 0;">
-        <input type="password" id="authPassword" placeholder="Contraseña" style="margin:8px 0;">
-        <button class="primary-button" onclick="iniciarSesion()" style="width:100%;margin-top:12px;">Entrar</button>
-        <p style="text-align:center;margin-top:16px;">
-          ¿No tienes cuenta? <a href="#" onclick="mostrarRegistro()">Registrarme</a>
-        </p>
+      <div style="margin-top: 24px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+        <button class="secondary-button" onclick="usarUbicacion()">📍 Cerca de mí</button>
+        <button class="secondary-button" onclick="irAFavoritos()">❤️ Favoritos</button>
+        <button class="secondary-button" onclick="irAReservas()">📅 Mis reservas</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: General -->
-  <div id="generalModal" class="modal-overlay hidden">
-    <div class="modal">
-      <button onclick="cerrarModal('generalModal')" style="float:right;border:0;background:transparent;color:inherit;cursor:pointer;">✕</button>
-      <div id="modalContent"></div>
+  <div class="section">
+    <h2>Categorías</h2>
+    <div class="category-grid" id="lista_categorias">
+      <!-- Se llena con JS -->
     </div>
   </div>
 
-  <!-- TOAST -->
-  <div id="toast" class="toast hidden"></div>
+  <div class="section">
+    <div class="section-heading">
+      <h2>✨ Destacados</h2>
+      <button class="secondary-button" onclick="verTodosDestacados()">Ver todos →</button>
+    </div>
+    <div class="business-grid" id="lista_destacados">
+      <!-- Se llena con JS -->
+    </div>
+  </div>
 
-  <!-- Navegación Inferior -->
-  <nav class="bottom-nav">
-    <button class="active" data-view="home" onclick="cambiarVista('home')">
-      <span>🏠</span>
-      <span>Inicio</span>
-    </button>
-    <button data-view="search" onclick="cambiarVista('search')">
-      <span>🔍</span>
-      <span>Buscar</span>
-    </button>
-    <button data-view="favorites" onclick="cambiarVista('favorites')">
-      <span>♥</span>
-      <span>Guardados</span>
-    </button>
-    <button data-view="reservations" onclick="cambiarVista('reservations')">
-      <span>📅</span>
-      <span>Reservas</span>
-    </button>
-    <button data-view="profile" onclick="cambiarVista('profile')">
-      <span>👤</span>
-      <span>Perfil</span>
-    </button>
-  </nav>
+  <div class="section">
+    <h2>📍 Cerca de ti</h2>
+    <button class="secondary-button" onclick="usarUbicacion()">Usar mi ubicación →</button>
+    <div class="business-grid" id="lista_cerca">
+      <!-- Se llena con JS -->
+    </div>
+  </div>
+</section>
 
-  <script src="app.js"></script>
+<!-- VISTA BUSCAR -->
+<section id="vista_buscar" class="view">
+  <div class="section">
+    <div class="page-header">
+      <h1>🔍 Buscar</h1>
+    </div>
+    <div class="filters" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;">
+      <input type="text" id="buscar_nombre" placeholder="Nombre, ciudad o servicio...">
+      <select id="filtro_categoria">
+        <option value="">Todas las categorías</option>
+      </select>
+    </div>
+    <div class="business-grid" id="lista_busqueda"></div>
+  </div>
+</section>
+
+<!-- VISTA FAVORITOS -->
+<section id="vista_favoritos" class="view">
+  <div class="section">
+    <div class="page-header">
+      <h1>❤️ Mis Favoritos</h1>
+    </div>
+    <div class="business-grid" id="lista_favoritos">
+      <div class="empty-state">
+        <p>Aún no tienes favoritos guardados.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VISTA RESERVAS -->
+<section id="vista_reservas" class="view">
+  <div class="section">
+    <div class="page-header">
+      <h1>📅 Mis Reservas</h1>
+    </div>
+    <div class="reservation-tabs">
+      <button class="active" onclick="filtrarReservas('todas')">Todas</button>
+      <button onclick="filtrarReservas('pendiente')">Pendientes</button>
+      <button onclick="filtrarReservas('pasada')">Pasadas</button>
+    </div>
+    <div id="lista_reservas"></div>
+  </div>
+</section>
+
+<!-- VISTA PERFIL -->
+<section id="vista_perfil" class="view">
+  <div class="section">
+    <div class="profile-card">
+      <div class="profile-avatar" id="avatar_perfil">👤</div>
+      <h2 id="nombre_usuario">Invitado</h2>
+      <p id="mensaje_perfil">Inicia sesión para ver tu perfil</p>
+      
+      <div class="settings-list" style="margin-top: 24px;">
+        <button onclick="cambiarIdioma()">🌐 Idioma: Español</button>
+        <button onclick="irAPanelNegocio()">🏢 Panel de Negocio</button>
+        <button class="premium-banner" onclick="irAPremium()">💎 ReservaYa Premium</button>
+        <button id="boton_cerrar_sesion" onclick="cerrarSesion()" style="display:none;">🚪 Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VISTA PANEL NEGOCIO -->
+<section id="vista_panel_negocio" class="view">
+  <div class="section">
+    <div class="page-header">
+      <h1>🏢 Panel de Negocio</h1>
+      <button class="secondary-button" onclick="irAInicio()">Volver</button>
+    </div>
+    
+    <div class="stats-grid">
+      <div class="stat-card">
+        <p>Pendientes</p>
+        <h3 id="stat_pendientes">0</h3>
+      </div>
+      <div class="stat-card">
+        <p>Completadas</p>
+        <h3 id="stat_completadas">0</h3>
+      </div>
+      <div class="stat-card">
+        <p>Canceladas</p>
+        <h3 id="stat_canceladas">0</h3>
+      </div>
+      <div class="stat-card">
+        <p>Ingresos</p>
+        <h3 id="stat_ingresos">$0</h3>
+      </div>
+    </div>
+    
+    <div class="business-actions">
+      <button class="secondary-button">🔧 Servicios</button>
+      <button class="secondary-button">🕐 Horarios</button>
+      <button class="secondary-button">⚙️ Negocio</button>
+      <button class="secondary-button">📱 WhatsApp</button>
+      <button class="premium-banner">💎 Desbloquear Premium</button>
+    </div>
+  </div>
+</section>
+
+<!-- MODAL INICIAR SESIÓN -->
+<div id="modal_login" class="modal-overlay hidden">
+  <div class="modal">
+    <span style="float:right;cursor:pointer;font-size:20px;" onclick="cerrarModalLogin()">×</span>
+    <h2 style="margin-bottom: 20px;">Iniciar Sesión</h2>
+    <input type="email" id="correo_login" placeholder="Correo electrónico" style="margin-bottom: 12px;">
+    <input type="password" id="clave_login" placeholder="Contraseña" style="margin-bottom: 16px;">
+    <button class="primary-button" onclick="iniciarSesion()" style="width:100%;">Entrar</button>
+    <p style="margin-top: 16px; text-align: center;">¿No tienes cuenta? <a href="#" onclick="mostrarRegistro()">Registrarme</a></p>
+  </div>
+</div>
+
+<!-- BARRA DE NAVEGACIÓN ABAJO -->
+<nav class="bottom-nav">
+  <button class="active" data-vista="inicio" onclick="cambiarVista('inicio')">
+    <span>🏠</span>
+    <span>Inicio</span>
+  </button>
+  <button data-vista="buscar" onclick="cambiarVista('buscar')">
+    <span>🔍</span>
+    <span>Buscar</span>
+  </button>
+  <button data-vista="favoritos" onclick="cambiarVista('favoritos')">
+    <span>❤️</span>
+    <span>Guardados</span>
+  </button>
+  <button data-vista="reservas" onclick="cambiarVista('reservas')">
+    <span>📅</span>
+    <span>Reservas</span>
+  </button>
+  <button data-vista="perfil" onclick="cambiarVista('perfil')">
+    <span>👤</span>
+    <span>Perfil</span>
+  </button>
+</nav>
+
+<!-- ✅ CORREGIDO: Busca dentro de la carpeta js -->
+<script src="js/app.js"></script>
+
 </body>
 </html>
