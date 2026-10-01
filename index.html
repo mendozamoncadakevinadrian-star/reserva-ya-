@@ -3,216 +3,263 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ReservaYa — Tu cita ideal, a un clic</title>
-  
-  <!-- ✅ CORREGIDO: Busca dentro de las carpetas -->
-  <link rel="stylesheet" href="css/app.css">
-  
-  <!-- Supabase -->
+  <title>ReservaYa — Todo en uno</title>
+  <link rel="stylesheet" href="app.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-<!-- BARRA SUPERIOR -->
+<!-- Barra Superior -->
 <header class="topbar">
-  <a href="#" class="brand">
+  <a href="#" class="brand" onclick="irAInicio()">
     <div class="brand-logo">R</div>
-    ReservaYa
+    <span>ReservaYa</span>
   </a>
   <div class="header-actions">
-    <select id="selector_idioma" onchange="cambiarIdioma()">
-      <option value="es">🇪🇸</option>
-      <option value="en">🇺🇸</option>
-    </select>
-    <button class="icon-button" id="boton_perfil" onclick="irAPerfil()">👤</button>
+    <button class="icon-btn" id="btn-notif" onclick="abrirNotificaciones()">🔔 <span id="cont-notif" class="oculto">0</span></button>
+    <button class="icon-btn" onclick="irAPerfil()">👤</button>
   </div>
 </header>
 
-<!-- VISTA INICIO -->
-<section id="vista_inicio" class="view active">
-  <div class="hero">
-    <div class="hero-content">
-      <p class="eyebrow">Encuentra · Reserva · Disfruta</p>
-      <h1>Tu cita ideal, a un clic de distancia</h1>
-      <p>Descubre los mejores negocios de tu ciudad y reserva al instante. Sin llamadas, sin esperas.</p>
-      
-      <div class="main-search">
-        <input type="text" id="buscador_principal" placeholder="Buscar negocios, servicios o ciudad...">
-        <button onclick="buscarNegocios()">🔍 Buscar</button>
+<!-- 🔍 DESCUBRIMIENTO -->
+<main id="vista-inicio" class="vista activa">
+  <section class="hero">
+    <div class="hero-contenido">
+      <p class="subtitulo">Descubre · Reserva · Disfruta</p>
+      <h1>Tu cita ideal, a un clic</h1>
+      <p>Negocios verificados, reservas al instante, sin llamadas.</p>
+      <div class="buscador-principal">
+        <input type="text" id="buscador" placeholder="Negocio, servicio o ciudad...">
+        <button class="btn-primario" onclick="buscar()">🔍 Buscar</button>
       </div>
-      
-      <div style="margin-top: 24px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
-        <button class="secondary-button" onclick="usarUbicacion()">📍 Cerca de mí</button>
-        <button class="secondary-button" onclick="irAFavoritos()">❤️ Favoritos</button>
-        <button class="secondary-button" onclick="irAReservas()">📅 Mis reservas</button>
+      <div class="botones-rapidos">
+        <button class="btn-secundario" onclick="usarUbicacion()">📍 Cerca de mí</button>
+        <button class="btn-secundario" onclick="irAFavoritos()">❤️ Favoritos</button>
+        <button class="btn-secundario" onclick="irAReservas()">📅 Mis reservas</button>
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="section">
-    <h2>Categorías</h2>
-    <div class="category-grid" id="lista_categorias">
-      <!-- Se llena con JS -->
-    </div>
-  </div>
+  <section class="seccion">
+    <h2>📂 Categorías</h2>
+    <div class="cuadricula-categorias" id="categorias"></div>
+  </section>
 
-  <div class="section">
-    <div class="section-heading">
-      <h2>✨ Destacados</h2>
-      <button class="secondary-button" onclick="verTodosDestacados()">Ver todos →</button>
+  <section class="seccion">
+    <div class="encabezado-seccion">
+      <h2>✨ Destacados — Premium</h2>
+      <button class="btn-secundario" onclick="irABuscar()">Ver todos →</button>
     </div>
-    <div class="business-grid" id="lista_destacados">
-      <!-- Se llena con JS -->
-    </div>
-  </div>
+    <div class="cuadricula-negocios" id="destacados"></div>
+  </section>
 
-  <div class="section">
+  <section class="seccion">
     <h2>📍 Cerca de ti</h2>
-    <button class="secondary-button" onclick="usarUbicacion()">Usar mi ubicación →</button>
-    <div class="business-grid" id="lista_cerca">
-      <!-- Se llena con JS -->
-    </div>
-  </div>
-</section>
+    <button class="btn-secundario" onclick="usarUbicacion()">Usar mi ubicación →</button>
+    <div class="cuadricula-negocios" id="cerca"></div>
+  </section>
+</main>
 
-<!-- VISTA BUSCAR -->
-<section id="vista_buscar" class="view">
-  <div class="section">
-    <div class="page-header">
-      <h1>🔍 Buscar</h1>
-    </div>
-    <div class="filters" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;">
-      <input type="text" id="buscar_nombre" placeholder="Nombre, ciudad o servicio...">
-      <select id="filtro_categoria">
+<!-- 🔍 BUSCAR -->
+<main id="vista-buscar" class="vista">
+  <section class="seccion">
+    <h1>🔍 Buscar Negocios</h1>
+    <div class="filtros">
+      <input type="text" id="filtro-nombre" placeholder="Nombre o servicio..." oninput="aplicarFiltros()">
+      <select id="filtro-cat" onchange="aplicarFiltros()">
         <option value="">Todas las categorías</option>
       </select>
+      <select id="filtro-sucursal" onchange="aplicarFiltros()">
+        <option value="">Todas las sucursales</option>
+      </select>
     </div>
-    <div class="business-grid" id="lista_busqueda"></div>
-  </div>
-</section>
+    <div class="cuadricula-negocios" id="resultados"></div>
+  </section>
+</main>
 
-<!-- VISTA FAVORITOS -->
-<section id="vista_favoritos" class="view">
-  <div class="section">
-    <div class="page-header">
-      <h1>❤️ Mis Favoritos</h1>
+<!-- 📅 RESERVAS -->
+<main id="vista-reservas" class="vista">
+  <section class="seccion">
+    <h1>📅 Mis Reservas</h1>
+    <div class="pestañas">
+      <button class="activa" onclick="filtrarReservas('todas')">Todas</button>
+      <button onclick="filtrarReservas('Pendiente')">Pendientes</button>
+      <button onclick="filtrarReservas('Confirmada')">Confirmadas</button>
+      <button onclick="filtrarReservas('Completada')">Completadas</button>
+      <button onclick="filtrarReservas('Cancelada')">Canceladas</button>
     </div>
-    <div class="business-grid" id="lista_favoritos">
-      <div class="empty-state">
-        <p>Aún no tienes favoritos guardados.</p>
+    <div id="lista-reservas"></div>
+  </section>
+</main>
+
+<!-- ❤️ FAVORITOS -->
+<main id="vista-favoritos" class="vista">
+  <section class="seccion">
+    <h1>❤️ Mis Favoritos</h1>
+    <div class="cuadricula-negocios" id="lista-favoritos">
+      <div class="estado-vacio"><p>Toca el corazón 🤍 en cualquier negocio para guardarlo aquí.</p></div>
+    </div>
+  </section>
+</main>
+
+<!-- 🏢 PANEL NEGOCIO -->
+<main id="vista-negocio" class="vista">
+  <section class="seccion">
+    <div class="encabezado-pagina">
+      <h1>🏢 Mi Negocio</h1>
+      <button class="btn-secundario" onclick="irAInicio()">← Volver</button>
+    </div>
+
+    <!-- Plan Activo -->
+    <div class="tarjeta-plan" id="tarjeta-plan">
+      <p>Tu plan actual:</p>
+      <h2 id="nombre-plan">Gratis</h2>
+      <button class="btn-premium" onclick="irAPlanes()">💎 Mejorar Plan</button>
+    </div>
+
+    <!-- Analítica -->
+    <h2 style="margin-top:24px">📊 Analítica Avanzada</h2>
+    <div class="cuadricula-estadisticas">
+      <div class="tarjeta-dato"><p>Reservas</p><h3 id="dato-total">0</h3></div>
+      <div class="tarjeta-dato"><p>Pendientes</p><h3 id="dato-pendiente">0</h3></div>
+      <div class="tarjeta-dato"><p>Completadas</p><h3 id="dato-completada">0</h3></div>
+      <div class="tarjeta-dato"><p>Canceladas</p><h3 id="dato-cancelada">0</h3></div>
+    </div>
+
+    <!-- Secciones del Negocio -->
+    <div class="menu-negocio">
+      <button onclick="cargarSeccion('operaciones')">⚙️ Operaciones y Horarios</button>
+      <button onclick="cargarSeccion('sucursales')">🏬 Sucursales / Multisede</button>
+      <button onclick="cargarSeccion('equipo')">👥 Equipo y Permisos</button>
+      <button onclick="cargarSeccion('promociones')">🎁 Promociones y Descuentos</button>
+      <button onclick="cargarSeccion('notificaciones')">🔔 Notificaciones</button>
+      <button onclick="cargarSeccion('crecimiento')">📈 Crecimiento</button>
+      <button onclick="cargarSeccion('herramientas')">🛠️ Herramientas Empresariales</button>
+    </div>
+
+    <!-- Contenido dinámico -->
+    <div id="contenido-negocio" style="margin-top:20px"></div>
+  </section>
+</main>
+
+<!-- 👤 PERFIL -->
+<main id="vista-perfil" class="vista">
+  <section class="seccion">
+    <div class="tarjeta-perfil">
+      <div class="avatar" id="avatar-usuario">👤</div>
+      <h2 id="nombre-usuario">Invitado</h2>
+      <p id="correo-usuario">Inicia sesión para acceder a todo</p>
+      <div class="lista-opciones">
+        <button id="btn-ingresar" onclick="abrirLogin()">🔐 Iniciar Sesión</button>
+        <button class="opcion-premium" onclick="irAPlanes()">💎 ReservaYa Premium</button>
+        <button class="opcion-pro" onclick="irAPlanes()">🚀 Business Pro</button>
+        <button id="btn-negocio" class="oculto" onclick="irANegocio()">🏢 Panel de Negocio</button>
+        <button id="btn-salir" class="oculto" onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
       </div>
     </div>
-  </div>
-</section>
+  </section>
+</main>
 
-<!-- VISTA RESERVAS -->
-<section id="vista_reservas" class="view">
-  <div class="section">
-    <div class="page-header">
-      <h1>📅 Mis Reservas</h1>
-    </div>
-    <div class="reservation-tabs">
-      <button class="active" onclick="filtrarReservas('todas')">Todas</button>
-      <button onclick="filtrarReservas('pendiente')">Pendientes</button>
-      <button onclick="filtrarReservas('pasada')">Pasadas</button>
-    </div>
-    <div id="lista_reservas"></div>
-  </div>
-</section>
-
-<!-- VISTA PERFIL -->
-<section id="vista_perfil" class="view">
-  <div class="section">
-    <div class="profile-card">
-      <div class="profile-avatar" id="avatar_perfil">👤</div>
-      <h2 id="nombre_usuario">Invitado</h2>
-      <p id="mensaje_perfil">Inicia sesión para ver tu perfil</p>
-      
-      <div class="settings-list" style="margin-top: 24px;">
-        <button onclick="cambiarIdioma()">🌐 Idioma: Español</button>
-        <button onclick="irAPanelNegocio()">🏢 Panel de Negocio</button>
-        <button class="premium-banner" onclick="irAPremium()">💎 ReservaYa Premium</button>
-        <button id="boton_cerrar_sesion" onclick="cerrarSesion()" style="display:none;">🚪 Cerrar sesión</button>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- VISTA PANEL NEGOCIO -->
-<section id="vista_panel_negocio" class="view">
-  <div class="section">
-    <div class="page-header">
-      <h1>🏢 Panel de Negocio</h1>
-      <button class="secondary-button" onclick="irAInicio()">Volver</button>
-    </div>
+<!-- 💎 PLANES -->
+<main id="vista-planes" class="vista">
+  <section class="seccion">
+    <h1 style="text-align:center">Elige tu Plan</h1>
+    <p style="text-align:center;color:var(--texto-claro);margin-bottom:30px">Escala según tu negocio</p>
     
-    <div class="stats-grid">
-      <div class="stat-card">
-        <p>Pendientes</p>
-        <h3 id="stat_pendientes">0</h3>
+    <div class="cuadricula-planes">
+      <div class="tarjeta-plan">
+        <h3>Gratis</h3>
+        <p class="precio">$0/mes</p>
+        <ul class="caracteristicas">
+          <li>✅ 1 sucursal</li>
+          <li>✅ Reservas básicas</li>
+          <li>❌ Sin destacado</li>
+          <li>❌ Sin analítica</li>
+        </ul>
+        <button class="btn-secundario" style="width:100%" onclick="irAInicio()">Actual</button>
       </div>
-      <div class="stat-card">
-        <p>Completadas</p>
-        <h3 id="stat_completadas">0</h3>
-      </div>
-      <div class="stat-card">
-        <p>Canceladas</p>
-        <h3 id="stat_canceladas">0</h3>
-      </div>
-      <div class="stat-card">
-        <p>Ingresos</p>
-        <h3 id="stat_ingresos">$0</h3>
-      </div>
-    </div>
-    
-    <div class="business-actions">
-      <button class="secondary-button">🔧 Servicios</button>
-      <button class="secondary-button">🕐 Horarios</button>
-      <button class="secondary-button">⚙️ Negocio</button>
-      <button class="secondary-button">📱 WhatsApp</button>
-      <button class="premium-banner">💎 Desbloquear Premium</button>
-    </div>
-  </div>
-</section>
 
-<!-- MODAL INICIAR SESIÓN -->
-<div id="modal_login" class="modal-overlay hidden">
-  <div class="modal">
-    <span style="float:right;cursor:pointer;font-size:20px;" onclick="cerrarModalLogin()">×</span>
-    <h2 style="margin-bottom: 20px;">Iniciar Sesión</h2>
-    <input type="email" id="correo_login" placeholder="Correo electrónico" style="margin-bottom: 12px;">
-    <input type="password" id="clave_login" placeholder="Contraseña" style="margin-bottom: 16px;">
-    <button class="primary-button" onclick="iniciarSesion()" style="width:100%;">Entrar</button>
-    <p style="margin-top: 16px; text-align: center;">¿No tienes cuenta? <a href="#" onclick="mostrarRegistro()">Registrarme</a></p>
+      <div class="tarjeta-plan destacado">
+        <span class="etiqueta-mas-popular">Más popular</span>
+        <h3>💎 Premium</h3>
+        <p class="precio">$19.900/mes</p>
+        <ul class="caracteristicas">
+          <li>✅ Hasta 5 sucursales</li>
+          <li>✅ Aparece primero en búsqueda</li>
+          <li>✅ Sello "Destacado"</li>
+          <li>✅ Analítica básica</li>
+          <li>✅ Promociones ilimitadas</li>
+          <li>✅ Notificaciones automáticas</li>
+        </ul>
+        <button class="btn-primario" style="width:100%" onclick="activarPlan('premium')">Elegir Premium</button>
+      </div>
+
+      <div class="tarjeta-plan pro">
+        <span class="etiqueta-pro">Empresas</span>
+        <h3>🚀 Business Pro</h3>
+        <p class="precio">$49.900+/mes</p>
+        <ul class="caracteristicas">
+          <li>✅ Sucursales ilimitadas</li>
+          <li>✅ Analítica avanzada completa</li>
+          <li>✅ Equipos con roles personalizados</li>
+          <li>✅ API y exportación de datos</li>
+          <li>✅ Bloqueos y horarios avanzados</li>
+          <li>✅ Soporte prioritario</li>
+          <li>✅ Marca personalizada</li>
+        </ul>
+        <button class="btn-pro" style="width:100%" onclick="activarPlan('pro')">Elegir Business Pro</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- MODAL LOGIN -->
+<div id="modal-login" class="modal oculto">
+  <div class="modal-contenido">
+    <button class="cerrar" onclick="cerrarModal()">✕</button>
+    <h2>Iniciar Sesión</h2>
+    <input type="email" id="correo" placeholder="Tu correo electrónico">
+    <input type="password" id="clave" placeholder="Tu contraseña">
+    <button class="btn-primario" onclick="hacerLogin()">Entrar</button>
+    <p class="texto-centro">¿No tienes cuenta? <a href="#" onclick="hacerRegistro()">Crear cuenta</a></p>
   </div>
 </div>
 
-<!-- BARRA DE NAVEGACIÓN ABAJO -->
-<nav class="bottom-nav">
-  <button class="active" data-vista="inicio" onclick="cambiarVista('inicio')">
-    <span>🏠</span>
-    <span>Inicio</span>
-  </button>
-  <button data-vista="buscar" onclick="cambiarVista('buscar')">
-    <span>🔍</span>
-    <span>Buscar</span>
-  </button>
-  <button data-vista="favoritos" onclick="cambiarVista('favoritos')">
-    <span>❤️</span>
-    <span>Guardados</span>
-  </button>
-  <button data-vista="reservas" onclick="cambiarVista('reservas')">
-    <span>📅</span>
-    <span>Reservas</span>
-  </button>
-  <button data-vista="perfil" onclick="cambiarVista('perfil')">
-    <span>👤</span>
-    <span>Perfil</span>
-  </button>
+<!-- MODAL RESERVA -->
+<div id="modal-reserva" class="modal oculto">
+  <div class="modal-contenido">
+    <button class="cerrar" onclick="cerrarModal()">✕</button>
+    <h2 id="titulo-negocio">Reservar</h2>
+    <select id="sucursal-reserva" class="oculto"></select>
+    <input type="date" id="fecha-reserva">
+    <input type="time" id="hora-reserva">
+    <input type="text" id="nombre-reserva" placeholder="Tu nombre completo">
+    <input type="tel" id="telefono-reserva" placeholder="Tu teléfono">
+    <button class="btn-primario" onclick="confirmarReserva()">✅ Confirmar Reserva</button>
+  </div>
+</div>
+
+<!-- MODAL NOTIFICACIONES -->
+<div id="modal-notif" class="modal oculto">
+  <div class="modal-contenido">
+    <button class="cerrar" onclick="cerrarModal()">✕</button>
+    <h2>🔔 Notificaciones</h2>
+    <div id="lista-notificaciones" style="margin-top:16px"></div>
+  </div>
+</div>
+
+<!-- NAVEGACIÓN INFERIOR -->
+<nav class="navegacion">
+  <button data-vista="inicio" onclick="cambiarVista('inicio')" class="activa">🏠 Inicio</button>
+  <button data-vista="buscar" onclick="cambiarVista('buscar')">🔍 Buscar</button>
+  <button data-vista="reservas" onclick="cambiarVista('reservas')">📅 Reservas</button>
+  <button data-vista="favoritos" onclick="cambiarVista('favoritos')">❤️ Guardados</button>
+  <button data-vista="perfil" onclick="cambiarVista('perfil')">👤 Perfil</button>
 </nav>
 
-<!-- ✅ CORREGIDO: Busca dentro de la carpeta js -->
-<script src="js/app.js"></script>
+<!-- MENSAJE -->
+<div id="aviso" class="aviso oculto"></div>
 
+<script src="app.js"></script>
 </body>
 </html>
